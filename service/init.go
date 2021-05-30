@@ -12,7 +12,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-
+	"github.com/spf13/viper"
+	"github.com/fsnotify/fsnotify"
 	"github.com/free5gc/MongoDBLibrary"
 	mongoDBLibLogger "github.com/free5gc/MongoDBLibrary/logger"
 	"github.com/free5gc/http2_util"
@@ -82,7 +83,28 @@ func (udr *UDR) Initialize(c *cli.Context) error {
 		return err
 	}
 
+	viper.SetConfigName("udrcfg.conf") 
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/free5gc/config")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil { // Handle errors reading the config file
+		return err
+	}
 	return nil
+}
+
+func (udr *UDR) WatchConfig() {
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("Config file changed:", e.Name)
+		if err := factory.UpdateUdrConfig("/free5gc/config/udrcfg.conf"); err != nil {
+			fmt.Println("error in loading updated configuration")
+		} else {
+			self := udr_context.UDR_Self()
+			util.InitUdrContext(self)
+			fmt.Println("successfully updated configuration")
+		}
+	})
 }
 
 func (udr *UDR) setLogLevel() {

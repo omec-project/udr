@@ -22,4 +22,6 @@ require (
 	github.com/urfave/cli v1.22.5
 	go.mongodb.org/mongo-driver v1.4.4
 	gopkg.in/yaml.v2 v2.4.0
+    github.com/fsnotify/fsnotify v1.4.7
+    github.com/spf13/viper v1.7.1
 )
