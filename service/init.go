@@ -97,7 +97,7 @@ func (udr *UDR) WatchConfig() {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed:", e.Name)
-		if err := factory.UpdateUdrConfig("/free5gc/config/udrcfg.conf"); err != nil {
+		if err := factory.UpdateUdrConfig(e.Name + "/udrcfg.conf"); err != nil {
 			fmt.Println("error in loading updated configuration")
 		} else {
 			self := udr_context.UDR_Self()
