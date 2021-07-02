@@ -176,6 +176,7 @@ func (udr *UDR) FilterCli(c *cli.Context) (args []string) {
 }
 
 func (udr *UDR) Start() {
+
 	// get config file info
 	config := factory.UdrConfig
 	mongodb := config.Configuration.Mongodb
@@ -199,15 +200,6 @@ func (udr *UDR) Start() {
 	util.InitUdrContext(self)
 
 	addr := fmt.Sprintf("%s:%d", self.BindingIPv4, self.SBIPort)
-	profile := consumer.BuildNFInstance(self)
-	var newNrfUri string
-	var err error
-	newNrfUri, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, profile.NfInstanceId, profile)
-	if err == nil {
-		self.NrfUri = newNrfUri
-	} else {
-		initLog.Errorf("Send Register NFInstance Error[%s]", err.Error())
-	}
 
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
@@ -216,6 +208,8 @@ func (udr *UDR) Start() {
 		udr.Terminate()
 		os.Exit(0)
 	}()
+
+	go udr.registerNF()
 
 	server, err := http2_util.NewServer(addr, udrLogPath, router)
 	if server == nil {
@@ -306,4 +300,21 @@ func (udr *UDR) Terminate() {
 		logger.InitLog.Infof("Deregister from NRF successfully")
 	}
 	logger.InitLog.Infof("UDR terminated")
+}
+
+func (udr *UDR) registerNF() {
+	for msg := range factory.ConfigPodTrigger {
+		initLog.Infof("Minimum configuration from config pod available %v", msg)
+		self := udr_context.UDR_Self()
+		profile := consumer.BuildNFInstance(self)
+		var newNrfUri string
+		var err error
+		// send registration with updated PLMN Ids.
+		newNrfUri, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, profile.NfInstanceId, profile)
+		if err == nil {
+			self.NrfUri = newNrfUri
+		} else {
+			initLog.Errorf("Send Register NFInstance Error[%s]", err.Error())
+		}
+	}
 }

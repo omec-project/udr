@@ -11,6 +11,9 @@ package factory
 
 import (
 	"github.com/free5gc/logger_util"
+	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/udr/logger"
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 
 const (
@@ -35,9 +38,15 @@ const (
 )
 
 type Configuration struct {
-	Sbi     *Sbi     `yaml:"sbi"`
-	Mongodb *Mongodb `yaml:"mongodb"`
-	NrfUri  string   `yaml:"nrfUri"`
+	Sbi             *Sbi              `yaml:"sbi"`
+	Mongodb         *Mongodb          `yaml:"mongodb"`
+	NrfUri          string            `yaml:"nrfUri"`
+	PlmnSupportList []PlmnSupportItem `yaml:"plmnSupportList,omitempty"`
+}
+
+type PlmnSupportItem struct {
+	PlmnId     models.PlmnId   `yaml:"plmnId"`
+	SNssaiList []models.Snssai `yaml:"snssaiList,omitempty"`
 }
 
 type Sbi struct {
@@ -60,9 +69,68 @@ type Mongodb struct {
 	Url  string `yaml:"url"`
 }
 
+var ConfigPodTrigger chan bool
+
+func init() {
+	ConfigPodTrigger = make(chan bool)
+}
+
 func (c *Config) GetVersion() string {
 	if c.Info != nil && c.Info.Version != "" {
 		return c.Info.Version
 	}
 	return ""
+}
+
+func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse) bool {
+	var minConfig bool
+	for rsp := range commChannel {
+		logger.GrpcLog.Infoln("Received updateConfig in the udr app : ", rsp)
+		for _, ns := range rsp.NetworkSlice {
+			logger.GrpcLog.Infoln("Network Slice Name ", ns.Name)
+			if ns.Site != nil {
+				logger.GrpcLog.Infoln("Network Slice has site name present ")
+				site := ns.Site
+				logger.GrpcLog.Infoln("Site name ", site.SiteName)
+				if site.Plmn != nil {
+					logger.GrpcLog.Infoln("Plmn mcc ", site.Plmn.Mcc)
+					plmn := PlmnSupportItem{}
+					plmn.PlmnId.Mnc = site.Plmn.Mnc
+					plmn.PlmnId.Mcc = site.Plmn.Mcc
+					var found bool = false
+					for _, cplmn := range UdrConfig.Configuration.PlmnSupportList {
+						if (cplmn.PlmnId.Mnc == plmn.PlmnId.Mnc) && (cplmn.PlmnId.Mcc == plmn.PlmnId.Mcc) {
+							found = true
+							break
+						}
+					}
+					if found == false {
+						UdrConfig.Configuration.PlmnSupportList = append(UdrConfig.Configuration.PlmnSupportList, plmn)
+					}
+				} else {
+					logger.GrpcLog.Infoln("Plmn not present in the message ")
+				}
+
+			}
+		}
+		if minConfig == false {
+			// first slice Created
+			if len(UdrConfig.Configuration.PlmnSupportList) > 0 {
+				minConfig = true
+				ConfigPodTrigger <- true
+				logger.GrpcLog.Infoln("Send config trigger to main routine")
+			}
+		} else {
+			// all slices deleted
+			if len(UdrConfig.Configuration.PlmnSupportList) == 0 {
+				minConfig = false
+				ConfigPodTrigger <- false
+				logger.GrpcLog.Infoln("Send config trigger to main routine")
+			} else {
+				ConfigPodTrigger <- true
+				logger.GrpcLog.Infoln("Send config trigger to main routine")
+			}
+		}
+	}
+	return true
 }

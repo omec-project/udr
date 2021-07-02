@@ -26,6 +26,14 @@ func BuildNFInstance(context *udr_context.UDRContext) models.NfProfile {
 	profile.NfInstanceId = context.NfId
 	profile.NfType = models.NfType_UDR
 	profile.NfStatus = models.NfStatus_REGISTERED
+	var plmns []models.PlmnId
+	for _, plmnItem := range config.Configuration.PlmnSupportList {
+		plmns = append(plmns, plmnItem.PlmnId)
+	}
+	if len(plmns) > 0 {
+		profile.PlmnList = &plmns
+	}
+
 	version := config.Info.Version
 	tmpVersion := strings.Split(version, ".")
 	versionUri := "v" + tmpVersion[0]
