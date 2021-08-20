@@ -24,6 +24,7 @@ import (
 	udr_context "github.com/free5gc/udr/context"
 	"github.com/free5gc/udr/logger"
 	"github.com/free5gc/udr/util"
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 
 const (
@@ -51,6 +52,67 @@ func deleteDataFromDB(collName string, filter bson.M) {
 
 func HandleCreateAccessAndMobilityData(request *http_wrapper.Request) *http_wrapper.Response {
 	return http_wrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
+}
+
+// seems something which we should move to mongolib
+func toBsonM(data interface{}) (ret bson.M) {
+	tmp, _ := json.Marshal(data)
+	json.Unmarshal(tmp, &ret)
+	return
+}
+
+// AddEntrySmPolicyTable ... write table entries into policyData.ues.smData
+func AddEntrySmPolicyTable(imsi string, dnn string, snssai *protos.NSSAI) error {
+	logger.CfgLog.Infoln("AddEntrySmPolicyTable")
+	collName := "policyData.ues.smData"
+	var addUeId bool
+	logger.CfgLog.Infoln("collname, imsi, dnn, sst, sd : ", collName, imsi, dnn, snssai.Sst, snssai.Sd)
+	ueID := "imsi-"
+	ueID += imsi
+
+	sval, err := strconv.ParseUint(snssai.Sst, 10, 32)
+	if err != nil {
+		logger.CfgLog.Infoln("parse fail for sst ", err)
+		return err
+	}
+	filter := bson.M{"ueId": ueID}
+	modelNssai := models.Snssai{
+		Sd:  snssai.Sd,
+		Sst: int32(sval),
+	}
+	smPolicyData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	var smPolicyDataWrite models.SmPolicyData
+	if smPolicyData != nil {
+		err := json.Unmarshal(util.MapToByte(smPolicyData), &smPolicyDataWrite)
+		if err != nil {
+			logger.DataRepoLog.Warnln(err)
+			return err
+		}
+	} else {
+		smPolicyDataWrite.SmPolicySnssaiData = make(map[string]models.SmPolicySnssaiData)
+		addUeId = true
+	}
+
+	smPolicySnssaiData := models.SmPolicySnssaiData{
+		Snssai: &modelNssai,
+		SmPolicyDnnData: map[string]models.SmPolicyDnnData{
+			dnn: {
+				Dnn: dnn,
+			},
+		},
+	}
+
+	for key, value := range smPolicyDataWrite.SmPolicySnssaiData {
+		logger.CfgLog.Infoln("entry in DB key  ", key)
+		logger.CfgLog.Infoln("entry in DB val  ", value)
+	}
+	smPolicyDataWrite.SmPolicySnssaiData[util.SnssaiModelsToHex(modelNssai)] = smPolicySnssaiData
+	smPolicyDataBsonM := toBsonM(smPolicyDataWrite)
+	if addUeId {
+		smPolicyDataBsonM["ueId"] = ueID
+	}
+	MongoDBLibrary.RestfulAPIPost(collName, filter, smPolicyDataBsonM)
+	return nil
 }
 
 func HandleDeleteAccessAndMobilityData(request *http_wrapper.Request) *http_wrapper.Response {

@@ -70,6 +70,7 @@ type Mongodb struct {
 }
 
 var ConfigPodTrigger chan bool
+var ConfigUpdateDbTrigger chan *UpdateDb
 
 func init() {
 	ConfigPodTrigger = make(chan bool)
@@ -82,7 +83,24 @@ func (c *Config) GetVersion() string {
 	return ""
 }
 
-func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse) bool {
+func (c *Config) addSmPolicyInfo(nwSlice *protos.NetworkSlice, dbUpdateChannel chan *UpdateDb) error {
+	for _, devGrp := range nwSlice.DeviceGroup {
+		for _, imsi := range devGrp.Imsi {
+			smPolicyEntry := &SmPolicyUpdateEntry{
+				Imsi:   imsi,
+				Dnn:    devGrp.IpDomainDetails.DnnName,
+				Snssai: nwSlice.Nssai,
+			}
+			dbUpdate := &UpdateDb{
+				SmPolicyTable: smPolicyEntry,
+			}
+			dbUpdateChannel <- dbUpdate
+		}
+	}
+	return nil
+}
+
+func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbUpdateChannel chan *UpdateDb) bool {
 	var minConfig bool
 	for rsp := range commChannel {
 		logger.GrpcLog.Infoln("Received updateConfig in the udr app : ", rsp)
@@ -112,6 +130,7 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse) boo
 				}
 
 			}
+			c.addSmPolicyInfo(ns, dbUpdateChannel)
 		}
 		if minConfig == false {
 			// first slice Created
