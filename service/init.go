@@ -30,6 +30,7 @@ import (
 	"github.com/free5gc/udr/datarepository"
 	"github.com/free5gc/udr/factory"
 	"github.com/free5gc/udr/logger"
+	"github.com/free5gc/udr/producer"
 	"github.com/free5gc/udr/util"
 )
 
@@ -210,6 +211,7 @@ func (udr *UDR) Start() {
 	}()
 
 	go udr.registerNF()
+	go udr.configUpdateDb()
 
 	server, err := http2_util.NewServer(addr, udrLogPath, router)
 	if server == nil {
@@ -300,6 +302,21 @@ func (udr *UDR) Terminate() {
 		logger.InitLog.Infof("Deregister from NRF successfully")
 	}
 	logger.InitLog.Infof("UDR terminated")
+}
+
+func (udr *UDR) configUpdateDb() {
+	for msg := range factory.ConfigUpdateDbTrigger {
+		initLog.Infof("Config update DB trigger")
+		err := producer.AddEntrySmPolicyTable(
+			msg.SmPolicyTable.Imsi,
+			msg.SmPolicyTable.Dnn,
+			msg.SmPolicyTable.Snssai)
+		if err == nil {
+			initLog.Infof("added entry to sm policy table success")
+		} else {
+			initLog.Errorf("entry add failed ", err)
+		}
+	}
 }
 
 func (udr *UDR) registerNF() {

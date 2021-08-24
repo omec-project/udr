@@ -18,10 +18,21 @@ import (
 
 	"github.com/free5gc/udr/logger"
 	"github.com/omec-project/config5g/proto/client"
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/sirupsen/logrus"
 )
 
 var UdrConfig Config
+
+type UpdateDb struct {
+	SmPolicyTable *SmPolicyUpdateEntry
+}
+
+type SmPolicyUpdateEntry struct {
+	Imsi   string
+	Dnn    string
+	Snssai *protos.NSSAI
+}
 
 var initLog *logrus.Entry
 
@@ -43,7 +54,8 @@ func InitConfigFactory(f string) error {
 		if roc == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
 			commChannel := client.ConfigWatcher()
-			go UdrConfig.updateConfig(commChannel)
+			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
+			go UdrConfig.updateConfig(commChannel, ConfigUpdateDbTrigger)
 		} else {
 			go func() {
 				initLog.Infoln("Use helm chart config ")
