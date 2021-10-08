@@ -24,6 +24,7 @@ func InitUdrContext(context *udr_context.UDRContext) {
 	context.NfId = uuid.New().String()
 	context.RegisterIPv4 = factory.UDR_DEFAULT_IPV4 // default localhost
 	context.SBIPort = factory.UDR_DEFAULT_PORT_INT  // default port
+	context.PlmnList = configuration.PlmnList
 	if sbi := configuration.Sbi; sbi != nil {
 		context.UriScheme = models.UriScheme(sbi.Scheme)
 		if sbi.RegisterIPv4 != "" {

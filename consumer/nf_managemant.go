@@ -60,6 +60,15 @@ func BuildNFInstance(context *udr_context.UDRContext) models.NfProfile {
 			},
 		},
 	}
+
+	var plmns []models.PlmnId
+	for _, plmnItem := range context.PlmnList {
+		plmns = append(plmns, plmnItem.PlmnId)
+	}
+	if len(plmns) > 0 {
+		profile.PlmnList = &plmns
+	}
+
 	profile.NfServices = &services
 	// TODO: finish the Udr Info
 	profile.UdrInfo = &models.UdrInfo{

@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/udr/factory"
 )
 
 var udrContext = UDRContext{}
@@ -47,6 +48,7 @@ type UDRContext struct {
 	UESubsCollection                        sync.Map // map[ueId]*UESubsData
 	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
 	SubscriptionDataSubscriptionIDGenerator int
+	PlmnList                                []factory.PlmnSupportItem
 	SubscriptionDataSubscriptions           map[subsId]*models.SubscriptionDataSubscriptions
 	PolicyDataSubscriptions                 map[subsId]*models.PolicyDataSubscription
 	appDataInfluDataSubscriptionIdGenerator uint64

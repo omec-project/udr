@@ -42,6 +42,7 @@ type Configuration struct {
 	Mongodb         *Mongodb          `yaml:"mongodb"`
 	NrfUri          string            `yaml:"nrfUri"`
 	PlmnSupportList []PlmnSupportItem `yaml:"plmnSupportList,omitempty"`
+	PlmnList        []PlmnSupportItem `yaml:"plmnList,omitempty"`
 }
 
 type PlmnSupportItem struct {
@@ -69,13 +70,15 @@ type Mongodb struct {
 	Url  string `yaml:"url"`
 }
 
+//type PlmnSupportItem struct {
+//        PlmnId     models.PlmnId   `yaml:"plmnId"`
+//}
 var ConfigPodTrigger chan bool
 var ConfigUpdateDbTrigger chan *UpdateDb
 
 func init() {
 	ConfigPodTrigger = make(chan bool)
 }
-
 func (c *Config) GetVersion() string {
 	if c.Info != nil && c.Info.Version != "" {
 		return c.Info.Version
