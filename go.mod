@@ -9,7 +9,6 @@ require (
 	github.com/free5gc/MongoDBLibrary v1.0.0
 	github.com/free5gc/http2_util v1.0.0
 	github.com/free5gc/http_wrapper v1.0.0
-	github.com/free5gc/logger_conf v1.0.0
 	github.com/free5gc/logger_util v1.0.0
 	github.com/free5gc/openapi v1.0.0
 	github.com/free5gc/path_util v1.0.0
@@ -17,7 +16,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/uuid v1.1.2
 	github.com/mitchellh/mapstructure v1.4.0
-	github.com/omec-project/config5g v1.0.1
+	github.com/omec-project/config5g v1.0.6
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.5
