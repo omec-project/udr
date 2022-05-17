@@ -19,8 +19,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/free5gc/MongoDBLibrary"
-	"github.com/free5gc/http_wrapper"
+	"github.com/omec-project/MongoDBLibrary"
+	"github.com/omec-project/http_wrapper"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
