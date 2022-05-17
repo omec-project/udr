@@ -12,8 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"github.com/free5gc/udr/logger"
-	udr_service "github.com/free5gc/udr/service"
+	"github.com/omec-project/udr/logger"
+	udr_service "github.com/omec-project/udr/service"
 	"github.com/free5gc/version"
 )
 

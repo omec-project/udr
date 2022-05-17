@@ -12,8 +12,8 @@ package factory
 
 import (
 	"github.com/free5gc/logger_util"
-	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/udr/logger"
+	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/udr/logger"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 

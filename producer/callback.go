@@ -6,8 +6,8 @@
 package producer
 
 import (
-	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/udr/producer/callback"
+	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/udr/producer/callback"
 )
 
 func PreHandleOnDataChangeNotify(ueId string, resourceId string, patchItems []models.PatchItem,

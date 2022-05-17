@@ -11,10 +11,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/free5gc/openapi/models"
-	udr_context "github.com/free5gc/udr/context"
-	"github.com/free5gc/udr/factory"
-	"github.com/free5gc/udr/logger"
+	"github.com/omec-project/openapi/models"
+	udr_context "github.com/omec-project/udr/context"
+	"github.com/omec-project/udr/factory"
+	"github.com/omec-project/udr/logger"
 )
 
 func InitUdrContext(context *udr_context.UDRContext) {

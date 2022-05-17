@@ -21,10 +21,10 @@ import (
 
 	"github.com/free5gc/MongoDBLibrary"
 	"github.com/free5gc/http_wrapper"
-	"github.com/free5gc/openapi/models"
-	udr_context "github.com/free5gc/udr/context"
-	"github.com/free5gc/udr/logger"
-	"github.com/free5gc/udr/util"
+	"github.com/omec-project/openapi/models"
+	udr_context "github.com/omec-project/udr/context"
+	"github.com/omec-project/udr/logger"
+	"github.com/omec-project/udr/util"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 

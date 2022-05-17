@@ -8,10 +8,10 @@ package callback
 import (
 	"context"
 
-	"github.com/free5gc/openapi/Nudr_DataRepository"
-	"github.com/free5gc/openapi/models"
-	udr_context "github.com/free5gc/udr/context"
-	"github.com/free5gc/udr/logger"
+	"github.com/omec-project/openapi/Nudr_DataRepository"
+	"github.com/omec-project/openapi/models"
+	udr_context "github.com/omec-project/udr/context"
+	"github.com/omec-project/udr/logger"
 )
 
 func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
