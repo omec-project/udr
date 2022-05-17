@@ -14,7 +14,6 @@ import (
 
 	"github.com/omec-project/udr/logger"
 	udr_service "github.com/omec-project/udr/service"
-	"github.com/free5gc/version"
 )
 
 var UDR = &udr_service.UDR{}
@@ -29,7 +28,6 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "udr"
 	appLog.Infoln(app.Name)
-	appLog.Infoln("UDR version: ", version.GetVersion())
 	app.Usage = "-free5gccfg common configuration file -udrcfg udr configuration file"
 	app.Action = action
 	app.Flags = UDR.GetCliCmd()
