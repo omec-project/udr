@@ -12,9 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"github.com/free5gc/udr/logger"
-	udr_service "github.com/free5gc/udr/service"
-	"github.com/free5gc/version"
+	"github.com/omec-project/udr/logger"
+	udr_service "github.com/omec-project/udr/service"
 )
 
 var UDR = &udr_service.UDR{}
@@ -29,7 +28,6 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "udr"
 	appLog.Infoln(app.Name)
-	appLog.Infoln("UDR version: ", version.GetVersion())
 	app.Usage = "-free5gccfg common configuration file -udrcfg udr configuration file"
 	app.Action = action
 	app.Flags = UDR.GetCliCmd()

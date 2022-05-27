@@ -19,20 +19,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"github.com/free5gc/MongoDBLibrary"
-	mongoDBLibLogger "github.com/free5gc/MongoDBLibrary/logger"
-	"github.com/free5gc/http2_util"
-	"github.com/free5gc/logger_util"
-	openApiLogger "github.com/free5gc/openapi/logger"
-	"github.com/free5gc/path_util"
-	pathUtilLogger "github.com/free5gc/path_util/logger"
-	"github.com/free5gc/udr/consumer"
-	udr_context "github.com/free5gc/udr/context"
-	"github.com/free5gc/udr/datarepository"
-	"github.com/free5gc/udr/factory"
-	"github.com/free5gc/udr/logger"
-	"github.com/free5gc/udr/producer"
-	"github.com/free5gc/udr/util"
+	"github.com/omec-project/MongoDBLibrary"
+	mongoDBLibLogger "github.com/omec-project/MongoDBLibrary/logger"
+	"github.com/omec-project/http2_util"
+	"github.com/omec-project/logger_util"
+	"github.com/omec-project/path_util"
+	pathUtilLogger "github.com/omec-project/path_util/logger"
+	"github.com/omec-project/udr/consumer"
+	udr_context "github.com/omec-project/udr/context"
+	"github.com/omec-project/udr/datarepository"
+	"github.com/omec-project/udr/factory"
+	"github.com/omec-project/udr/logger"
+	"github.com/omec-project/udr/producer"
+	"github.com/omec-project/udr/util"
 )
 
 type UDR struct{}
@@ -129,22 +128,6 @@ func (udr *UDR) setLogLevel() {
 			pathUtilLogger.SetLogLevel(logrus.InfoLevel)
 		}
 		pathUtilLogger.SetReportCaller(factory.UdrConfig.Logger.PathUtil.ReportCaller)
-	}
-
-	if factory.UdrConfig.Logger.OpenApi != nil {
-		if factory.UdrConfig.Logger.OpenApi.DebugLevel != "" {
-			if level, err := logrus.ParseLevel(factory.UdrConfig.Logger.OpenApi.DebugLevel); err != nil {
-				openApiLogger.OpenApiLog.Warnf("OpenAPI Log level [%s] is invalid, set to [info] level",
-					factory.UdrConfig.Logger.OpenApi.DebugLevel)
-				openApiLogger.SetLogLevel(logrus.InfoLevel)
-			} else {
-				openApiLogger.SetLogLevel(level)
-			}
-		} else {
-			openApiLogger.OpenApiLog.Warnln("OpenAPI Log level not set. Default set to [info] level")
-			openApiLogger.SetLogLevel(logrus.InfoLevel)
-		}
-		openApiLogger.SetReportCaller(factory.UdrConfig.Logger.OpenApi.ReportCaller)
 	}
 
 	if factory.UdrConfig.Logger.MongoDBLibrary != nil {
