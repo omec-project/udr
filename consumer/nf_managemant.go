@@ -74,7 +74,7 @@ func BuildNFInstance(context *udr_context.UDRContext) models.NfProfile {
 	return profile
 }
 
-func SendRegisterNFInstance(nrfUri, nfInstanceId string, profile models.NfProfile) (string, string, error) {
+var SendRegisterNFInstance = func(nrfUri, nfInstanceId string, profile models.NfProfile) (models.NfProfile, string, string, error) {
 	// Set client and set url
 	configuration := Nnrf_NFManagement.NewConfiguration()
 	configuration.SetBasePath(nrfUri)
@@ -83,7 +83,7 @@ func SendRegisterNFInstance(nrfUri, nfInstanceId string, profile models.NfProfil
 	var retrieveNfInstanceId string
 
 	for {
-		_, res, err := client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfInstanceId, profile)
+		prof, res, err := client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfInstanceId, profile)
 		if err != nil || res == nil {
 			// TODO : add log
 			fmt.Println(fmt.Errorf("UDR register to NRF Error[%s]", err.Error()))
@@ -99,13 +99,13 @@ func SendRegisterNFInstance(nrfUri, nfInstanceId string, profile models.NfProfil
 		status := res.StatusCode
 		if status == http.StatusOK {
 			// NFUpdate
-			return resouceNrfUri, retrieveNfInstanceId, err
+			return prof, resouceNrfUri, retrieveNfInstanceId, err
 		} else if status == http.StatusCreated {
 			// NFRegister
 			resourceUri := res.Header.Get("Location")
 			resouceNrfUri = resourceUri[:strings.Index(resourceUri, "/nnrf-nfm/")]
 			retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
-			return resouceNrfUri, retrieveNfInstanceId, err
+			return prof, resouceNrfUri, retrieveNfInstanceId, err
 		} else {
 			fmt.Println("handler returned wrong status code", status)
 			fmt.Println("NRF return wrong status code", status)
@@ -135,6 +135,36 @@ func SendDeregisterNFInstance() (problemDetails *models.ProblemDetails, err erro
 		}()
 
 		if res.Status != err.Error() {
+			return
+		}
+		problem := err.(openapi.GenericOpenAPIError).Model().(models.ProblemDetails)
+		problemDetails = &problem
+	} else {
+		err = openapi.ReportError("server no response")
+	}
+	return
+}
+
+var SendUpdateNFInstance = func(patchItem []models.PatchItem) (nfProfile models.NfProfile, problemDetails *models.ProblemDetails, err error) {
+	logger.ConsumerLog.Debugf("Send Update NFInstance")
+
+	udrSelf := udr_context.UDR_Self()
+	configuration := Nnrf_NFManagement.NewConfiguration()
+	configuration.SetBasePath(udrSelf.NrfUri)
+	client := Nnrf_NFManagement.NewAPIClient(configuration)
+
+	var res *http.Response
+	nfProfile, res, err = client.NFInstanceIDDocumentApi.UpdateNFInstance(context.Background(), udrSelf.NfId, patchItem)
+	if err == nil {
+		return
+	} else if res != nil {
+		defer func() {
+			if resCloseErr := res.Body.Close(); resCloseErr != nil {
+				logger.ConsumerLog.Errorf("UpdateNFInstance response cannot close: %+v", resCloseErr)
+			}
+		}()
+		if res.Status != err.Error() {
+			logger.ConsumerLog.Errorf("UpdateNFInstance received error response: %v", res.Status)
 			return
 		}
 		problem := err.(openapi.GenericOpenAPIError).Model().(models.ProblemDetails)
