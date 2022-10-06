@@ -1,6 +1,6 @@
 module github.com/omec-project/udr
 
-go 1.14
+go 1.16
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/omec-project/MongoDBLibrary v1.1.0
-	github.com/omec-project/config5g v1.1.0
+	github.com/omec-project/config5g v1.2.0
 	github.com/omec-project/http2_util v1.1.0
 	github.com/omec-project/http_wrapper v1.1.0
 	github.com/omec-project/logger_util v1.1.0
@@ -20,5 +20,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.5
 	go.mongodb.org/mongo-driver v1.7.3
+	google.golang.org/grpc v1.48.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
