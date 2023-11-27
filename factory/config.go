@@ -11,10 +11,10 @@
 package factory
 
 import (
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/logger_util"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 
 const (

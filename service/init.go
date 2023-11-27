@@ -307,7 +307,7 @@ func (udr *UDR) configUpdateDb() {
 		if err == nil {
 			initLog.Infof("added entry to sm policy table success")
 		} else {
-			initLog.Errorln("entry add failed ", err)
+			initLog.Errorf("entry add failed %+v", err)
 		}
 	}
 }
@@ -386,15 +386,13 @@ func (udr *UDR) registerNF() {
 		initLog.Infof("Minimum configuration from config pod available %v", msg)
 		self := udr_context.UDR_Self()
 		profile := consumer.BuildNFInstance(self)
-		var newNrfUri string
 		var err error
 		var prof models.NfProfile
 		// send registration with updated PLMN Ids.
-		prof, newNrfUri, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, profile.NfInstanceId, profile)
+		prof, _, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, profile.NfInstanceId, profile)
 		if err == nil {
 			udr.StartKeepAliveTimer(prof)
-			logger.CfgLog.Infof("Sent Register NF Instance with updated profile")
-			self.NrfUri = newNrfUri
+			logger.CfgLog.Infoln("Sent Register NF Instance with updated profile")
 		} else {
 			initLog.Errorf("Send Register NFInstance Error[%s]", err.Error())
 		}
