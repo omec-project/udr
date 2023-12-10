@@ -18,7 +18,7 @@ COPY . $GOPATH/src/udr
 RUN cd $GOPATH/src/udr \
     && make all
 
-FROM alpine:3.16 as udr
+FROM alpine:3.19 as udr
 
 LABEL description="ONF open source 5G Core Network" \
     version="Stage 3"
