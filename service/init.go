@@ -307,7 +307,7 @@ func (udr *UDR) configUpdateDb() {
 		if err == nil {
 			initLog.Infof("added entry to sm policy table success")
 		} else {
-			initLog.Errorf("entry add failed ", err)
+			initLog.Errorln("entry add failed ", err)
 		}
 	}
 }
@@ -341,7 +341,7 @@ func (udr *UDR) BuildAndSendRegisterNFInstance() (prof models.NfProfile, err err
 	return profile, err
 }
 
-//UpdateNF is the callback function, this is called when keepalivetimer elapsed
+// UpdateNF is the callback function, this is called when keepalivetimer elapsed
 func (udr *UDR) UpdateNF() {
 	KeepAliveTimerMutex.Lock()
 	defer KeepAliveTimerMutex.Unlock()
