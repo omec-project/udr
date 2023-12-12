@@ -7,7 +7,7 @@ info:
   description: UDR initial local configuration
 
 configuration:
-  sbi: # Service-based interface information
+  sbi: # Service Based Interface
     scheme: https
     registerIPv4: 127.0.0.4
     bindingIPv4: 0.0.0.0
