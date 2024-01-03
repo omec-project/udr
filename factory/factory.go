@@ -17,9 +17,9 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
+	"github.com/omec-project/udr/logger"
 	"github.com/sirupsen/logrus"
 )
 

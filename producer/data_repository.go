@@ -20,12 +20,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/omec-project/MongoDBLibrary"
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/http_wrapper"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/udr/util"
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 )
 
 const (
