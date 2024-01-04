@@ -131,7 +131,10 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 				}
 
 			}
-			c.addSmPolicyInfo(ns, dbUpdateChannel)
+			err := c.addSmPolicyInfo(ns, dbUpdateChannel)
+			if err != nil {
+				logger.GrpcLog.Errorf("Error in adding sm policy info to db %v", err)
+			}
 		}
 		if minConfig == false {
 			// first slice Created
