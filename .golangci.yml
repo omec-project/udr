@@ -221,8 +221,8 @@ linters:
     - gofmt
     - govet
     # - errcheck
-    # - staticcheck
-    # - unused
+    - staticcheck
+    - unused
     # - gosimple
     - ineffassign
     - typecheck
