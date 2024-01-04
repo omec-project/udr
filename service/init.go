@@ -42,8 +42,7 @@ type UDR struct{}
 type (
 	// Config information.
 	Config struct {
-		udrcfg         string
-		heartBeatTimer string
+		udrcfg string
 	}
 )
 
@@ -366,10 +365,16 @@ func (udr *UDR) UpdateNF() {
 			problemDetails.Status == 404 || problemDetails.Status == 400 {
 			//register with NRF full profile
 			nfProfile, err = udr.BuildAndSendRegisterNFInstance()
+			if err != nil {
+				initLog.Errorf("UDR register to NRF Error[%s]", err.Error())
+			}
 		}
 	} else if err != nil {
 		initLog.Errorf("UDR update to NRF Error[%s]", err.Error())
 		nfProfile, err = udr.BuildAndSendRegisterNFInstance()
+		if err != nil {
+			initLog.Errorf("UDR register to NRF Error[%s]", err.Error())
+		}
 	}
 
 	if nfProfile.HeartBeatTimer != 0 {
