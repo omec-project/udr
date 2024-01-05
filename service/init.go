@@ -169,7 +169,6 @@ func (udr *UDR) FilterCli(c *cli.Context) (args []string) {
 }
 
 func (udr *UDR) Start() {
-
 	// get config file info
 	config := factory.UdrConfig
 	mongodb := config.Configuration.Mongodb
