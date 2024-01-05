@@ -129,7 +129,6 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 				} else {
 					logger.GrpcLog.Infoln("Plmn not present in the message ")
 				}
-
 			}
 			err := c.addSmPolicyInfo(ns, dbUpdateChannel)
 			if err != nil {
