@@ -123,7 +123,7 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 							break
 						}
 					}
-					if found == false {
+					if !found {
 						UdrConfig.Configuration.PlmnSupportList = append(UdrConfig.Configuration.PlmnSupportList, plmn)
 					}
 				} else {
@@ -135,7 +135,7 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 				logger.GrpcLog.Errorf("Error in adding sm policy info to db %v", err)
 			}
 		}
-		if minConfig == false {
+		if !minConfig {
 			// first slice Created
 			if len(UdrConfig.Configuration.PlmnSupportList) > 0 {
 				minConfig = true
