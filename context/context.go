@@ -36,19 +36,19 @@ type UDRContext struct {
 	Name                                    string
 	UriScheme                               models.UriScheme
 	BindingIPv4                             string
-	SBIPort                                 int
 	RegisterIPv4                            string // IP register to NRF
 	HttpIPv6Address                         string
 	NfId                                    string
 	NrfUri                                  string
+	SubscriptionDataSubscriptions           map[subsId]*models.SubscriptionDataSubscriptions
+	PolicyDataSubscriptions                 map[subsId]*models.PolicyDataSubscription
+	UESubsCollection                        sync.Map // map[ueId]*UESubsData
+	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
+	SBIPort                                 int
 	EeSubscriptionIDGenerator               int
 	SdmSubscriptionIDGenerator              int
 	PolicyDataSubscriptionIDGenerator       int
-	UESubsCollection                        sync.Map // map[ueId]*UESubsData
-	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
 	SubscriptionDataSubscriptionIDGenerator int
-	SubscriptionDataSubscriptions           map[subsId]*models.SubscriptionDataSubscriptions
-	PolicyDataSubscriptions                 map[subsId]*models.PolicyDataSubscription
 	appDataInfluDataSubscriptionIdGenerator uint64
 	mtx                                     sync.RWMutex
 }
