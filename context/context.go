@@ -44,13 +44,13 @@ type UDRContext struct {
 	PolicyDataSubscriptions                 map[subsId]*models.PolicyDataSubscription
 	UESubsCollection                        sync.Map // map[ueId]*UESubsData
 	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
+	mtx                                     sync.RWMutex
 	SBIPort                                 int
 	EeSubscriptionIDGenerator               int
 	SdmSubscriptionIDGenerator              int
 	PolicyDataSubscriptionIDGenerator       int
 	SubscriptionDataSubscriptionIDGenerator int
 	appDataInfluDataSubscriptionIdGenerator uint64
-	mtx                                     sync.RWMutex
 }
 
 type UESubsData struct {
