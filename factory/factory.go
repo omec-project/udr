@@ -29,9 +29,9 @@ type UpdateDb struct {
 }
 
 type SmPolicyUpdateEntry struct {
+	Snssai *protos.NSSAI
 	Imsi   string
 	Dnn    string
-	Snssai *protos.NSSAI
 }
 
 var initLog *logrus.Entry
