@@ -2,24 +2,20 @@
 // Copyright 2019 free5GC.org
 //
 // SPDX-License-Identifier: Apache-2.0
-//
-
 package producer
 
 import (
 	"encoding/json"
 	"fmt"
+	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/mitchellh/mapstructure"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 
-	jsonpatch "github.com/evanphx/json-patch"
-	"github.com/mitchellh/mapstructure"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/omec-project/MongoDBLibrary"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/http_wrapper"
 	"github.com/omec-project/openapi/models"
@@ -37,7 +33,10 @@ const (
 var CurrentResourceUri string
 
 func getDataFromDB(collName string, filter bson.M) (map[string]interface{}, *models.ProblemDetails) {
-	data := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	data, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	if data == nil {
 		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
 	}
@@ -48,7 +47,10 @@ func getDataFromDB(collName string, filter bson.M) (map[string]interface{}, *mod
 }
 
 func deleteDataFromDB(collName string, filter bson.M) {
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandleCreateAccessAndMobilityData(request *http_wrapper.Request) *http_wrapper.Response {
@@ -87,7 +89,10 @@ func AddEntrySmPolicyTable(imsi string, dnn string, snssai *protos.NSSAI) error 
 		Sd:  snssai.Sd,
 		Sst: int32(sval),
 	}
-	smPolicyData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	var smPolicyDataWrite models.SmPolicyData
 	if smPolicyData != nil {
 		err := json.Unmarshal(util.MapToByte(smPolicyData), &smPolicyDataWrite)
@@ -118,7 +123,10 @@ func AddEntrySmPolicyTable(imsi string, dnn string, snssai *protos.NSSAI) error 
 	if addUeId {
 		smPolicyDataBsonM["ueId"] = ueID
 	}
-	MongoDBLibrary.RestfulAPIPost(collName, filter, smPolicyDataBsonM)
+	_, errPost := CommonDBClient.RestfulAPIPost(collName, filter, smPolicyDataBsonM)
+	if errPost != nil {
+		logger.DataRepoLog.Warnln(errPost)
+	}
 	return nil
 }
 
@@ -148,7 +156,10 @@ func HandleQueryAmData(request *http_wrapper.Request) *http_wrapper.Response {
 func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*map[string]interface{},
 	*models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-	accessAndMobilitySubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	accessAndMobilitySubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	if accessAndMobilitySubscriptionData != nil {
 		return &accessAndMobilitySubscriptionData, nil
 	} else {
@@ -172,16 +183,22 @@ func HandleAmfContext3gpp(request *http_wrapper.Request) *http_wrapper.Response 
 
 func AmfContext3gppProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
 	filter := bson.M{"ueId": ueId}
-	origValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	origValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	patchJSON, err := json.Marshal(patchItem)
 	if err != nil {
 		logger.DataRepoLog.Error(err)
 	}
-	success := MongoDBLibrary.RestfulAPIJSONPatch(collName, filter, patchJSON)
+	failure := CommonDBClient.RestfulAPIJSONPatch(collName, filter, patchJSON)
 
-	if success {
-		newValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	if failure == nil {
+		newValue, errGetOneNew := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOneNew != nil {
+			logger.DataRepoLog.Warnln(errGetOneNew)
+		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
 	} else {
@@ -207,7 +224,10 @@ func CreateAmfContext3gppProcedure(collName string, ueId string,
 	putData := util.ToBsonM(Amf3GppAccessRegistration)
 	putData["ueId"] = ueId
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleQueryAmfContext3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -230,7 +250,10 @@ func HandleQueryAmfContext3gpp(request *http_wrapper.Request) *http_wrapper.Resp
 
 func QueryAmfContext3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
-	amf3GppAccessRegistration := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	amf3GppAccessRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if amf3GppAccessRegistration != nil {
 		return &amf3GppAccessRegistration, nil
@@ -258,15 +281,21 @@ func HandleAmfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.Respon
 
 func AmfContextNon3gppProcedure(ueId string, collName string, patchItem []models.PatchItem,
 	filter bson.M) *models.ProblemDetails {
-	origValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	origValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	patchJSON, err := json.Marshal(patchItem)
 	if err != nil {
 		logger.DataRepoLog.Error(err)
 	}
-	success := MongoDBLibrary.RestfulAPIJSONPatch(collName, filter, patchJSON)
-	if success {
-		newValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	failure := CommonDBClient.RestfulAPIJSONPatch(collName, filter, patchJSON)
+	if failure == nil {
+		newValue, errGetOneNew := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOneNew != nil {
+			logger.DataRepoLog.Warnln(errGetOneNew)
+		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
 	} else {
@@ -292,7 +321,10 @@ func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon
 	putData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleQueryAmfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -315,7 +347,10 @@ func HandleQueryAmfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.R
 
 func QueryAmfContextNon3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
-	response := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	response, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if response != nil {
 		return &response, nil
@@ -342,16 +377,22 @@ func HandleModifyAuthentication(request *http_wrapper.Request) *http_wrapper.Res
 
 func ModifyAuthenticationProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
 	filter := bson.M{"ueId": ueId}
-	origValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	origValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	patchJSON, err := json.Marshal(patchItem)
 	if err != nil {
 		logger.DataRepoLog.Error(err)
 	}
-	success := MongoDBLibrary.RestfulAPIJSONPatch(collName, filter, patchJSON)
+	failure := CommonDBClient.RestfulAPIJSONPatch(collName, filter, patchJSON)
 
-	if success {
-		newValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	if failure == nil {
+		newValue, errGetOneNew := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOneNew != nil {
+			logger.DataRepoLog.Warnln(errGetOneNew)
+		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
 	} else {
@@ -380,7 +421,10 @@ func HandleQueryAuthSubsData(request *http_wrapper.Request) *http_wrapper.Respon
 func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	authenticationSubscription := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	authenticationSubscription, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if authenticationSubscription != nil {
 		return authenticationSubscription, nil
@@ -404,7 +448,10 @@ func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson
 	filter := bson.M{"ueId": ueId}
 	putData["ueId"] = ueId
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleQueryAuthSoR(request *http_wrapper.Request) *http_wrapper.Response {
@@ -428,7 +475,10 @@ func HandleQueryAuthSoR(request *http_wrapper.Request) *http_wrapper.Response {
 func QueryAuthSoRProcedure(collName string, ueId string) (map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	sorData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	sorData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if sorData != nil {
 		return sorData, nil
@@ -453,7 +503,10 @@ func CreateAuthenticationStatusProcedure(collName string, ueId string, putData b
 	filter := bson.M{"ueId": ueId}
 	putData["ueId"] = ueId
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleQueryAuthenticationStatus(request *http_wrapper.Request) *http_wrapper.Response {
@@ -478,7 +531,10 @@ func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[stri
 	*models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	authEvent := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	authEvent, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if authEvent != nil {
 		return &authEvent, nil
@@ -508,7 +564,10 @@ func HandleApplicationDataInfluenceDataGet(queryParams map[string][]string) *htt
 func getApplicationDataInfluenceDatafromDB(influIDs, dnns, snssais,
 	intGroupIDs, supis []string) []map[string]interface{} {
 	filter := bson.M{}
-	allInfluDatas := MongoDBLibrary.RestfulAPIGetMany(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
+	allInfluDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 	var matchedInfluDatas []map[string]interface{}
 	matchedInfluDatas = filterDataByString("influenceId", influIDs, allInfluDatas)
 	matchedInfluDatas = filterDataByString("dnn", dnns, matchedInfluDatas)
@@ -597,7 +656,10 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 	trInfluDataPatch *models.TrafficInfluDataPatch) (bson.M, int) {
 	filter := bson.M{"influenceId": influID}
 
-	oldData := MongoDBLibrary.RestfulAPIGetOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
+	oldData, errGetOne := CommonDBClient.RestfulAPIGetOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	if oldData == nil {
 		return nil, http.StatusNotFound
 	}
@@ -622,7 +684,10 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 
 	// Add "influenceId" entry to DB
 	newData["influenceId"] = influID
-	MongoDBLibrary.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, newData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, newData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	// Roll back to origin data before return
 	delete(newData, "influenceId")
 
@@ -645,7 +710,10 @@ func putApplicationDataIndividualInfluenceDataToDB(influID string,
 
 	// Add "influenceId" entry to DB
 	data["influenceId"] = influID
-	isExisted := MongoDBLibrary.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, data)
+	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, data)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	// Roll back to origin data before return
 	delete(data, "influenceId")
 
@@ -700,7 +768,10 @@ func getApplicationDataInfluenceDataSubsToNotifyfromDB(dnn, snssai, intGroupID,
 	if len(supi) != 0 {
 		filter["supis"] = supi[0]
 	}
-	matchedSubs := MongoDBLibrary.RestfulAPIGetMany(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
+	matchedSubs, errGetMany := CommonDBClient.RestfulAPIGetMany(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 	if len(snssai) != 0 {
 		matchedSubs = filterDataBySnssais(snssai[0], matchedSubs)
 	}
@@ -763,7 +834,10 @@ func postApplicationDataInfluenceDataSubsToNotifyToDB(subscID string,
 
 	// Add "subscriptionId" entry to DB
 	data["subscriptionId"] = subscID
-	MongoDBLibrary.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, data)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, data)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	// Revert back to origin data before return
 	delete(data, "subscriptionId")
 	return data, http.StatusCreated
@@ -820,14 +894,20 @@ func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 	filter := bson.M{"subscriptionId": subscID}
 	newData := util.ToBsonM(*trInfluSub)
 
-	oldData := MongoDBLibrary.RestfulAPIGetOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
+	oldData, errGetOne := CommonDBClient.RestfulAPIGetOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	if oldData == nil {
 		return nil, http.StatusNotFound
 	}
 	// Add "subscriptionId" entry to DB
 	newData["subscriptionId"] = subscID
 	// Modify with new data
-	MongoDBLibrary.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, newData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, newData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	// Roll back to origin data before return
 	delete(newData, "subscriptionId")
 	return newData, http.StatusOK
@@ -874,7 +954,10 @@ func putApplicationDataIndividualPfdToDB(appID string, pfdDataForApp *models.Pfd
 	filter := bson.M{"applicationId": appID}
 	data := util.ToBsonM(*pfdDataForApp)
 
-	isExisted := MongoDBLibrary.RestfulAPIPutOne(APPDATA_PFD_DB_COLLECTION_NAME, filter, data)
+	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_PFD_DB_COLLECTION_NAME, filter, data)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 
 	if isExisted {
 		return data, http.StatusOK
@@ -896,15 +979,22 @@ func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]in
 	filter := bson.M{}
 
 	var matchedPfds []map[string]interface{}
+	var errGetMany error
 	if len(pfdsAppIDs) == 0 {
-		matchedPfds = MongoDBLibrary.RestfulAPIGetMany(APPDATA_PFD_DB_COLLECTION_NAME, filter)
+		matchedPfds, errGetMany = CommonDBClient.RestfulAPIGetMany(APPDATA_PFD_DB_COLLECTION_NAME, filter)
+		if errGetMany != nil {
+			logger.DataRepoLog.Warnln(errGetMany)
+		}
 		for i := 0; i < len(matchedPfds); i++ {
 			delete(matchedPfds[i], "_id")
 		}
 	} else {
 		for _, v := range pfdsAppIDs {
 			filter := bson.M{"applicationId": v}
-			data := MongoDBLibrary.RestfulAPIGetOne(APPDATA_PFD_DB_COLLECTION_NAME, filter)
+			data, errGetOne := CommonDBClient.RestfulAPIGetOne(APPDATA_PFD_DB_COLLECTION_NAME, filter)
+			if errGetOne != nil {
+				logger.DataRepoLog.Warnln(errGetOne)
+			}
 			if data != nil {
 				// Delete "_id" entry which is auto-inserted by MongoDB
 				delete(data, "_id")
@@ -939,7 +1029,10 @@ func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *http_wrapper.Request) 
 
 func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenceId string) {
 	filter := bson.M{"bdtReferenceId": bdtReferenceId}
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdGet(request *http_wrapper.Request) *http_wrapper.Response {
@@ -963,7 +1056,10 @@ func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId
 	*models.ProblemDetails) {
 	filter := bson.M{"bdtReferenceId": bdtReferenceId}
 
-	bdtData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	bdtData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if bdtData != nil {
 		return &bdtData, nil
@@ -994,7 +1090,10 @@ func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId
 	putData["bdtReferenceId"] = bdtReferenceId
 	filter := bson.M{"bdtReferenceId": bdtReferenceId}
 
-	isExisted := MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 
 	if isExisted {
 		PreHandlePolicyDataChangeNotification("", bdtReferenceId, bdtData)
@@ -1015,7 +1114,10 @@ func HandlePolicyDataBdtDataGet(request *http_wrapper.Request) *http_wrapper.Res
 
 func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]interface{}) {
 	filter := bson.M{}
-	bdtDataArray := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+	bdtDataArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 	return &bdtDataArray
 }
 
@@ -1040,7 +1142,10 @@ func HandlePolicyDataPlmnsPlmnIdUePolicySetGet(request *http_wrapper.Request) *h
 func PolicyDataPlmnsPlmnIdUePolicySetGetProcedure(collName string,
 	plmnId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"plmnId": plmnId}
-	uePolicySet := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	uePolicySet, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if uePolicySet != nil {
 		return &uePolicySet, nil
@@ -1071,7 +1176,10 @@ func PolicyDataSponsorConnectivityDataSponsorIdGetProcedure(collName string,
 	sponsorId string) (*map[string]interface{}, int) {
 	filter := bson.M{"sponsorId": sponsorId}
 
-	sponsorConnectivityData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	sponsorConnectivityData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if sponsorConnectivityData != nil {
 		return &sponsorConnectivityData, http.StatusOK
@@ -1182,7 +1290,10 @@ func PolicyDataUesUeIdAmDataGetProcedure(collName string,
 	ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	amPolicyData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	amPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if amPolicyData != nil {
 		return &amPolicyData, nil
@@ -1213,7 +1324,10 @@ func PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName string,
 	ueId string) (*interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	operatorSpecificDataContainerMapCover := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	operatorSpecificDataContainerMapCover, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if operatorSpecificDataContainerMapCover != nil {
 		operatorSpecificDataContainerMap := operatorSpecificDataContainerMapCover["operatorSpecificDataContainerMap"]
@@ -1248,10 +1362,10 @@ func PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(collName string, ueId s
 		logger.DataRepoLog.Warnln(err)
 	}
 
-	success := MongoDBLibrary.RestfulAPIJSONPatchExtend(collName, filter, patchJSON,
+	failure := CommonDBClient.RestfulAPIJSONPatchExtend(collName, filter, patchJSON,
 		"operatorSpecificDataContainerMap")
 
-	if success {
+	if failure == nil {
 		return nil
 	} else {
 		return util.ProblemDetailsModifyNotAllowed("")
@@ -1279,7 +1393,10 @@ func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId str
 	putData := map[string]interface{}{"operatorSpecificDataContainerMap": OperatorSpecificDataContainer}
 	putData["ueId"] = ueId
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandlePolicyDataUesUeIdSmDataGet(request *http_wrapper.Request) *http_wrapper.Response {
@@ -1317,7 +1434,10 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 		filter["smPolicySnssaiData."+util.SnssaiModelsToHex(snssai)+".smPolicyDnnData."+dnn] = bson.M{"$exists": true}
 	}
 
-	smPolicyData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 	if smPolicyData != nil {
 		var smPolicyDataResp models.SmPolicyData
 		err := json.Unmarshal(util.MapToByte(smPolicyData), &smPolicyDataResp)
@@ -1327,7 +1447,10 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 		{
 			collName := "policyData.ues.smData.usageMonData"
 			filter := bson.M{"ueId": ueId}
-			usageMonDataMapArray := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+			usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+			if errGetMany != nil {
+				logger.DataRepoLog.Warnln(errGetMany)
+			}
 
 			if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
 				var usageMonDataArray []models.UsageMonData
@@ -1370,12 +1493,15 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 	for k, usageMonData := range UsageMonData {
 		limitId := k
 		filterTmp := bson.M{"ueId": ueId, "limitId": limitId}
-		success := MongoDBLibrary.RestfulAPIMergePatch(collName, filterTmp, util.ToBsonM(usageMonData))
-		if !success {
+		failure := CommonDBClient.RestfulAPIMergePatch(collName, filterTmp, util.ToBsonM(usageMonData))
+		if failure != nil {
 			successAll = false
 		} else {
 			var usageMonData models.UsageMonData
-			usageMonDataBsonM := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+			usageMonDataBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+			if errGetOne != nil {
+				logger.DataRepoLog.Warnln(errGetOne)
+			}
 			err := json.Unmarshal(util.MapToByte(usageMonDataBsonM), &usageMonData)
 			if err != nil {
 				logger.DataRepoLog.Warnln(err)
@@ -1385,7 +1511,10 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 	}
 
 	if successAll {
-		smPolicyDataBsonM := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		smPolicyDataBsonM, errGetOneNew := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOneNew != nil {
+			logger.DataRepoLog.Warnln(errGetOneNew)
+		}
 		var smPolicyData models.SmPolicyData
 		err := json.Unmarshal(util.MapToByte(smPolicyDataBsonM), &smPolicyData)
 		if err != nil {
@@ -1394,7 +1523,10 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 		{
 			collName := "policyData.ues.smData.usageMonData"
 			filter := bson.M{"ueId": ueId}
-			usageMonDataMapArray := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+			usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+			if errGetMany != nil {
+				logger.DataRepoLog.Warnln(errGetMany)
+			}
 
 			if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
 				var usageMonDataArray []models.UsageMonData
@@ -1428,7 +1560,10 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *http_wrapper.Request
 
 func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId string, usageMonId string) {
 	filter := bson.M{"ueId": ueId, "usageMonId": usageMonId}
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *http_wrapper.Request) *http_wrapper.Response {
@@ -1451,7 +1586,10 @@ func PolicyDataUesUeIdSmDataUsageMonIdGetProcedure(collName string, usageMonId s
 	ueId string) *map[string]interface{} {
 	filter := bson.M{"ueId": ueId, "usageMonId": usageMonId}
 
-	usageMonData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	usageMonData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	return &usageMonData
 }
@@ -1476,7 +1614,10 @@ func PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName string, ueId string,
 	putData["usageMonId"] = usageMonId
 	filter := bson.M{"ueId": ueId, "usageMonId": usageMonId}
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	return &putData
 }
 
@@ -1502,7 +1643,10 @@ func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*ma
 	*models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	uePolicySet := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	uePolicySet, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if uePolicySet != nil {
 		return &uePolicySet, nil
@@ -1533,11 +1677,14 @@ func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
 	patchData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
 
-	success := MongoDBLibrary.RestfulAPIMergePatch(collName, filter, patchData)
+	failure := CommonDBClient.RestfulAPIMergePatch(collName, filter, patchData)
 
-	if success {
+	if failure == nil {
 		var uePolicySet models.UePolicySet
-		uePolicySetBsonM := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		uePolicySetBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		err := json.Unmarshal(util.MapToByte(uePolicySetBsonM), &uePolicySet)
 		if err != nil {
 			logger.DataRepoLog.Warnln(err)
@@ -1574,7 +1721,10 @@ func PolicyDataUesUeIdUePolicySetPutProcedure(collName string, ueId string,
 	putData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
 
-	isExisted := MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 	if !isExisted {
 		return putData, http.StatusCreated
 	} else {
@@ -1779,7 +1929,10 @@ func HandleQueryEEData(request *http_wrapper.Request) *http_wrapper.Response {
 
 func QueryEEDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
-	eeProfileData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	eeProfileData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if eeProfileData != nil {
 		return &eeProfileData, nil
@@ -2087,17 +2240,23 @@ func HandlePatchOperSpecData(request *http_wrapper.Request) *http_wrapper.Respon
 func PatchOperSpecDataProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
 	filter := bson.M{"ueId": ueId}
 
-	origValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	origValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Errorln(errGetOne)
+	}
 
 	patchJSON, err := json.Marshal(patchItem)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 	}
 
-	success := MongoDBLibrary.RestfulAPIJSONPatch(collName, filter, patchJSON)
+	failure := CommonDBClient.RestfulAPIJSONPatch(collName, filter, patchJSON)
 
-	if success {
-		newValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	if failure == nil {
+		newValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Errorln(errGetOne)
+		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
 	} else {
@@ -2126,7 +2285,10 @@ func HandleQueryOperSpecData(request *http_wrapper.Request) *http_wrapper.Respon
 func QueryOperSpecDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	operatorSpecificDataContainer := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	operatorSpecificDataContainer, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	// The key of the map is operator specific data element name and the value is the operator specific data of the UE.
 
@@ -2158,7 +2320,10 @@ func HandleGetppData(request *http_wrapper.Request) *http_wrapper.Response {
 func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	ppData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	ppData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if ppData != nil {
 		return &ppData, nil
@@ -2203,7 +2368,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.amData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		accessAndMobilitySubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		accessAndMobilitySubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if accessAndMobilitySubscriptionData != nil {
 			var tmp models.AccessAndMobilitySubscriptionData
 			err := mapstructure.Decode(accessAndMobilitySubscriptionData, &tmp)
@@ -2217,7 +2385,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.smfSelectionSubscriptionData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		smfSelectionSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		smfSelectionSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if smfSelectionSubscriptionData != nil {
 			var tmp models.SmfSelectionSubscriptionData
 			err := mapstructure.Decode(smfSelectionSubscriptionData, &tmp)
@@ -2231,7 +2402,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.smsData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		smsSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		smsSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if smsSubscriptionData != nil {
 			var tmp models.SmsSubscriptionData
 			err := mapstructure.Decode(smsSubscriptionData, &tmp)
@@ -2245,7 +2419,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.smData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		sessionManagementSubscriptionDatas := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+		sessionManagementSubscriptionDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+		if errGetMany != nil {
+			logger.DataRepoLog.Warnln(errGetMany)
+		}
 		if sessionManagementSubscriptionDatas != nil {
 			var tmp []models.SessionManagementSubscriptionData
 			err := mapstructure.Decode(sessionManagementSubscriptionDatas, &tmp)
@@ -2259,7 +2436,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.traceData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		traceData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		traceData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if traceData != nil {
 			var tmp models.TraceData
 			err := mapstructure.Decode(traceData, &tmp)
@@ -2273,7 +2453,10 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 	{
 		collName := "subscriptionData.provisionedData.smsMngData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-		smsManagementSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		smsManagementSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if smsManagementSubscriptionData != nil {
 			var tmp models.SmsManagementSubscriptionData
 			err := mapstructure.Decode(smsManagementSubscriptionData, &tmp)
@@ -2309,17 +2492,23 @@ func HandleModifyPpData(request *http_wrapper.Request) *http_wrapper.Response {
 func ModifyPpDataProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
 	filter := bson.M{"ueId": ueId}
 
-	origValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	origValue, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	patchJSON, err := json.Marshal(patchItem)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 	}
 
-	success := MongoDBLibrary.RestfulAPIJSONPatch(collName, filter, patchJSON)
+	failure := CommonDBClient.RestfulAPIJSONPatch(collName, filter, patchJSON)
 
-	if success {
-		newValue := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	if failure == nil {
+		newValue, errGetOneNew := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOneNew != nil {
+			logger.DataRepoLog.Warnln(errGetOneNew)
+		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
 	} else {
@@ -2348,7 +2537,10 @@ func HandleGetIdentityData(request *http_wrapper.Request) *http_wrapper.Response
 func GetIdentityDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	identityData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	identityData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if identityData != nil {
 		return &identityData, nil
@@ -2378,7 +2570,10 @@ func HandleGetOdbData(request *http_wrapper.Request) *http_wrapper.Response {
 func GetOdbDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	operatorDeterminedBarringData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	operatorDeterminedBarringData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if operatorDeterminedBarringData != nil {
 		return &operatorDeterminedBarringData, nil
@@ -2416,7 +2611,10 @@ func GetSharedDataProcedure(collName string, sharedDataIds []string) (*[]map[str
 	var sharedDataArray []map[string]interface{}
 	for _, sharedDataId := range sharedDataIds {
 		filter := bson.M{"sharedDataId": sharedDataId}
-		sharedData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+		sharedData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+		if errGetOne != nil {
+			logger.DataRepoLog.Warnln(errGetOne)
+		}
 		if sharedData != nil {
 			sharedDataArray = append(sharedDataArray, sharedData)
 		}
@@ -2609,7 +2807,10 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 		filter["dnnConfigurations."+dnn] = bson.M{"$exists": true}
 	}
 
-	sessionManagementSubscriptionDatas := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+	sessionManagementSubscriptionDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 
 	return &sessionManagementSubscriptionDatas
 }
@@ -2644,7 +2845,10 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 	putData["pduSessionId"] = int32(pduSessionIdInt)
 
 	filter := bson.M{"ueId": ueId, "pduSessionId": pduSessionIdInt}
-	isExisted := MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 
 	if !isExisted {
 		return putData, http.StatusCreated
@@ -2671,7 +2875,10 @@ func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string
 	}
 	filter := bson.M{"ueId": ueId, "pduSessionId": pduSessionIdInt}
 
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandleQuerySmfRegistration(request *http_wrapper.Request) *http_wrapper.Response {
@@ -2701,7 +2908,10 @@ func QuerySmfRegistrationProcedure(collName string, ueId string,
 
 	filter := bson.M{"ueId": ueId, "pduSessionId": pduSessionIdInt}
 
-	smfRegistration := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smfRegistration != nil {
 		return &smfRegistration, nil
@@ -2726,7 +2936,10 @@ func HandleQuerySmfRegList(request *http_wrapper.Request) *http_wrapper.Response
 
 func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]interface{} {
 	filter := bson.M{"ueId": ueId}
-	smfRegList := MongoDBLibrary.RestfulAPIGetMany(collName, filter)
+	smfRegList, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 
 	if smfRegList != nil {
 		return &smfRegList
@@ -2754,7 +2967,10 @@ func HandleQuerySmfSelectData(request *http_wrapper.Request) *http_wrapper.Respo
 func QuerySmfSelectDataProcedure(collName string, ueId string,
 	servingPlmnId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-	smfSelectionSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smfSelectionSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smfSelectionSubscriptionData != nil {
 		return &smfSelectionSubscriptionData, nil
@@ -2780,7 +2996,10 @@ func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistrati
 	putData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleDeleteSmsfContext3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -2795,7 +3014,10 @@ func HandleDeleteSmsfContext3gpp(request *http_wrapper.Request) *http_wrapper.Re
 
 func DeleteSmsfContext3gppProcedure(collName string, ueId string) {
 	filter := bson.M{"ueId": ueId}
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandleQuerySmsfContext3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -2818,7 +3040,10 @@ func HandleQuerySmsfContext3gpp(request *http_wrapper.Request) *http_wrapper.Res
 func QuerySmsfContext3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	smsfRegistration := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smsfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smsfRegistration != nil {
 		return &smsfRegistration, nil
@@ -2844,7 +3069,10 @@ func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration,
 	putData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
 
-	MongoDBLibrary.RestfulAPIPutOne(collName, filter, putData)
+	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
+	if errPutOne != nil {
+		logger.DataRepoLog.Warnln(errPutOne)
+	}
 }
 
 func HandleDeleteSmsfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -2859,7 +3087,10 @@ func HandleDeleteSmsfContextNon3gpp(request *http_wrapper.Request) *http_wrapper
 
 func DeleteSmsfContextNon3gppProcedure(collName string, ueId string) {
 	filter := bson.M{"ueId": ueId}
-	MongoDBLibrary.RestfulAPIDeleteOne(collName, filter)
+	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
+	if errDelOne != nil {
+		logger.DataRepoLog.Warnln(errDelOne)
+	}
 }
 
 func HandleQuerySmsfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.Response {
@@ -2882,7 +3113,10 @@ func HandleQuerySmsfContextNon3gpp(request *http_wrapper.Request) *http_wrapper.
 func QuerySmsfContextNon3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId}
 
-	smsfRegistration := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smsfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smsfRegistration != nil {
 		return &smsfRegistration, nil
@@ -2912,7 +3146,10 @@ func HandleQuerySmsMngData(request *http_wrapper.Request) *http_wrapper.Response
 func QuerySmsMngDataProcedure(collName string, ueId string,
 	servingPlmnId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
-	smsManagementSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smsManagementSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smsManagementSubscriptionData != nil {
 		return &smsManagementSubscriptionData, nil
@@ -2944,7 +3181,10 @@ func QuerySmsDataProcedure(collName string, ueId string,
 	servingPlmnId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
 
-	smsSubscriptionData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	smsSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if smsSubscriptionData != nil {
 		return &smsSubscriptionData, nil
@@ -3028,7 +3268,10 @@ func QueryTraceDataProcedure(collName string, ueId string,
 	servingPlmnId string) (*map[string]interface{}, *models.ProblemDetails) {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
 
-	traceData := MongoDBLibrary.RestfulAPIGetOne(collName, filter)
+	traceData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+	if errGetOne != nil {
+		logger.DataRepoLog.Warnln(errGetOne)
+	}
 
 	if traceData != nil {
 		return &traceData, nil

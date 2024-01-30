@@ -21,8 +21,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"github.com/omec-project/MongoDBLibrary"
-	mongoDBLibLogger "github.com/omec-project/MongoDBLibrary/logger"
 	"github.com/omec-project/http2_util"
 	"github.com/omec-project/logger_util"
 	"github.com/omec-project/path_util"
@@ -35,6 +33,7 @@ import (
 	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/udr/producer"
 	"github.com/omec-project/udr/util"
+	mongoDBLibLogger "github.com/omec-project/util/logger"
 )
 
 type UDR struct{}
@@ -141,14 +140,14 @@ func (udr *UDR) setLogLevel() {
 	if factory.UdrConfig.Logger.MongoDBLibrary != nil {
 		if factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel != "" {
 			if level, err := logrus.ParseLevel(factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel); err != nil {
-				mongoDBLibLogger.MongoDBLog.Warnf("MongoDBLibrary Log level [%s] is invalid, set to [info] level",
+				mongoDBLibLogger.AppLog.Warnf("MongoDBLibrary Log level [%s] is invalid, set to [info] level",
 					factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel)
 				mongoDBLibLogger.SetLogLevel(logrus.InfoLevel)
 			} else {
 				mongoDBLibLogger.SetLogLevel(level)
 			}
 		} else {
-			mongoDBLibLogger.MongoDBLog.Warnln("MongoDBLibrary Log level not set. Default set to [info] level")
+			mongoDBLibLogger.AppLog.Warnln("MongoDBLibrary Log level not set. Default set to [info] level")
 			mongoDBLibLogger.SetLogLevel(logrus.InfoLevel)
 		}
 		mongoDBLibLogger.SetReportCaller(factory.UdrConfig.Logger.MongoDBLibrary.ReportCaller)
@@ -172,12 +171,10 @@ func (udr *UDR) Start() {
 	// get config file info
 	config := factory.UdrConfig
 	mongodb := config.Configuration.Mongodb
-
 	initLog.Infof("UDR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 
 	// Connect to MongoDB
-	MongoDBLibrary.SetMongoDB(mongodb.Name, mongodb.Url)
-
+	producer.ConnectMongo(mongodb.Url, mongodb.Name)
 	initLog.Infoln("Server started")
 
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
