@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -56,7 +56,7 @@ func HTTPCreateSmfContextNon3gpp(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, smfRegistration)
+	req := httpwrapper.NewRequest(c.Request, smfRegistration)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleCreateSmfContextNon3gpp(req)
@@ -77,7 +77,7 @@ func HTTPCreateSmfContextNon3gpp(c *gin.Context) {
 
 // HTTPDeleteSmfContext - To remove an individual SMF context data of a UE the UDR
 func HTTPDeleteSmfContext(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["pduSessionId"] = c.Params.ByName("pduSessionId")
 
@@ -99,7 +99,7 @@ func HTTPDeleteSmfContext(c *gin.Context) {
 
 // HTTPQuerySmfRegistration - Retrieves the individual SMF registration of a UE
 func HTTPQuerySmfRegistration(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["pduSessionId"] = c.Params.ByName("pduSessionId")
 

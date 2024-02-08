@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -56,7 +56,7 @@ func HTTPCreateAMFSubscriptions(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, amfSubscriptionInfoArray)
+	req := httpwrapper.NewRequest(c.Request, amfSubscriptionInfoArray)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
 
@@ -78,7 +78,7 @@ func HTTPCreateAMFSubscriptions(c *gin.Context) {
 
 // HTTPRemoveAmfSubscriptionsInfo - Deletes AMF Subscription Info for an eeSubscription
 func HTTPRemoveAmfSubscriptionsInfo(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
 
