@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -27,7 +27,7 @@ import (
 	"github.com/omec-project/udr/util"
 )
 
-func sendResponse(c *gin.Context, rsp *http_wrapper.Response) {
+func sendResponse(c *gin.Context, rsp *httpwrapper.Response) {
 	for k, v := range rsp.Header {
 		// TODO: concatenate all values
 		c.Header(k, v[0])
@@ -198,7 +198,7 @@ func HTTPExposureDataSubsToNotifySubIdPut(c *gin.Context) {
 
 // HTTPPolicyDataBdtDataBdtReferenceIdDelete -
 func HTTPPolicyDataBdtDataBdtReferenceIdDelete(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["bdtReferenceId"] = c.Params.ByName("bdtReferenceId")
 
 	rsp := producer.HandlePolicyDataBdtDataBdtReferenceIdDelete(req)
@@ -208,7 +208,7 @@ func HTTPPolicyDataBdtDataBdtReferenceIdDelete(c *gin.Context) {
 
 // HTTPPolicyDataBdtDataBdtReferenceIdGet -
 func HTTPPolicyDataBdtDataBdtReferenceIdGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["bdtReferenceId"] = c.Params.ByName("bdtReferenceId")
 
 	rsp := producer.HandlePolicyDataBdtDataBdtReferenceIdGet(req)
@@ -224,7 +224,7 @@ func HTTPPolicyDataBdtDataBdtReferenceIdPut(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, bdtData)
+	req := httpwrapper.NewRequest(c.Request, bdtData)
 	req.Params["bdtReferenceId"] = c.Params.ByName("bdtReferenceId")
 
 	rsp := producer.HandlePolicyDataBdtDataBdtReferenceIdPut(req)
@@ -234,7 +234,7 @@ func HTTPPolicyDataBdtDataBdtReferenceIdPut(c *gin.Context) {
 
 // HTTPPolicyDataBdtDataGet -
 func HTTPPolicyDataBdtDataGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 
 	rsp := producer.HandlePolicyDataBdtDataGet(req)
 
@@ -243,7 +243,7 @@ func HTTPPolicyDataBdtDataGet(c *gin.Context) {
 
 // HTTPPolicyDataPlmnsPlmnIdUePolicySetGet -
 func HTTPPolicyDataPlmnsPlmnIdUePolicySetGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["plmnId"] = c.Params.ByName("plmnId")
 
 	rsp := producer.HandlePolicyDataPlmnsPlmnIdUePolicySetGet(req)
@@ -253,7 +253,7 @@ func HTTPPolicyDataPlmnsPlmnIdUePolicySetGet(c *gin.Context) {
 
 // HTTPPolicyDataSponsorConnectivityDataSponsorIdGet -
 func HTTPPolicyDataSponsorConnectivityDataSponsorIdGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["sponsorId"] = c.Params.ByName("sponsorId")
 
 	rsp := producer.HandlePolicyDataSponsorConnectivityDataSponsorIdGet(req)
@@ -269,7 +269,7 @@ func HTTPPolicyDataSubsToNotifyPost(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, policyDataSubscription)
+	req := httpwrapper.NewRequest(c.Request, policyDataSubscription)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataSubsToNotifyPost(req)
@@ -283,7 +283,7 @@ func HTTPPolicyDataSubsToNotifyPost(c *gin.Context) {
 
 // HTTPPolicyDataSubsToNotifySubsIdDelete -
 func HTTPPolicyDataSubsToNotifySubsIdDelete(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["subsId"] = c.Params.ByName("subsId")
 
 	rsp := producer.HandlePolicyDataSubsToNotifySubsIdDelete(req)
@@ -299,7 +299,7 @@ func HTTPPolicyDataSubsToNotifySubsIdPut(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, policyDataSubscription)
+	req := httpwrapper.NewRequest(c.Request, policyDataSubscription)
 	req.Params["subsId"] = c.Params.ByName("subsId")
 
 	rsp := producer.HandlePolicyDataSubsToNotifySubsIdPut(req)
@@ -309,7 +309,7 @@ func HTTPPolicyDataSubsToNotifySubsIdPut(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdAmDataGet -
 func HTTPPolicyDataUesUeIdAmDataGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdAmDataGet(req)
@@ -319,7 +319,7 @@ func HTTPPolicyDataUesUeIdAmDataGet(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdOperatorSpecificDataGet -
 func HTTPPolicyDataUesUeIdOperatorSpecificDataGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdOperatorSpecificDataGet(req)
@@ -335,7 +335,7 @@ func HTTPPolicyDataUesUeIdOperatorSpecificDataPatch(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, patchItemArray)
+	req := httpwrapper.NewRequest(c.Request, patchItemArray)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdOperatorSpecificDataPatch(req)
@@ -351,7 +351,7 @@ func HTTPPolicyDataUesUeIdOperatorSpecificDataPut(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, operatorSpecificDataContainerMap)
+	req := httpwrapper.NewRequest(c.Request, operatorSpecificDataContainerMap)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdOperatorSpecificDataPut(req)
@@ -361,7 +361,7 @@ func HTTPPolicyDataUesUeIdOperatorSpecificDataPut(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdSmDataGet -
 func HTTPPolicyDataUesUeIdSmDataGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdSmDataGet(req)
@@ -377,7 +377,7 @@ func HTTPPolicyDataUesUeIdSmDataPatch(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, usageMonDataMap)
+	req := httpwrapper.NewRequest(c.Request, usageMonDataMap)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdSmDataPatch(req)
@@ -387,7 +387,7 @@ func HTTPPolicyDataUesUeIdSmDataPatch(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdSmDataUsageMonIdDelete -
 func HTTPPolicyDataUesUeIdSmDataUsageMonIdDelete(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["usageMonId"] = c.Params.ByName("usageMonId")
 
@@ -398,7 +398,7 @@ func HTTPPolicyDataUesUeIdSmDataUsageMonIdDelete(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdSmDataUsageMonIdGet -
 func HTTPPolicyDataUesUeIdSmDataUsageMonIdGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["usageMonId"] = c.Params.ByName("usageMonId")
 
@@ -415,7 +415,7 @@ func HTTPPolicyDataUesUeIdSmDataUsageMonIdPut(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, usageMonData)
+	req := httpwrapper.NewRequest(c.Request, usageMonData)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["usageMonId"] = c.Params.ByName("usageMonId")
 
@@ -426,7 +426,7 @@ func HTTPPolicyDataUesUeIdSmDataUsageMonIdPut(c *gin.Context) {
 
 // HTTPPolicyDataUesUeIdUePolicySetGet -
 func HTTPPolicyDataUesUeIdUePolicySetGet(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdUePolicySetGet(req)
@@ -442,7 +442,7 @@ func HTTPPolicyDataUesUeIdUePolicySetPatch(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, uePolicySet)
+	req := httpwrapper.NewRequest(c.Request, uePolicySet)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdUePolicySetPatch(req)
@@ -458,7 +458,7 @@ func HTTPPolicyDataUesUeIdUePolicySetPut(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, uePolicySet)
+	req := httpwrapper.NewRequest(c.Request, uePolicySet)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePolicyDataUesUeIdUePolicySetPut(req)

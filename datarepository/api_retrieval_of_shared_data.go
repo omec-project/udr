@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -29,7 +29,7 @@ import (
 // HTTPGetSharedData - retrieve shared data
 func HTTPGetSharedData(c *gin.Context) {
 	sharedDataIdArray := c.QueryArray("shared-data-ids")
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Query["sharedDataIds"] = sharedDataIdArray
 
 	rsp := producer.HandleGetSharedData(req)

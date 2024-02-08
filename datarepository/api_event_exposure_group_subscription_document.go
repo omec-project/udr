@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -28,7 +28,7 @@ import (
 
 // HTTPRemoveEeGroupSubscriptions - Deletes a eeSubscription for a group of UEs or any UE
 func HTTPRemoveEeGroupSubscriptions(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
 
@@ -78,7 +78,7 @@ func HTTPUpdateEeGroupSubscriptions(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, eeSubscription)
+	req := httpwrapper.NewRequest(c.Request, eeSubscription)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
 

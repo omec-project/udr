@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -55,7 +55,7 @@ func HTTPCreateEeGroupSubscriptions(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, eeSubscription)
+	req := httpwrapper.NewRequest(c.Request, eeSubscription)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 
 	rsp := producer.HandleCreateEeGroupSubscriptions(req)
@@ -76,7 +76,7 @@ func HTTPCreateEeGroupSubscriptions(c *gin.Context) {
 
 // HTTPQueryEeGroupSubscriptions - Retrieves the ee subscriptions of a group of UEs or any UE
 func HTTPQueryEeGroupSubscriptions(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 
 	rsp := producer.HandleQueryEeGroupSubscriptions(req)

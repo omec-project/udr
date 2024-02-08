@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/omec-project/http_wrapper"
+	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -56,7 +56,7 @@ func HTTPCreateSmsfContext3gpp(c *gin.Context) {
 		return
 	}
 
-	req := http_wrapper.NewRequest(c.Request, smsfRegistration)
+	req := httpwrapper.NewRequest(c.Request, smsfRegistration)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleCreateSmsfContext3gpp(req)
@@ -77,7 +77,7 @@ func HTTPCreateSmsfContext3gpp(c *gin.Context) {
 
 // HTTPDeleteSmsfContext3gpp - To remove the SMSF context data of a UE via 3GPP access
 func HTTPDeleteSmsfContext3gpp(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleDeleteSmsfContext3gpp(req)
@@ -98,7 +98,7 @@ func HTTPDeleteSmsfContext3gpp(c *gin.Context) {
 
 // HTTPQuerySmsfContext3gpp - Retrieves the SMSF context data of a UE using 3gpp access
 func HTTPQuerySmsfContext3gpp(c *gin.Context) {
-	req := http_wrapper.NewRequest(c.Request, nil)
+	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleQuerySmsfContext3gpp(req)
