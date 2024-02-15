@@ -174,7 +174,7 @@ func (udr *UDR) Start() {
 	initLog.Infof("UDR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 
 	// Connect to MongoDB
-	producer.ConnectMongo(mongodb.Url, mongodb.Name)
+	producer.ConnectMongo(mongodb.Url, mongodb.Name, mongodb.AuthUrl, mongodb.AuthKeysDbName)
 	initLog.Infoln("Server started")
 
 	router := logger_util.NewGinWithLogrus(logger.GinLog)

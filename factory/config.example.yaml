@@ -12,6 +12,11 @@ configuration:
     registerIPv4: 127.0.0.4
     bindingIPv4: 0.0.0.0
     port: 8000
+  mongodb:
+    name: free5gc
+    url: http://dummy
+    authKeysDbName: authentication
+    authUrl: http://dummy
   plmnSupportList:
     - plmnId:
         mcc: "208"

@@ -81,3 +81,17 @@ docker-push:
 	for target in $(DOCKER_TARGETS); do \
 		docker push ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}5gc-$$target:${DOCKER_TAG}; \
 	done
+
+.coverage:
+	rm -rf $(CURDIR)/.coverage
+	mkdir -p $(CURDIR)/.coverage
+
+test: .coverage
+	docker run --rm -v $(CURDIR):/udr -w /udr golang:latest \
+		go test \
+			-failfast \
+			-coverprofile=.coverage/coverage-unit.txt \
+			-covermode=atomic \
+			-v \
+			./ ./...
+

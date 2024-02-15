@@ -65,8 +65,10 @@ type Tls struct {
 }
 
 type Mongodb struct {
-	Name string `yaml:"name"`
-	Url  string `yaml:"url"`
+	Name           string `yaml:"name,omitempty"`
+	Url            string `yaml:"url,omitempty"`
+	AuthKeysDbName string `yaml:"authKeysDbName"`
+	AuthUrl        string `yaml:"authUrl"`
 }
 
 var ConfigPodTrigger chan bool
