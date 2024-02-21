@@ -23,8 +23,6 @@ import (
 
 	"github.com/omec-project/http2_util"
 	"github.com/omec-project/logger_util"
-	"github.com/omec-project/path_util"
-	pathUtilLogger "github.com/omec-project/path_util/logger"
 	"github.com/omec-project/udr/consumer"
 	"github.com/omec-project/udr/context"
 	udr_context "github.com/omec-project/udr/context"
@@ -34,6 +32,8 @@ import (
 	"github.com/omec-project/udr/producer"
 	"github.com/omec-project/udr/util"
 	mongoDBLibLogger "github.com/omec-project/util/logger"
+	"github.com/omec-project/util/path_util"
+	pathUtilLogger "github.com/omec-project/util/path_util/logger"
 )
 
 type UDR struct{}
