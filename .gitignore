@@ -23,3 +23,6 @@ cscope.*
 *.log
 *.pcap
 vendor*
+
+# coverage
+.coverage

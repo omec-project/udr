@@ -50,6 +50,13 @@ func InitConfigFactory(f string) error {
 		if yamlErr := yaml.Unmarshal(content, &UdrConfig); yamlErr != nil {
 			return yamlErr
 		}
+		if UdrConfig.Configuration.Mongodb.AuthUrl == "" {
+			authUrl := UdrConfig.Configuration.Mongodb.Url
+			UdrConfig.Configuration.Mongodb.AuthUrl = authUrl
+		}
+		if UdrConfig.Configuration.Mongodb.AuthKeysDbName == "" {
+			UdrConfig.Configuration.Mongodb.AuthKeysDbName = "authentication"
+		}
 		roc := os.Getenv("MANAGED_BY_CONFIG_POD")
 		if roc == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
