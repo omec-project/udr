@@ -17,6 +17,7 @@ configuration:
     url: http://dummy
     authKeysDbName: authentication
     authUrl: http://dummy
+  webuiUri: webui:9876
   plmnSupportList:
     - plmnId:
         mcc: "208"

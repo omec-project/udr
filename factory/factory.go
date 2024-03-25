@@ -57,10 +57,13 @@ func InitConfigFactory(f string) error {
 		if UdrConfig.Configuration.Mongodb.AuthKeysDbName == "" {
 			UdrConfig.Configuration.Mongodb.AuthKeysDbName = "authentication"
 		}
+		if UdrConfig.Configuration.WebuiUri == "" {
+			UdrConfig.Configuration.WebuiUri = "webui:9876"
+		}
 		roc := os.Getenv("MANAGED_BY_CONFIG_POD")
 		if roc == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			commChannel := client.ConfigWatcher()
+			commChannel := client.ConfigWatcher(UdrConfig.Configuration.WebuiUri)
 			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 			go UdrConfig.updateConfig(commChannel, ConfigUpdateDbTrigger)
 		} else {
