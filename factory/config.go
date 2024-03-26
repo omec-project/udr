@@ -42,6 +42,7 @@ type Configuration struct {
 	Sbi             *Sbi              `yaml:"sbi"`
 	Mongodb         *Mongodb          `yaml:"mongodb"`
 	NrfUri          string            `yaml:"nrfUri"`
+	WebuiUri        string            `yaml:"webuiUri"`
 	PlmnSupportList []PlmnSupportItem `yaml:"plmnSupportList,omitempty"`
 }
 
