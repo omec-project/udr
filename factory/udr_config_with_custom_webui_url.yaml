@@ -17,4 +17,3 @@ configuration:
     url: http://dummy
     authKeysDbName: authentication
     authUrl: http://dummy
-
