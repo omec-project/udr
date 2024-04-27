@@ -29,6 +29,7 @@ import (
 	"github.com/omec-project/udr/datarepository"
 	"github.com/omec-project/udr/factory"
 	"github.com/omec-project/udr/logger"
+	"github.com/omec-project/udr/metrics"
 	"github.com/omec-project/udr/producer"
 	"github.com/omec-project/udr/util"
 	mongoDBLibLogger "github.com/omec-project/util/logger"
@@ -180,6 +181,8 @@ func (udr *UDR) Start() {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
 	datarepository.AddService(router)
+
+	go metrics.InitMetrics()
 
 	udrLogPath := util.UdrLogPath
 	udrPemPath := util.UdrPemPath
