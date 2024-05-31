@@ -72,8 +72,10 @@ type Mongodb struct {
 	AuthUrl        string `yaml:"authUrl"`
 }
 
-var ConfigPodTrigger chan bool
-var ConfigUpdateDbTrigger chan *UpdateDb
+var (
+	ConfigPodTrigger      chan bool
+	ConfigUpdateDbTrigger chan *UpdateDb
+)
 
 func init() {
 	ConfigPodTrigger = make(chan bool)
