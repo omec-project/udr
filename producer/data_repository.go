@@ -28,6 +28,15 @@ const (
 	APPDATA_INFLUDATA_DB_COLLECTION_NAME       = "applicationData.influenceData"
 	APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME = "applicationData.influenceData.subsToNotify"
 	APPDATA_PFD_DB_COLLECTION_NAME             = "applicationData.pfds"
+	POLICYDATA_BDTDATA                         = "policyData.bdtData"
+	POLICYDATA_UES_OPSPECDATA                  = "policyData.ues.operatorSpecificData"
+	POLICYDATA_UES_SMDATA_USAGEMONDATA         = "policyData.ues.smData.usageMonData"
+	POLICYDATA_UES_UEPOLICYSET                 = "policyData.ues.uePolicySet"
+	SUBSCDATA_CTXDATA_AMF_3GPPACCESS           = "subscriptionData.contextData.amf3gppAccess"
+	SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS        = "subscriptionData.contextData.amfNon3gppAccess"
+	SUBSCDATA_CTXDATA_SMF_REGISTRATION         = "subscriptionData.contextData.smfRegistrations"
+	SUBSCDATA_CTXDATA_SMSF_3GPPACCESS          = "subscriptionData.contextData.smsf3gppAccess"
+	SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS       = "subscriptionData.contextData.smsfNon3gppAccess"
 )
 
 var CurrentResourceUri string
@@ -170,7 +179,7 @@ func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*
 
 func HandleAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle AmfContext3gpp")
-	collName := "subscriptionData.contextData.amf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
 	patchItem := request.Body.([]models.PatchItem)
 	ueId := request.Params["ueId"]
 
@@ -212,7 +221,7 @@ func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 
 	Amf3GppAccessRegistration := request.Body.(models.Amf3GppAccessRegistration)
 	ueId := request.Params["ueId"]
-	collName := "subscriptionData.contextData.amf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
 
 	CreateAmfContext3gppProcedure(collName, ueId, Amf3GppAccessRegistration)
 
@@ -236,7 +245,7 @@ func HandleQueryAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respon
 	logger.DataRepoLog.Infof("Handle QueryAmfContext3gpp")
 
 	ueId := request.Params["ueId"]
-	collName := "subscriptionData.contextData.amf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
 
 	response, problemDetails := QueryAmfContext3gppProcedure(collName, ueId)
 
@@ -268,7 +277,7 @@ func HandleAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response
 	logger.DataRepoLog.Infof("Handle AmfContextNon3gpp")
 
 	ueId := request.Params["ueId"]
-	collName := "subscriptionData.contextData.amfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
 	patchItem := request.Body.([]models.PatchItem)
 	filter := bson.M{"ueId": ueId}
 
@@ -310,7 +319,7 @@ func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 	logger.DataRepoLog.Infof("Handle CreateAmfContextNon3gpp")
 
 	AmfNon3GppAccessRegistration := request.Body.(models.AmfNon3GppAccessRegistration)
-	collName := "subscriptionData.contextData.amfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration, collName, ueId)
@@ -334,7 +343,7 @@ func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon
 func HandleQueryAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle QueryAmfContextNon3gpp")
 
-	collName := "subscriptionData.contextData.amfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	response, problemDetails := QueryAmfContextNon3gppProcedure(collName, ueId)
@@ -1038,7 +1047,7 @@ func HandleExposureDataSubsToNotifySubIdPut(request *httpwrapper.Request) *httpw
 func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataBdtDataBdtReferenceIdDelete")
 
-	collName := "policyData.bdtData"
+	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
 
 	PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName, bdtReferenceId)
@@ -1056,7 +1065,7 @@ func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenc
 func HandlePolicyDataBdtDataBdtReferenceIdGet(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataBdtDataBdtReferenceIdGet")
 
-	collName := "policyData.bdtData"
+	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
 
 	response, problemDetails := PolicyDataBdtDataBdtReferenceIdGetProcedure(collName, bdtReferenceId)
@@ -1090,7 +1099,7 @@ func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId
 func HandlePolicyDataBdtDataBdtReferenceIdPut(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataBdtDataBdtReferenceIdPut")
 
-	collName := "policyData.bdtData"
+	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
 	bdtData := request.Body.(models.BdtData)
 
@@ -1126,7 +1135,7 @@ func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId
 func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataBdtDataGet")
 
-	collName := "policyData.bdtData"
+	collName := POLICYDATA_BDTDATA
 
 	response := PolicyDataBdtDataGetProcedure(collName)
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
@@ -1329,7 +1338,7 @@ func PolicyDataUesUeIdAmDataGetProcedure(collName string,
 func HandlePolicyDataUesUeIdOperatorSpecificDataGet(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdOperatorSpecificDataGet")
 
-	collName := "policyData.ues.operatorSpecificData"
+	collName := POLICYDATA_UES_OPSPECDATA
 	ueId := request.Params["ueId"]
 
 	response, problemDetails := PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName, ueId)
@@ -1365,7 +1374,7 @@ func PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName string,
 func HandlePolicyDataUesUeIdOperatorSpecificDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdOperatorSpecificDataPatch")
 
-	collName := "policyData.ues.operatorSpecificData"
+	collName := POLICYDATA_UES_OPSPECDATA
 	ueId := request.Params["ueId"]
 	patchItem := request.Body.([]models.PatchItem)
 
@@ -1403,7 +1412,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request
 
 	// json.NewDecoder(c.Request.Body).Decode(&operatorSpecificDataContainerMap)
 
-	collName := "policyData.ues.operatorSpecificData"
+	collName := POLICYDATA_UES_OPSPECDATA
 	ueId := request.Params["ueId"]
 	OperatorSpecificDataContainer := request.Body.(map[string]models.OperatorSpecificDataContainer)
 
@@ -1473,7 +1482,7 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 			logger.DataRepoLog.Warnln(err)
 		}
 		{
-			collName := "policyData.ues.smData.usageMonData"
+			collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 			filter := bson.M{"ueId": ueId}
 			usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
 			if errGetMany != nil {
@@ -1501,7 +1510,7 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdSmDataPatch")
 
-	collName := "policyData.ues.smData.usageMonData"
+	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
 	usageMonData := request.Body.(map[string]models.UsageMonData)
 
@@ -1550,7 +1559,7 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 			logger.DataRepoLog.Warnln(err)
 		}
 		{
-			collName := "policyData.ues.smData.usageMonData"
+			collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 			filter := bson.M{"ueId": ueId}
 			usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
 			if errGetMany != nil {
@@ -1579,7 +1588,7 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdSmDataUsageMonIdDelete")
 
-	collName := "policyData.ues.smData.usageMonData"
+	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
 	usageMonId := request.Params["usageMonId"]
 
@@ -1598,7 +1607,7 @@ func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId stri
 func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdSmDataUsageMonIdGet")
 
-	collName := "policyData.ues.smData.usageMonData"
+	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
 	usageMonId := request.Params["usageMonId"]
 
@@ -1630,7 +1639,7 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdPut(request *httpwrapper.Request) *h
 	ueId := request.Params["ueId"]
 	usageMonId := request.Params["usageMonId"]
 	usageMonData := request.Body.(models.UsageMonData)
-	collName := "policyData.ues.smData.usageMonData"
+	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 
 	response := PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName, ueId, usageMonId, usageMonData)
 
@@ -1656,7 +1665,7 @@ func HandlePolicyDataUesUeIdUePolicySetGet(request *httpwrapper.Request) *httpwr
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdUePolicySetGet")
 
 	ueId := request.Params["ueId"]
-	collName := "policyData.ues.uePolicySet"
+	collName := POLICYDATA_UES_UEPOLICYSET
 
 	response, problemDetails := PolicyDataUesUeIdUePolicySetGetProcedure(collName, ueId)
 
@@ -1690,7 +1699,7 @@ func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*ma
 func HandlePolicyDataUesUeIdUePolicySetPatch(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdUePolicySetPatch")
 
-	collName := "policyData.ues.uePolicySet"
+	collName := POLICYDATA_UES_UEPOLICYSET
 	ueId := request.Params["ueId"]
 	UePolicySet := request.Body.(models.UePolicySet)
 
@@ -1732,7 +1741,7 @@ func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
 func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle PolicyDataUesUeIdUePolicySetPut")
 
-	collName := "policyData.ues.uePolicySet"
+	collName := POLICYDATA_UES_UEPOLICYSET
 	ueId := request.Params["ueId"]
 	UePolicySet := request.Body.(models.UePolicySet)
 
@@ -2742,7 +2751,7 @@ func HandleCreateSdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 	logger.DataRepoLog.Infof("Handle CreateSdmSubscriptions")
 
 	SdmSubscription := request.Body.(models.SdmSubscription)
-	collName := "subscriptionData.contextData.amfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	locationHeader, SdmSubscription := CreateSdmSubscriptionsProcedure(SdmSubscription, collName, ueId)
@@ -2863,7 +2872,7 @@ func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 	logger.DataRepoLog.Infof("Handle CreateSmfContextNon3gpp")
 
 	SmfRegistration := request.Body.(models.SmfRegistration)
-	collName := "subscriptionData.contextData.smfRegistrations"
+	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 	ueId := request.Params["ueId"]
 	pduSessionId, err := strconv.ParseInt(request.Params["pduSessionId"], 10, 64)
 	if err != nil {
@@ -2905,7 +2914,7 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle DeleteSmfContext")
 
-	collName := "subscriptionData.contextData.smfRegistrations"
+	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 	ueId := request.Params["ueId"]
 	pduSessionId := request.Params["pduSessionId"]
 
@@ -2931,7 +2940,7 @@ func HandleQuerySmfRegistration(request *httpwrapper.Request) *httpwrapper.Respo
 
 	ueId := request.Params["ueId"]
 	pduSessionId := request.Params["pduSessionId"]
-	collName := "subscriptionData.contextData.smfRegistrations"
+	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 
 	response, problemDetails := QuerySmfRegistrationProcedure(collName, ueId, pduSessionId)
 	if response != nil {
@@ -2969,7 +2978,7 @@ func QuerySmfRegistrationProcedure(collName string, ueId string,
 func HandleQuerySmfRegList(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle QuerySmfRegList")
 
-	collName := "subscriptionData.contextData.smfRegistrations"
+	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 	ueId := request.Params["ueId"]
 	response := QuerySmfRegListProcedure(collName, ueId)
 
@@ -3030,7 +3039,7 @@ func HandleCreateSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Resp
 	logger.DataRepoLog.Infof("Handle CreateSmsfContext3gpp")
 
 	SmsfRegistration := request.Body.(models.SmsfRegistration)
-	collName := "subscriptionData.contextData.smsf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	CreateSmsfContext3gppProcedure(collName, ueId, SmsfRegistration)
@@ -3052,7 +3061,7 @@ func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistrati
 func HandleDeleteSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle DeleteSmsfContext3gpp")
 
-	collName := "subscriptionData.contextData.smsf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	DeleteSmsfContext3gppProcedure(collName, ueId)
@@ -3070,7 +3079,7 @@ func DeleteSmsfContext3gppProcedure(collName string, ueId string) {
 func HandleQuerySmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle QuerySmsfContext3gpp")
 
-	collName := "subscriptionData.contextData.smsf3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	response, problemDetails := QuerySmsfContext3gppProcedure(collName, ueId)
@@ -3103,7 +3112,7 @@ func HandleCreateSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.R
 	logger.DataRepoLog.Infof("Handle CreateSmsfContextNon3gpp")
 
 	SmsfRegistration := request.Body.(models.SmsfRegistration)
-	collName := "subscriptionData.contextData.smsfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	CreateSmsfContextNon3gppProcedure(SmsfRegistration, collName, ueId)
@@ -3125,7 +3134,7 @@ func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration,
 func HandleDeleteSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("Handle DeleteSmsfContextNon3gpp")
 
-	collName := "subscriptionData.contextData.smsfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
 
 	DeleteSmsfContextNon3gppProcedure(collName, ueId)
@@ -3144,7 +3153,7 @@ func HandleQuerySmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 	logger.DataRepoLog.Infof("Handle QuerySmsfContextNon3gpp")
 
 	ueId := request.Params["ueId"]
-	collName := "subscriptionData.contextData.smsfNon3gppAccess"
+	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 
 	response, problemDetails := QuerySmsfContextNon3gppProcedure(collName, ueId)
 	if response != nil {
