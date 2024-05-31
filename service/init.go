@@ -18,9 +18,6 @@ import (
 	"time"
 
 	"github.com/omec-project/openapi/models"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-
 	"github.com/omec-project/udr/consumer"
 	"github.com/omec-project/udr/context"
 	udr_context "github.com/omec-project/udr/context"
@@ -35,6 +32,8 @@ import (
 	mongoDBLibLogger "github.com/omec-project/util/logger"
 	"github.com/omec-project/util/path_util"
 	pathUtilLogger "github.com/omec-project/util/path_util/logger"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
 
 type UDR struct{}
@@ -318,7 +317,7 @@ func (udr *UDR) StartKeepAliveTimer(nfProfile models.NfProfile) {
 		nfProfile.HeartBeatTimer = 60
 	}
 	logger.InitLog.Infof("Started KeepAlive Timer: %v sec", nfProfile.HeartBeatTimer)
-	//AfterFunc starts timer and waits for KeepAliveTimer to elapse and then calls udr.UpdateNF function
+	// AfterFunc starts timer and waits for KeepAliveTimer to elapse and then calls udr.UpdateNF function
 	KeepAliveTimer = time.AfterFunc(time.Duration(nfProfile.HeartBeatTimer)*time.Second, udr.UpdateNF)
 }
 
@@ -334,7 +333,7 @@ func (udr *UDR) BuildAndSendRegisterNFInstance() (prof models.NfProfile, err err
 	self := context.UDR_Self()
 	profile := consumer.BuildNFInstance(self)
 	initLog.Infof("Pcf Profile Registering to NRF: %v", profile)
-	//Indefinite attempt to register until success
+	// Indefinite attempt to register until success
 	profile, _, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, self.NfId, profile)
 	return profile, err
 }
@@ -347,7 +346,7 @@ func (udr *UDR) UpdateNF() {
 		initLog.Warnf("KeepAlive timer has been stopped.")
 		return
 	}
-	//setting default value 30 sec
+	// setting default value 30 sec
 	var heartBeatTimer int32 = 60
 	pitem := models.PatchItem{
 		Op:    "replace",
@@ -359,10 +358,10 @@ func (udr *UDR) UpdateNF() {
 	nfProfile, problemDetails, err := consumer.SendUpdateNFInstance(patchItem)
 	if problemDetails != nil {
 		initLog.Errorf("UDR update to NRF ProblemDetails[%v]", problemDetails)
-		//5xx response from NRF, 404 Not Found, 400 Bad Request
+		// 5xx response from NRF, 404 Not Found, 400 Bad Request
 		if (problemDetails.Status/100) == 5 ||
 			problemDetails.Status == 404 || problemDetails.Status == 400 {
-			//register with NRF full profile
+			// register with NRF full profile
 			nfProfile, err = udr.BuildAndSendRegisterNFInstance()
 			if err != nil {
 				initLog.Errorf("UDR register to NRF Error[%s]", err.Error())
@@ -381,7 +380,7 @@ func (udr *UDR) UpdateNF() {
 		heartBeatTimer = nfProfile.HeartBeatTimer
 	}
 	logger.InitLog.Debugf("Restarted KeepAlive Timer: %v sec", heartBeatTimer)
-	//restart timer with received HeartBeatTimer value
+	// restart timer with received HeartBeatTimer value
 	KeepAliveTimer = time.AfterFunc(time.Duration(heartBeatTimer)*time.Second, udr.UpdateNF)
 }
 

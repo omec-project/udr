@@ -11,7 +11,8 @@ import (
 )
 
 func PreHandleOnDataChangeNotify(ueId string, resourceId string, patchItems []models.PatchItem,
-	origValue interface{}, newValue interface{}) {
+	origValue interface{}, newValue interface{},
+) {
 	notifyItems := []models.NotifyItem{}
 	changes := []models.ChangeItem{}
 

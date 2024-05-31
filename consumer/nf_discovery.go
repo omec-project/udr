@@ -16,7 +16,8 @@ import (
 )
 
 func SendSearchNFInstances(nrfUri string, targetNfType, requestNfType models.NfType,
-	param Nnrf_NFDiscovery.SearchNFInstancesParamOpts) (models.SearchResult, error) {
+	param Nnrf_NFDiscovery.SearchNFInstancesParamOpts,
+) (models.SearchResult, error) {
 	// Set client and set url
 	configuration := Nnrf_NFDiscovery.NewConfiguration()
 	configuration.SetBasePath(nrfUri)

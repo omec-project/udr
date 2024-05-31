@@ -18,13 +18,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/omec-project/util/httpwrapper"
 	"github.com/omec-project/openapi"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/udr/producer"
 	"github.com/omec-project/udr/util"
+	"github.com/omec-project/util/httpwrapper"
 )
 
 func sendResponse(c *gin.Context, rsp *httpwrapper.Response) {
