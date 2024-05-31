@@ -227,13 +227,12 @@ linters:
     #- gomnd
     # - goconst
     # - gocognit
-    # - maligned
     # - nestif
     # - gomodguard
     - nakedret
     - gci
     - misspell
-    # - gofumpt
+    - gofumpt
     - whitespace
     - unconvert
     - predeclared
@@ -243,7 +242,7 @@ linters:
     - asciicheck
       #- stylecheck
       # - unparam
-      #- wsl
+      # - wsl
 
   #disable-all: false
   fast: true
