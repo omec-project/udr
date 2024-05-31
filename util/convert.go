@@ -10,10 +10,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"go.mongodb.org/mongo-driver/bson"
-
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func MapToByte(data map[string]interface{}) []byte {

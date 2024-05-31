@@ -18,9 +18,6 @@ import (
 	"time"
 
 	"github.com/omec-project/openapi/models"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-
 	"github.com/omec-project/udr/consumer"
 	"github.com/omec-project/udr/context"
 	udr_context "github.com/omec-project/udr/context"
@@ -35,6 +32,8 @@ import (
 	mongoDBLibLogger "github.com/omec-project/util/logger"
 	"github.com/omec-project/util/path_util"
 	pathUtilLogger "github.com/omec-project/util/path_util/logger"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
 
 type UDR struct{}

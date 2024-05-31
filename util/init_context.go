@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/factory"

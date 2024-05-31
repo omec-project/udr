@@ -9,11 +9,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-
 	"github.com/omec-project/udr/logger"
 	udr_service "github.com/omec-project/udr/service"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
 
 var UDR = &udr_service.UDR{}

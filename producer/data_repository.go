@@ -14,15 +14,14 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/mitchellh/mapstructure"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/udr/util"
 	"github.com/omec-project/util/httpwrapper"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
