@@ -184,8 +184,6 @@ func (udr *UDR) Start() {
 	go metrics.InitMetrics()
 
 	udrLogPath := util.UdrLogPath
-	udrPemPath := util.UdrPemPath
-	udrKeyPath := util.UdrKeyPath
 
 	self := udr_context.UDR_Self()
 	util.InitUdrContext(self)
@@ -217,7 +215,7 @@ func (udr *UDR) Start() {
 	if serverScheme == "http" {
 		err = server.ListenAndServe()
 	} else if serverScheme == "https" {
-		err = server.ListenAndServeTLS(udrPemPath, udrKeyPath)
+		err = server.ListenAndServeTLS(self.PEM, self.Key)
 	}
 
 	if err != nil {

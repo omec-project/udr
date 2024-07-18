@@ -36,6 +36,8 @@ type UDRContext struct {
 	Name                                    string
 	UriScheme                               models.UriScheme
 	BindingIPv4                             string
+	Key                                     string
+	PEM                                     string
 	RegisterIPv4                            string // IP register to NRF
 	HttpIPv6Address                         string
 	NfId                                    string
