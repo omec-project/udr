@@ -23,6 +23,8 @@ func InitUdrContext(context *udr_context.UDRContext) {
 	context.NfId = uuid.New().String()
 	context.RegisterIPv4 = factory.UDR_DEFAULT_IPV4 // default localhost
 	context.SBIPort = factory.UDR_DEFAULT_PORT_INT  // default port
+	context.Key = UdrKeyPath                        // default key path
+	context.PEM = UdrPemPath                        // default PEM path
 	if sbi := configuration.Sbi; sbi != nil {
 		context.UriScheme = models.UriScheme(sbi.Scheme)
 		if sbi.RegisterIPv4 != "" {
@@ -30,6 +32,14 @@ func InitUdrContext(context *udr_context.UDRContext) {
 		}
 		if sbi.Port != 0 {
 			context.SBIPort = sbi.Port
+		}
+		if tls := sbi.Tls; tls != nil {
+			if tls.Key != "" {
+				context.Key = tls.Key
+			}
+			if tls.Pem != "" {
+				context.PEM = tls.Pem
+			}
 		}
 
 		context.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
