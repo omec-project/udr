@@ -26,7 +26,7 @@ func SendSearchNFInstances(nrfUri string, targetNfType, requestNfType models.NfT
 	var res *http.Response
 	result, res, err := client.NFInstancesStoreApi.SearchNFInstances(context.TODO(), targetNfType, requestNfType, &param)
 	if res != nil && res.StatusCode == http.StatusTemporaryRedirect {
-		err = fmt.Errorf("Temporary Redirect For Non NRF Consumer")
+		err = fmt.Errorf("temporary Redirect For Non NRF Consumer")
 	}
 	defer func() {
 		if rspCloseErr := res.Body.Close(); rspCloseErr != nil {
