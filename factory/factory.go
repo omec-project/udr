@@ -80,7 +80,7 @@ func CheckConfigVersion() error {
 	currentVersion := UdrConfig.GetVersion()
 
 	if currentVersion != UDR_EXPECTED_CONFIG_VERSION {
-		return fmt.Errorf("config version is [%s], but expected is [%s].",
+		return fmt.Errorf("config version is [%s], but expected is [%s]",
 			currentVersion, UDR_EXPECTED_CONFIG_VERSION)
 	}
 
