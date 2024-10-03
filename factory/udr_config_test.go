@@ -7,16 +7,16 @@
 package factory
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/omec-project/udr/logger"
 	"github.com/stretchr/testify/assert"
 )
 
 // Webui URL is not set then default Webui URL value is returned
 func TestGetDefaultWebuiUrl(t *testing.T) {
 	if err := InitConfigFactory("config.example.yaml"); err != nil {
-		fmt.Printf("Error in InitConfigFactory: %v\n", err)
+		logger.CfgLog.Errorf("error in InitConfigFactory: %v", err)
 	}
 	got := UdrConfig.Configuration.WebuiUri
 	want := "webui:9876"
@@ -26,7 +26,7 @@ func TestGetDefaultWebuiUrl(t *testing.T) {
 // Webui URL is set to a custom value then custom Webui URL is returned
 func TestGetCustomWebuiUrl(t *testing.T) {
 	if err := InitConfigFactory("udr_config_with_custom_webui_url.yaml"); err != nil {
-		fmt.Printf("Error in InitConfigFactory: %v\n", err)
+		logger.CfgLog.Errorf("error in InitConfigFactory: %v", err)
 	}
 	got := UdrConfig.Configuration.WebuiUri
 	want := "myspecialwebui:9872"

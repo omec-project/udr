@@ -85,8 +85,7 @@ var SendRegisterNFInstance = func(nrfUri, nfInstanceId string, profile models.Nf
 	for {
 		prof, res, err := client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfInstanceId, profile)
 		if err != nil || res == nil {
-			// TODO : add log
-			fmt.Println(fmt.Errorf("UDR register to NRF Error[%s]", err.Error()))
+			logger.ConsumerLog.Errorf("UDR register to NRF Error[%s]", err.Error())
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -107,14 +106,14 @@ var SendRegisterNFInstance = func(nrfUri, nfInstanceId string, profile models.Nf
 			retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
 			return prof, resouceNrfUri, retrieveNfInstanceId, err
 		} else {
-			fmt.Println("handler returned wrong status code", status)
-			fmt.Println("NRF return wrong status code", status)
+			logger.ConsumerLog.Errorln("handler returned wrong status code", status)
+			logger.ConsumerLog.Errorln("NRF return wrong status code", status)
 		}
 	}
 }
 
 func SendDeregisterNFInstance() (problemDetails *models.ProblemDetails, err error) {
-	logger.ConsumerLog.Infof("Send Deregister NFInstance")
+	logger.ConsumerLog.Infoln("send Deregister NFInstance")
 
 	udrSelf := udr_context.UDR_Self()
 	// Set client and set url
@@ -146,7 +145,7 @@ func SendDeregisterNFInstance() (problemDetails *models.ProblemDetails, err erro
 }
 
 var SendUpdateNFInstance = func(patchItem []models.PatchItem) (nfProfile models.NfProfile, problemDetails *models.ProblemDetails, err error) {
-	logger.ConsumerLog.Debugf("Send Update NFInstance")
+	logger.ConsumerLog.Debugln("send Update NFInstance")
 
 	udrSelf := udr_context.UDR_Self()
 	configuration := Nnrf_NFManagement.NewConfiguration()

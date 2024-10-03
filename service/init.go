@@ -27,11 +27,11 @@ import (
 	"github.com/omec-project/udr/producer"
 	"github.com/omec-project/udr/util"
 	"github.com/omec-project/util/http2_util"
-	loggerUtil "github.com/omec-project/util/logger"
+	utilLogger "github.com/omec-project/util/logger"
 	"github.com/omec-project/util/path_util"
-	pathUtilLogger "github.com/omec-project/util/path_util/logger"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type UDR struct{}
@@ -56,7 +56,7 @@ var udrCLi = []cli.Flag{
 	},
 }
 
-var initLog *logrus.Entry
+var initLog *zap.SugaredLogger
 
 var (
 	KeepAliveTimer      *time.Timer
@@ -104,51 +104,33 @@ func (udr *UDR) setLogLevel() {
 
 	if factory.UdrConfig.Logger.UDR != nil {
 		if factory.UdrConfig.Logger.UDR.DebugLevel != "" {
-			if level, err := logrus.ParseLevel(factory.UdrConfig.Logger.UDR.DebugLevel); err != nil {
+			if level, err := zapcore.ParseLevel(factory.UdrConfig.Logger.UDR.DebugLevel); err != nil {
 				initLog.Warnf("UDR Log level [%s] is invalid, set to [info] level",
 					factory.UdrConfig.Logger.UDR.DebugLevel)
-				logger.SetLogLevel(logrus.InfoLevel)
+				logger.SetLogLevel(zap.InfoLevel)
 			} else {
 				initLog.Infof("UDR Log level is set to [%s] level", level)
 				logger.SetLogLevel(level)
 			}
 		} else {
 			initLog.Infoln("UDR Log level not set. Default set to [info] level")
-			logger.SetLogLevel(logrus.InfoLevel)
+			logger.SetLogLevel(zap.InfoLevel)
 		}
-		logger.SetReportCaller(factory.UdrConfig.Logger.UDR.ReportCaller)
-	}
-
-	if factory.UdrConfig.Logger.PathUtil != nil {
-		if factory.UdrConfig.Logger.PathUtil.DebugLevel != "" {
-			if level, err := logrus.ParseLevel(factory.UdrConfig.Logger.PathUtil.DebugLevel); err != nil {
-				pathUtilLogger.PathLog.Warnf("PathUtil Log level [%s] is invalid, set to [info] level",
-					factory.UdrConfig.Logger.PathUtil.DebugLevel)
-				pathUtilLogger.SetLogLevel(logrus.InfoLevel)
-			} else {
-				pathUtilLogger.SetLogLevel(level)
-			}
-		} else {
-			pathUtilLogger.PathLog.Warnln("PathUtil Log level not set. Default set to [info] level")
-			pathUtilLogger.SetLogLevel(logrus.InfoLevel)
-		}
-		pathUtilLogger.SetReportCaller(factory.UdrConfig.Logger.PathUtil.ReportCaller)
 	}
 
 	if factory.UdrConfig.Logger.MongoDBLibrary != nil {
 		if factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel != "" {
-			if level, err := logrus.ParseLevel(factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel); err != nil {
-				loggerUtil.AppLog.Warnf("MongoDBLibrary Log level [%s] is invalid, set to [info] level",
+			if level, err := zapcore.ParseLevel(factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel); err != nil {
+				utilLogger.AppLog.Warnf("MongoDBLibrary Log level [%s] is invalid, set to [info] level",
 					factory.UdrConfig.Logger.MongoDBLibrary.DebugLevel)
-				loggerUtil.SetLogLevel(logrus.InfoLevel)
+				utilLogger.SetLogLevel(zap.InfoLevel)
 			} else {
-				loggerUtil.SetLogLevel(level)
+				utilLogger.SetLogLevel(level)
 			}
 		} else {
-			loggerUtil.AppLog.Warnln("MongoDBLibrary Log level not set. Default set to [info] level")
-			loggerUtil.SetLogLevel(logrus.InfoLevel)
+			utilLogger.AppLog.Warnln("MongoDBLibrary Log level not set. Default set to [info] level")
+			utilLogger.SetLogLevel(zap.InfoLevel)
 		}
-		loggerUtil.SetReportCaller(factory.UdrConfig.Logger.MongoDBLibrary.ReportCaller)
 	}
 }
 
@@ -175,7 +157,7 @@ func (udr *UDR) Start() {
 	producer.ConnectMongo(mongodb.Url, mongodb.Name, mongodb.AuthUrl, mongodb.AuthKeysDbName)
 	initLog.Infoln("server started")
 
-	router := loggerUtil.NewGinWithLogrus(logger.GinLog)
+	router := utilLogger.NewGinWithZap(logger.GinLog)
 
 	datarepository.AddService(router)
 
@@ -223,10 +205,9 @@ func (udr *UDR) Start() {
 
 func (udr *UDR) Exec(c *cli.Context) error {
 	// UDR.Initialize(cfgPath, c)
-
-	initLog.Traceln("args:", c.String("udrcfg"))
+	initLog.Debugln("args:", c.String("udrcfg"))
 	args := udr.FilterCli(c)
-	initLog.Traceln("filter: ", args)
+	initLog.Debugln("filter:", args)
 	command := exec.Command("./udr", args...)
 
 	if err := udr.Initialize(c); err != nil {
@@ -244,7 +225,7 @@ func (udr *UDR) Exec(c *cli.Context) error {
 	go func() {
 		in := bufio.NewScanner(stdout)
 		for in.Scan() {
-			fmt.Println(in.Text())
+			initLog.Debugln(in.Text())
 		}
 		wg.Done()
 	}()
@@ -258,7 +239,7 @@ func (udr *UDR) Exec(c *cli.Context) error {
 	go func() {
 		in := bufio.NewScanner(stderr)
 		for in.Scan() {
-			fmt.Println(in.Text())
+			initLog.Debugln(in.Text())
 		}
 		wg.Done()
 	}()
@@ -266,7 +247,7 @@ func (udr *UDR) Exec(c *cli.Context) error {
 	var err error
 	go func() {
 		if errormessage := command.Start(); err != nil {
-			fmt.Println("command.Start Fails!")
+			initLog.Errorln("command.Start Failed")
 			err = errormessage
 		}
 		wg.Done()

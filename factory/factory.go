@@ -17,7 +17,7 @@ import (
 	"github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,7 +33,7 @@ type SmPolicyUpdateEntry struct {
 	Dnn    string
 }
 
-var initLog *logrus.Entry
+var initLog *zap.SugaredLogger
 
 func init() {
 	initLog = logger.InitLog
