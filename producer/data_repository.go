@@ -267,7 +267,7 @@ func HandleQueryAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respon
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
 
@@ -376,7 +376,7 @@ func HandleQueryAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Res
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "amf-non-3gpp-access", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -454,7 +454,7 @@ func HandleQueryAuthSubsData(request *httpwrapper.Request) *httpwrapper.Response
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("update", "authentication-subscription", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -517,7 +517,7 @@ func HandleQueryAuthSoR(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "sor-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -581,7 +581,7 @@ func HandleQueryAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "authentication-status", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1157,7 +1157,7 @@ func HandlePolicyDataBdtDataBdtReferenceIdGet(request *httpwrapper.Request) *htt
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "bdt-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1192,7 +1192,7 @@ func HandlePolicyDataBdtDataBdtReferenceIdPut(request *httpwrapper.Request) *htt
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("update", "bdt-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1252,7 +1252,7 @@ func HandlePolicyDataPlmnsPlmnIdUePolicySetGet(request *httpwrapper.Request) *ht
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "plmn-ue-policy-set", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1289,7 +1289,7 @@ func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Re
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "sponsor-connectivity-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1413,7 +1413,7 @@ func HandlePolicyDataUesUeIdAmDataGet(request *httpwrapper.Request) *httpwrapper
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "am-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1451,7 +1451,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataGet(request *httpwrapper.Request
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "operator-specific-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1568,7 +1568,7 @@ func HandlePolicyDataUesUeIdSmDataGet(request *httpwrapper.Request) *httpwrapper
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "sm-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1802,7 +1802,7 @@ func HandlePolicyDataUesUeIdUePolicySetGet(request *httpwrapper.Request) *httpwr
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "ue-policy-set", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -1885,7 +1885,7 @@ func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwr
 		return httpwrapper.NewResponse(http.StatusCreated, nil, response)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("create", "ue-policy-set", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2069,7 +2069,7 @@ func HandleGetAmfSubscriptionInfo(request *httpwrapper.Request) *httpwrapper.Res
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "amf-subscriptions", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2113,7 +2113,7 @@ func HandleQueryEEData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "ee-profile-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2259,7 +2259,7 @@ func HandleQueryEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "group-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2408,7 +2408,7 @@ func HandleQueryeesubscriptions(request *httpwrapper.Request) *httpwrapper.Respo
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "ee-subscriptions", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2491,7 +2491,7 @@ func HandleQueryOperSpecData(request *httpwrapper.Request) *httpwrapper.Response
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrPolicyDataStats("get", "operator-specific-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2529,7 +2529,7 @@ func HandleGetppData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "pp-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2578,7 +2578,7 @@ func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Respo
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "provisioned-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2755,7 +2755,7 @@ func HandleGetIdentityData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "identity-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2791,7 +2791,7 @@ func HandleGetOdbData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "operator-determined-barring-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2833,7 +2833,7 @@ func HandleGetSharedData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "shared-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -2992,7 +2992,7 @@ func HandleQuerysdmsubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "sdm-subscriptions", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3080,7 +3080,7 @@ func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("create", "smf-registrations", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3146,7 +3146,7 @@ func HandleQuerySmfRegistration(request *httpwrapper.Request) *httpwrapper.Respo
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "smf-registrations", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3293,7 +3293,7 @@ func HandleQuerySmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "smsf-3gpp-access", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3370,7 +3370,7 @@ func HandleQuerySmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "smsf-non-3gpp-access", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3406,7 +3406,7 @@ func HandleQuerySmsMngData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "sms-mng-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3444,7 +3444,7 @@ func HandleQuerySmsData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "sms-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
@@ -3539,7 +3539,7 @@ func HandleQueryTraceData(request *httpwrapper.Request) *httpwrapper.Response {
 		return httpwrapper.NewResponse(int(problemDetails.Status), nil, problemDetails)
 	}
 
-	pd := util.ProblemDetailsUpspecified("")
+	pd := util.ProblemDetailsUnspecified("")
 	stats.IncrementUdrSubscriptionDataStats("get", "trace-data", "FAILURE")
 	return httpwrapper.NewResponse(int(pd.Status), nil, pd)
 }
