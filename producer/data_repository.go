@@ -56,12 +56,12 @@ func getDataFromDB(collName string, filter bson.M) (map[string]interface{}, *mod
 	return data, nil
 }
 
-func deleteDataFromDB(collName string, filter bson.M) *error {
+func deleteDataFromDB(collName string, filter bson.M) error {
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
-	return &errDelOne
+	return errDelOne
 }
 
 func HandleCreateAccessAndMobilityData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -239,7 +239,7 @@ func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 
 func CreateAmfContext3gppProcedure(collName string, ueId string,
 	Amf3GppAccessRegistration models.Amf3GppAccessRegistration,
-) *error {
+) error {
 	filter := bson.M{"ueId": ueId}
 	putData := util.ToBsonM(Amf3GppAccessRegistration)
 	putData["ueId"] = ueId
@@ -248,7 +248,7 @@ func CreateAmfContext3gppProcedure(collName string, ueId string,
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
-	return &errPutOne
+	return errPutOne
 }
 
 func HandleQueryAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -348,7 +348,7 @@ func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 
 func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon3GppAccessRegistration,
 	collName string, ueId string,
-) *error {
+) error {
 	putData := util.ToBsonM(AmfNon3GppAccessRegistration)
 	putData["ueId"] = ueId
 	filter := bson.M{"ueId": ueId}
@@ -357,7 +357,7 @@ func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
-	return &errPutOne
+	return errPutOne
 }
 
 func HandleQueryAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -490,7 +490,7 @@ func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Re
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson.M) *error {
+func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson.M) error {
 	filter := bson.M{"ueId": ueId}
 	putData["ueId"] = ueId
 
@@ -498,7 +498,7 @@ func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
-	return &errPutOne
+	return errPutOne
 }
 
 func HandleQueryAuthSoR(request *httpwrapper.Request) *httpwrapper.Response {
@@ -554,7 +554,7 @@ func HandleCreateAuthenticationStatus(request *httpwrapper.Request) *httpwrapper
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func CreateAuthenticationStatusProcedure(collName string, ueId string, putData bson.M) *error {
+func CreateAuthenticationStatusProcedure(collName string, ueId string, putData bson.M) error {
 	filter := bson.M{"ueId": ueId}
 	putData["ueId"] = ueId
 
@@ -562,7 +562,7 @@ func CreateAuthenticationStatusProcedure(collName string, ueId string, putData b
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
-	return &errPutOne
+	return errPutOne
 }
 
 func HandleQueryAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1133,13 +1133,13 @@ func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenceId string) *error {
+func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenceId string) error {
 	filter := bson.M{"bdtReferenceId": bdtReferenceId}
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
-	return &errDelOne
+	return errDelOne
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1533,7 +1533,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request
 
 func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId string,
 	OperatorSpecificDataContainer map[string]models.OperatorSpecificDataContainer,
-) *error {
+) error {
 	filter := bson.M{"ueId": ueId}
 
 	putData := map[string]interface{}{"operatorSpecificDataContainerMap": OperatorSpecificDataContainer}
@@ -1543,7 +1543,7 @@ func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId str
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
-	return &errPutOne
+	return errPutOne
 }
 
 func HandlePolicyDataUesUeIdSmDataGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1717,13 +1717,13 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request)
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId string, usageMonId string) *error {
+func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId string, usageMonId string) error {
 	filter := bson.M{"ueId": ueId, "usageMonId": usageMonId}
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
-	return &errDelOne
+	return errDelOne
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *httpwrapper.Request) *httpwrapper.Response {
