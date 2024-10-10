@@ -931,15 +931,19 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete(subscID 
 	logger.DataRepoLog.Infof(
 		"handle ApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete: subscID=%q", subscID)
 
-	deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID)
-	stats.IncrementUdrApplicationDataStats("delete", "influence-data-subscription", "SUCCESS")
+	err := deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID)
+	if err == nil {
+		stats.IncrementUdrApplicationDataStats("delete", "influence-data-subscription", "SUCCESS")
+	} else {
+		stats.IncrementUdrApplicationDataStats("delete", "influence-data-subscription", "FAILURE")
+	}
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID string) {
+func deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID string) error {
 	filter := bson.M{"subscriptionId": subscID}
-	deleteDataFromDB(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
+	return deleteDataFromDB(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdGet(subscID string) *httpwrapper.Response {
@@ -1011,14 +1015,18 @@ func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 func HandleApplicationDataPfdsAppIdDelete(appID string) *httpwrapper.Response {
 	logger.DataRepoLog.Infof("handle ApplicationDataPfdsAppIdDelete: appID=%s", appID)
 
-	deleteApplicationDataIndividualPfdFromDB(appID)
-	stats.IncrementUdrApplicationDataStats("delete", "pfds", "SUCCESS")
+	err := deleteApplicationDataIndividualPfdFromDB(appID)
+	if err == nil {
+		stats.IncrementUdrApplicationDataStats("delete", "pfds", "SUCCESS")
+	} else {
+		stats.IncrementUdrApplicationDataStats("delete", "pfds", "FAILURE")
+	}
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
-func deleteApplicationDataIndividualPfdFromDB(appID string) {
+func deleteApplicationDataIndividualPfdFromDB(appID string) error {
 	filter := bson.M{"applicationId": appID}
-	deleteDataFromDB(APPDATA_PFD_DB_COLLECTION_NAME, filter)
+	return deleteDataFromDB(APPDATA_PFD_DB_COLLECTION_NAME, filter)
 }
 
 func HandleApplicationDataPfdsAppIdGet(appID string) *httpwrapper.Response {
