@@ -55,7 +55,7 @@ func ProblemDetailsModifyNotAllowed(detail string) *models.ProblemDetails {
 	}
 }
 
-func ProblemDetailsUpspecified(detail string) *models.ProblemDetails {
+func ProblemDetailsUnspecified(detail string) *models.ProblemDetails {
 	return &models.ProblemDetails{
 		Title:  "Unspecified",
 		Status: http.StatusForbidden,

@@ -727,7 +727,7 @@ var subRoutes = Routes{
 		HTTPGetOdbData,
 	},
 
-	// Sepcial case
+	// Special case
 	{
 		"HTTPRemovesubscriptionDataSubscriptions",
 		strings.ToUpper("Delete"),
