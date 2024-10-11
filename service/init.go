@@ -309,7 +309,7 @@ func (udr *UDR) StopKeepAliveTimer() {
 func (udr *UDR) BuildAndSendRegisterNFInstance() (prof models.NfProfile, err error) {
 	self := context.UDR_Self()
 	profile := consumer.BuildNFInstance(self)
-	initLog.Infof("pcf Profile Registering to NRF: %v", profile)
+	initLog.Infof("udr Profile Registering to NRF: %v", profile)
 	// Indefinite attempt to register until success
 	profile, _, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, self.NfId, profile)
 	return profile, err
