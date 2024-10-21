@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"gopkg.in/yaml.v2"
@@ -52,12 +51,8 @@ func InitConfigFactory(f string) error {
 		if UdrConfig.Configuration.WebuiUri == "" {
 			UdrConfig.Configuration.WebuiUri = "webui:9876"
 		}
-		roc := os.Getenv("MANAGED_BY_CONFIG_POD")
-		if roc == "true" {
+		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			commChannel := client.ConfigWatcher(UdrConfig.Configuration.WebuiUri)
-			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-			go UdrConfig.updateConfig(commChannel, ConfigUpdateDbTrigger)
 		} else {
 			go func() {
 				logger.InitLog.Infoln("use helm chart config")
