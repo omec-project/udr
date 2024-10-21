@@ -13,8 +13,9 @@ package factory
 import (
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/omec-project/config5g/proto/client"
+	grpcClient "github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
@@ -39,6 +40,11 @@ func init() {
 	initLog = logger.InitLog
 }
 
+// InitConfigFactory gets the NrfConfig and subscribes the config pod.
+// This observes the GRPC client availability and connection status in a loop.
+// When the GRPC server pod is restarted, GRPC connection status stuck in idle.
+// If GRPC client does not exist, creates it. If client exists but GRPC connectivity is not ready,
+// then it closes the existing client start a new client.
 // TODO: Support configuration update from REST api
 func InitConfigFactory(f string) error {
 	if content, err := os.ReadFile(f); err != nil {
@@ -59,12 +65,13 @@ func InitConfigFactory(f string) error {
 		if UdrConfig.Configuration.WebuiUri == "" {
 			UdrConfig.Configuration.WebuiUri = "webui:9876"
 		}
-		roc := os.Getenv("MANAGED_BY_CONFIG_POD")
-		if roc == "true" {
+		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			commChannel := client.ConfigWatcher(UdrConfig.Configuration.WebuiUri)
-			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-			go UdrConfig.updateConfig(commChannel, ConfigUpdateDbTrigger)
+			client, err := grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			if err != nil {
+				go updateConfig(client)
+			}
+			return err
 		} else {
 			go func() {
 				initLog.Infoln("Use helm chart config ")
@@ -74,6 +81,44 @@ func InitConfigFactory(f string) error {
 	}
 
 	return nil
+}
+
+// updateConfig connects the config pod GRPC server and subscribes the config changes
+// then updates NRF configuration
+func updateConfig(client grpcClient.ConfClient) {
+	var stream protos.ConfigService_NetworkSliceSubscribeClient
+	var err error
+	var configChannel chan *protos.NetworkSliceResponse
+	for {
+		if client != nil {
+			stream, err = client.CheckGrpcConnectivity()
+			if err != nil {
+				initLog.Errorf("%v", err)
+				if stream != nil {
+					time.Sleep(time.Second * 30)
+					continue
+				} else {
+					err = client.GetConfigClientConn().Close()
+					if err != nil {
+						initLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
+					}
+					client = nil
+					continue
+				}
+			}
+			if configChannel == nil {
+				configChannel = client.PublishOnConfigChange(true, stream)
+				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
+				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
+			}
+		} else {
+			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			if err != nil {
+				initLog.Errorf("%+v", err)
+			}
+			continue
+		}
+	}
 }
 
 func CheckConfigVersion() error {
