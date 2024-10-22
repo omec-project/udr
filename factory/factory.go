@@ -70,9 +70,9 @@ func InitConfigFactory(f string) error {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
 			client, err := grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			if err != nil {
-				go manageGrpcClient(client)
+				logger.InitLog.Infof("Connect to config server failed: %v", err)
 			}
-			return err
+			go manageGrpcClient(client)
 		} else {
 			go func() {
 				initLog.Infoln("Use helm chart config ")
