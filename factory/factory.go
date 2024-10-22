@@ -17,7 +17,6 @@ import (
 	"github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,12 +30,6 @@ type SmPolicyUpdateEntry struct {
 	Snssai *protos.NSSAI
 	Imsi   string
 	Dnn    string
-}
-
-var initLog *zap.SugaredLogger
-
-func init() {
-	initLog = logger.InitLog
 }
 
 // TODO: Support configuration update from REST api
@@ -61,13 +54,13 @@ func InitConfigFactory(f string) error {
 		}
 		roc := os.Getenv("MANAGED_BY_CONFIG_POD")
 		if roc == "true" {
-			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
+			logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
 			commChannel := client.ConfigWatcher(UdrConfig.Configuration.WebuiUri)
 			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 			go UdrConfig.updateConfig(commChannel, ConfigUpdateDbTrigger)
 		} else {
 			go func() {
-				initLog.Infoln("Use helm chart config ")
+				logger.InitLog.Infoln("use helm chart config")
 				ConfigPodTrigger <- true
 			}()
 		}
