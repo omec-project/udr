@@ -19,6 +19,7 @@ import (
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/connectivity"
 	"gopkg.in/yaml.v2"
 )
 
@@ -69,7 +70,7 @@ func InitConfigFactory(f string) error {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
 			client, err := grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			if err != nil {
-				go updateConfig(client)
+				go manageGrpcClient(client)
 			}
 			return err
 		} else {
@@ -83,9 +84,9 @@ func InitConfigFactory(f string) error {
 	return nil
 }
 
-// updateConfig connects the config pod GRPC server and subscribes the config changes
+// manageGrpcClient connects the config pod GRPC server and subscribes the config changes
 // then updates UDR configuration
-func updateConfig(client grpcClient.ConfClient) {
+func manageGrpcClient(client grpcClient.ConfClient) {
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	var configChannel chan *protos.NetworkSliceResponse
@@ -93,28 +94,30 @@ func updateConfig(client grpcClient.ConfClient) {
 		if client != nil {
 			stream, err = client.CheckGrpcConnectivity()
 			if err != nil {
-				initLog.Errorf("%v", err)
-				if stream != nil {
-					time.Sleep(time.Second * 30)
-					continue
-				} else {
-					err = client.GetConfigClientConn().Close()
-					if err != nil {
-						initLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
-					}
-					client = nil
-					continue
+				logger.InitLog.Errorf("%v", err)
+			}
+			if stream == nil {
+				time.Sleep(time.Second * 30)
+				continue
+			}
+			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+				err = client.GetConfigClientConn().Close()
+				if err != nil {
+					logger.InitLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
 				}
+				client = nil
+				continue
 			}
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 			}
+
 		} else {
 			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			if err != nil {
-				initLog.Errorf("%+v", err)
+				logger.InitLog.Errorf("%+v", err)
 			}
 			continue
 		}
