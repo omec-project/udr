@@ -19,8 +19,11 @@ import (
 <<<<<<< HEAD
 =======
 	"go.uber.org/zap"
+<<<<<<< HEAD
 	"google.golang.org/grpc/connectivity"
 >>>>>>> 4fa3dfc (fix: rename and organize a method)
+=======
+>>>>>>> bd9df4e (fix: change method)
 	"gopkg.in/yaml.v2"
 )
 
