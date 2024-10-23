@@ -15,7 +15,6 @@ import (
 	"os"
 	"time"
 
-	grpcClient "github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
@@ -68,7 +67,7 @@ func InitConfigFactory(f string) error {
 		}
 		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			client, err := grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			client, err := ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			if err != nil {
 				logger.InitLog.Infof("Connect to config server failed: %v", err)
 			}
@@ -86,7 +85,7 @@ func InitConfigFactory(f string) error {
 
 // manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
 // Then it updates UDR configuration.
-func manageGrpcClient(client grpcClient.ConfClient) {
+func manageGrpcClient(client ConfClient) {
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	var configChannel chan *protos.NetworkSliceResponse
@@ -119,7 +118,7 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 				initLog.Infoln("UDR updateConfig is triggered.")
 			}
 		} else {
-			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			client, err = ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			initLog.Infoln("Connecting to config server.")
 			if err != nil {
 				logger.InitLog.Errorf("%+v", err)
