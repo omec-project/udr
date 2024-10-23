@@ -84,8 +84,8 @@ func InitConfigFactory(f string) error {
 	return nil
 }
 
-// manageGrpcClient connects the config pod GRPC server and subscribes the config changes
-// then updates UDR configuration
+// manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
+// Then it updates UDR configuration.
 func manageGrpcClient(client grpcClient.ConfClient) {
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
@@ -111,9 +111,9 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 			}
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
-				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 			}
+			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
+			go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 
 		} else {
 			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
