@@ -97,11 +97,13 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 				logger.InitLog.Errorf("%v", err)
 			}
 			if stream == nil {
+				initLog.Infoln("Stream is nil, waiting for 30 secs")
 				time.Sleep(time.Second * 30)
 				continue
 			}
 			time.Sleep(time.Second * 30)
 			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+				initLog.Infoln("GRPC connectivity is not ready, the connection will be closed.")
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
 					logger.InitLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
@@ -111,12 +113,15 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 			}
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
+				initLog.Infoln("PublishOnConfigChange is triggered.")
 			}
 			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 			go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
+			initLog.Infoln("UDR updateConfig is triggered.")
 
 		} else {
 			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			initLog.Infoln("Connecting to config server.")
 			if err != nil {
 				logger.InitLog.Errorf("%+v", err)
 			}
