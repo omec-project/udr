@@ -170,6 +170,16 @@ func (confClient *ConfigClient) CheckGrpcConnectivity() (stream protos.ConfigSer
 // using stream and communication channel as inputs
 func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse, stream protos.ConfigService_NetworkSliceSubscribeClient) {
 	for {
+		var err error
+		stream, err = confClient.CheckGrpcConnectivity()
+		if err != nil {
+			logger.GrpcLog.Errorf("failed to receive message: %v", err)
+			// Clearing the stream will force the client to resubscribe on next iteration
+			stream = nil
+			time.Sleep(time.Second * 5)
+			// Retry on failure
+			continue
+		}
 		rsp, err := stream.Recv()
 		if err != nil {
 			logger.GrpcLog.Errorf("failed to receive message from stream: %v", err)
