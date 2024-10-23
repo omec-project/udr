@@ -173,7 +173,8 @@ func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.Netwo
 		rsp, err := stream.Recv()
 		if err != nil {
 			logger.GrpcLog.Errorf("failed to receive message from stream: %v", err)
-			return
+			time.Sleep(10 * time.Second)
+			continue
 		}
 
 		logger.GrpcLog.Infoln("stream message received")
