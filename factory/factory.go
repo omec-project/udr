@@ -18,7 +18,6 @@ import (
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/connectivity"
 	"gopkg.in/yaml.v2"
 )
 
@@ -89,31 +88,27 @@ func manageGrpcClient(client ConfClient) {
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	var configChannel chan *protos.NetworkSliceResponse
-	ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 	for {
 		if client != nil {
-			time.Sleep(time.Second * 30)
-			if client.GetConfigClientConn().GetState() != connectivity.Ready {
-				initLog.Infoln("GRPC connectivity is not ready, the connection will be closed.")
-				err = client.GetConfigClientConn().Close()
-				if err != nil {
-					logger.InitLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
-				}
-				client = nil
-				continue
-			}
 			stream, err = client.CheckGrpcConnectivity()
 			if err != nil {
-				logger.InitLog.Errorf("%v", err)
-			}
-			if stream == nil {
-				initLog.Infoln("Stream is nil, waiting for 30 secs")
-				time.Sleep(time.Second * 30)
-				continue
+				initLog.Errorf("%v", err)
+				if stream != nil {
+					time.Sleep(time.Second * 30)
+					continue
+				} else {
+					err = client.GetConfigClientConn().Close()
+					if err != nil {
+						initLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
+					}
+					client = nil
+					continue
+				}
 			}
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				initLog.Infoln("PublishOnConfigChange is triggered.")
+				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 				initLog.Infoln("UDR updateConfig is triggered.")
 			}
