@@ -91,15 +91,6 @@ func manageGrpcClient(client ConfClient) {
 	var configChannel chan *protos.NetworkSliceResponse
 	for {
 		if client != nil {
-			stream, err = client.CheckGrpcConnectivity()
-			if err != nil {
-				logger.InitLog.Errorf("%v", err)
-			}
-			if stream == nil {
-				initLog.Infoln("Stream is nil, waiting for 30 secs")
-				time.Sleep(time.Second * 30)
-				continue
-			}
 			time.Sleep(time.Second * 30)
 			if client.GetConfigClientConn().GetState() != connectivity.Ready {
 				initLog.Infoln("GRPC connectivity is not ready, the connection will be closed.")
@@ -108,6 +99,15 @@ func manageGrpcClient(client ConfClient) {
 					logger.InitLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
 				}
 				client = nil
+				continue
+			}
+			stream, err = client.CheckGrpcConnectivity()
+			if err != nil {
+				logger.InitLog.Errorf("%v", err)
+			}
+			if stream == nil {
+				initLog.Infoln("Stream is nil, waiting for 30 secs")
+				time.Sleep(time.Second * 30)
 				continue
 			}
 			if configChannel == nil {
