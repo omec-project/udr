@@ -58,7 +58,6 @@ func InitConfigFactory(f string) error {
 		}
 		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-
 		} else {
 			go func() {
 				logger.InitLog.Infoln("use helm chart config")
