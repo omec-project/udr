@@ -100,6 +100,7 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 				time.Sleep(time.Second * 30)
 				continue
 			}
+			time.Sleep(time.Second * 30)
 			if client.GetConfigClientConn().GetState() != connectivity.Ready {
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
