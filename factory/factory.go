@@ -20,10 +20,14 @@ import (
 =======
 	"go.uber.org/zap"
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"google.golang.org/grpc/connectivity"
 >>>>>>> 4fa3dfc (fix: rename and organize a method)
 =======
 >>>>>>> bd9df4e (fix: change method)
+=======
+	"google.golang.org/grpc/connectivity"
+>>>>>>> 7bb8bf6 (modify subscribeToConfigPod)
 	"gopkg.in/yaml.v2"
 )
 
@@ -61,6 +65,7 @@ func InitConfigFactory(f string) error {
 		}
 		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
+
 		} else {
 			go func() {
 				logger.InitLog.Infoln("use helm chart config")
@@ -72,6 +77,49 @@ func InitConfigFactory(f string) error {
 	return nil
 }
 
+<<<<<<< HEAD
+=======
+// manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
+// Then it updates UDR configuration.
+func manageGrpcClient(webuiUri string) {
+	var configChannel chan *protos.NetworkSliceResponse
+	var client ConfClient
+	var err error
+	for {
+		if client != nil {
+			_, err = client.CheckGrpcConnectivity()
+			if err != nil {
+				initLog.Infoln("Connectivity error, waiting 30 seconds")
+				time.Sleep(time.Second * 30)
+			}
+			time.Sleep(time.Second * 30)
+			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+				err = client.GetConfigClientConn().Close()
+				if err != nil {
+					initLog.Infof("failing ConfigClient is not closed properly: %+v", err)
+				}
+				client = nil
+				continue
+			}
+			if configChannel == nil {
+				configChannel = client.PublishOnConfigChange(true)
+				initLog.Infoln("PublishOnConfigChange is triggered.")
+				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
+				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
+				initLog.Infoln("UDR updateConfig is triggered.")
+			}
+		} else {
+			client, err = ConnectToConfigServer(webuiUri)
+			initLog.Infoln("Connecting to config server.")
+			if err != nil {
+				logger.InitLog.Errorf("%+v", err)
+			}
+			continue
+		}
+	}
+}
+
+>>>>>>> 7bb8bf6 (modify subscribeToConfigPod)
 func CheckConfigVersion() error {
 	currentVersion := UdrConfig.GetVersion()
 
