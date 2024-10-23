@@ -92,7 +92,7 @@ func manageGrpcClient(client ConfClient) {
 		if client != nil {
 			stream, err = client.CheckGrpcConnectivity()
 			if err != nil {
-				initLog.Errorf("%v", err)
+				logger.InitLog.Errorf("%v", err)
 				if stream != nil {
 					time.Sleep(time.Second * 30)
 					continue
