@@ -89,6 +89,7 @@ func manageGrpcClient(client ConfClient) {
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	var configChannel chan *protos.NetworkSliceResponse
+	ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 	for {
 		if client != nil {
 			time.Sleep(time.Second * 30)
@@ -113,7 +114,6 @@ func manageGrpcClient(client ConfClient) {
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				initLog.Infoln("PublishOnConfigChange is triggered.")
-				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 				initLog.Infoln("UDR updateConfig is triggered.")
 			}
