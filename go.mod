@@ -2,6 +2,8 @@ module github.com/omec-project/udr
 
 go 1.21
 
+replace github.com/omec-project/config5g => /home/gatici/omec/config5g/
+
 require (
 	github.com/evanphx/json-patch v5.9.0+incompatible
 	github.com/gin-gonic/gin v1.10.0

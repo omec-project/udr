@@ -114,11 +114,10 @@ func manageGrpcClient(client grpcClient.ConfClient) {
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				initLog.Infoln("PublishOnConfigChange is triggered.")
+				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
+				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
+				initLog.Infoln("UDR updateConfig is triggered.")
 			}
-			ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-			go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
-			initLog.Infoln("UDR updateConfig is triggered.")
-
 		} else {
 			client, err = grpcClient.ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
 			initLog.Infoln("Connecting to config server.")
