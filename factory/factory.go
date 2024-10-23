@@ -18,6 +18,7 @@ import (
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/connectivity"
 	"gopkg.in/yaml.v2"
 )
 
@@ -66,11 +67,7 @@ func InitConfigFactory(f string) error {
 		}
 		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
 			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			client, err := ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
-			if err != nil {
-				logger.InitLog.Infof("Connect to config server failed: %v", err)
-			}
-			go manageGrpcClient(client)
+			go manageGrpcClient(UdrConfig.Configuration.WebuiUri)
 		} else {
 			go func() {
 				initLog.Infoln("Use helm chart config ")
@@ -84,36 +81,35 @@ func InitConfigFactory(f string) error {
 
 // manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
 // Then it updates UDR configuration.
-func manageGrpcClient(client ConfClient) {
-	var stream protos.ConfigService_NetworkSliceSubscribeClient
-	var err error
+func manageGrpcClient(webuiUri string) {
 	var configChannel chan *protos.NetworkSliceResponse
+	var client ConfClient
+	var err error
 	for {
 		if client != nil {
-			stream, err = client.CheckGrpcConnectivity()
+			_, err = client.CheckGrpcConnectivity()
 			if err != nil {
-				logger.InitLog.Errorf("%v", err)
-				if stream != nil {
-					time.Sleep(time.Second * 30)
-					continue
-				} else {
-					err = client.GetConfigClientConn().Close()
-					if err != nil {
-						initLog.Debugf("failing ConfigClient is not closed properly: %+v", err)
-					}
-					client = nil
-					continue
+				initLog.Infoln("Connectivity error, waiting 30 seconds")
+				time.Sleep(time.Second * 30)
+			}
+			time.Sleep(time.Second * 30)
+			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+				err = client.GetConfigClientConn().Close()
+				if err != nil {
+					initLog.Infof("failing ConfigClient is not closed properly: %+v", err)
 				}
+				client = nil
+				continue
 			}
 			if configChannel == nil {
-				configChannel = client.PublishOnConfigChange(true, stream)
+				configChannel = client.PublishOnConfigChange(true)
 				initLog.Infoln("PublishOnConfigChange is triggered.")
 				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
 				initLog.Infoln("UDR updateConfig is triggered.")
 			}
 		} else {
-			client, err = ConnectToConfigServer(UdrConfig.Configuration.WebuiUri)
+			client, err = ConnectToConfigServer(webuiUri)
 			initLog.Infoln("Connecting to config server.")
 			if err != nil {
 				logger.InitLog.Errorf("%+v", err)
