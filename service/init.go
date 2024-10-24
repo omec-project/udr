@@ -111,8 +111,8 @@ func manageGrpcClient(webuiUri string) {
 	var err error
 	for {
 		if client != nil {
-			initLog.Infoln("waiting for connectivity to be ready")
-			time.Sleep(time.Second * 30)
+			initLog.Infoln("Checking the connectivity readiness")
+			time.Sleep(time.Second * 60)
 			if client.GetConfigClientConn().GetState() != connectivity.Ready {
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
