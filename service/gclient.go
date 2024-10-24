@@ -50,13 +50,13 @@ type ConfClient interface {
 	// PublishOnConfigChange creates a channel to perform the subscription using it.
 	// On Receiving Configuration from ConfigServer, this api publishes
 	// on created channel and returns the channel
-	PublishOnConfigChange(metadataRequested bool) chan *protos.NetworkSliceResponse
+	PublishOnConfigChange(metadataRequested bool, stream protos.ConfigService_NetworkSliceSubscribeClient) chan *protos.NetworkSliceResponse
 
 	// getConfigClientConn returns grpc connection object
 	GetConfigClientConn() *grpc.ClientConn
 
 	// Client Subscribing channel to ConfigPod to receive configuration
-	subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse)
+	subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse, stream protos.ConfigService_NetworkSliceSubscribeClient)
 
 	// CheckGrpcConnectivity checks the connectivity status and
 	// subscribes to a stream of NetworkSlice if connectivity is ready
@@ -75,12 +75,12 @@ func ConnectToConfigServer(host string) (ConfClient, error) {
 
 // PublishOnConfigChange creates a communication channel to publish the messages from ConfigServer to the channel
 // then NFs gets the messages
-func (confClient *ConfigClient) PublishOnConfigChange(metadataFlag bool) chan *protos.NetworkSliceResponse {
+func (confClient *ConfigClient) PublishOnConfigChange(metadataFlag bool, stream protos.ConfigService_NetworkSliceSubscribeClient) chan *protos.NetworkSliceResponse {
 	confClient.MetadataRequested = metadataFlag
 	commChan := make(chan *protos.NetworkSliceResponse)
 	confClient.Channel = commChan
 	logger.GrpcLog.Debugln("a communication channel is created for ConfigServer")
-	go confClient.subscribeToConfigPod(commChan)
+	go confClient.subscribeToConfigPod(commChan, stream)
 	return commChan
 }
 
@@ -168,12 +168,8 @@ func (confClient *ConfigClient) CheckGrpcConnectivity() (stream protos.ConfigSer
 
 // subscribeToConfigPod subscribing channel to ConfigPod to receive configuration
 // using stream and communication channel as inputs
-func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse) {
+func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse, stream protos.ConfigService_NetworkSliceSubscribeClient) {
 	for {
-		stream, err := confClient.CheckGrpcConnectivity()
-		if err != nil {
-			logger.GrpcLog.Errorf("%v", err)
-		}
 		if stream == nil {
 			time.Sleep(time.Second * 30)
 			continue
