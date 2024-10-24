@@ -169,6 +169,7 @@ func (confClient *ConfigClient) CheckGrpcConnectivity() (stream protos.ConfigSer
 // subscribeToConfigPod subscribing channel to ConfigPod to receive configuration
 // using stream and communication channel as inputs
 func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.NetworkSliceResponse) {
+	var oldRsp *protos.NetworkSliceResponse = nil
 	for {
 		stream, err := confClient.CheckGrpcConnectivity()
 		if err != nil {
@@ -185,7 +186,9 @@ func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.Netwo
 			time.Sleep(time.Second * 5)
 			continue
 		}
-		logger.GrpcLog.Infoln("stream message received")
+		if rsp != oldRsp {
+			logger.GrpcLog.Infoln("stream message received")
+		}
 		logger.GrpcLog.Infof("network slices %d, RC of config pod %d", len(rsp.NetworkSlice), rsp.RestartCounter)
 		if configPodRestartCounter == 0 || (configPodRestartCounter == rsp.RestartCounter) {
 			// first time connection or config update
@@ -207,5 +210,7 @@ func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.Netwo
 			logger.GrpcLog.Errorln("config pod is restarted and no config received")
 		}
 		time.Sleep(time.Second * 10)
+		oldRsp = rsp
+		rsp = nil
 	}
 }
