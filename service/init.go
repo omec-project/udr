@@ -100,6 +100,7 @@ func (udr *UDR) Initialize(c *cli.Context) error {
 func manageGrpcClient(webuiUri string) {
 	var configChannel chan *protos.NetworkSliceResponse
 	var client ConfClient
+	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	for {
 		if client != nil {
@@ -113,14 +114,17 @@ func manageGrpcClient(webuiUri string) {
 				client = nil
 				continue
 			}
+			if stream == nil {
+				stream, _ = client.CheckGrpcConnectivity()
+			}
 			if configChannel == nil {
-				stream, _ := client.CheckGrpcConnectivity()
 				configChannel = client.PublishOnConfigChange(true, stream)
 				logger.InitLog.Infoln("PublishOnConfigChange is triggered.")
 				factory.ConfigUpdateDbTrigger = make(chan *factory.UpdateDb, 10)
 				go factory.UdrConfig.UpdateConfig(configChannel, factory.ConfigUpdateDbTrigger)
 				logger.InitLog.Infoln("UDR updateConfig is triggered.")
 			}
+
 		} else {
 			client, err = ConnectToConfigServer(webuiUri)
 			logger.InitLog.Infoln("Connecting to config server.")
