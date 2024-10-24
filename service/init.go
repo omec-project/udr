@@ -103,12 +103,8 @@ func manageGrpcClient(webuiUri string) {
 	var err error
 	for {
 		if client != nil {
-			_, err = client.CheckGrpcConnectivity()
-			if err != nil {
-				logger.InitLog.Infoln("GRPC connectivity error, waiting 15 seconds")
-				time.Sleep(time.Second * 15)
-			}
-			time.Sleep(time.Second * 15)
+			logger.InitLog.Infoln("waiting for connectivity to be ready")
+			time.Sleep(time.Second * 30)
 			if client.GetConfigClientConn().GetState() != connectivity.Ready {
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
@@ -118,7 +114,8 @@ func manageGrpcClient(webuiUri string) {
 				continue
 			}
 			if configChannel == nil {
-				configChannel = client.PublishOnConfigChange(true)
+				stream, _ := client.CheckGrpcConnectivity()
+				configChannel = client.PublishOnConfigChange(true, stream)
 				logger.InitLog.Infoln("PublishOnConfigChange is triggered.")
 				factory.ConfigUpdateDbTrigger = make(chan *factory.UpdateDb, 10)
 				go factory.UdrConfig.UpdateConfig(configChannel, factory.ConfigUpdateDbTrigger)
