@@ -106,7 +106,7 @@ func (c *Config) addSmPolicyInfo(nwSlice *protos.NetworkSlice, dbUpdateChannel c
 	return nil
 }
 
-func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbUpdateChannel chan *UpdateDb) bool {
+func (c *Config) UpdateConfig(commChannel chan *protos.NetworkSliceResponse, dbUpdateChannel chan *UpdateDb) bool {
 	var minConfig bool
 	for rsp := range commChannel {
 		logger.GrpcLog.Infoln("received updateConfig in the udr app:", rsp)

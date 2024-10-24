@@ -18,6 +18,7 @@ import (
 	"syscall"
 	"time"
 
+	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/consumer"
 	"github.com/omec-project/udr/context"
@@ -32,6 +33,7 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"google.golang.org/grpc/connectivity"
 )
 
 type UDR struct{}
@@ -85,7 +87,52 @@ func (udr *UDR) Initialize(c *cli.Context) error {
 		return err
 	}
 
+	if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
+		logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
+		go manageGrpcClient(factory.UdrConfig.Configuration.WebuiUri)
+	}
+
 	return nil
+}
+
+// manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
+// Then it updates UDR configuration.
+func manageGrpcClient(webuiUri string) {
+	var configChannel chan *protos.NetworkSliceResponse
+	var client ConfClient
+	var err error
+	for {
+		if client != nil {
+			_, err = client.CheckGrpcConnectivity()
+			if err != nil {
+				logger.InitLog.Infoln("GRPC connectivity error, waiting 15 seconds")
+				time.Sleep(time.Second * 15)
+			}
+			time.Sleep(time.Second * 15)
+			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+				err = client.GetConfigClientConn().Close()
+				if err != nil {
+					logger.InitLog.Infof("failing ConfigClient is not closed properly: %+v", err)
+				}
+				client = nil
+				continue
+			}
+			if configChannel == nil {
+				configChannel = client.PublishOnConfigChange(true)
+				logger.InitLog.Infoln("PublishOnConfigChange is triggered.")
+				factory.ConfigUpdateDbTrigger = make(chan *factory.UpdateDb, 10)
+				go factory.UdrConfig.UpdateConfig(configChannel, factory.ConfigUpdateDbTrigger)
+				logger.InitLog.Infoln("UDR updateConfig is triggered.")
+			}
+		} else {
+			client, err = ConnectToConfigServer(webuiUri)
+			logger.InitLog.Infoln("Connecting to config server.")
+			if err != nil {
+				logger.InitLog.Errorf("%+v", err)
+			}
+			continue
+		}
+	}
 }
 
 func (udr *UDR) setLogLevel() {
