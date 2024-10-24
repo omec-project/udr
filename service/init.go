@@ -114,9 +114,9 @@ func manageGrpcClient(webuiUri string) {
 				client = nil
 				continue
 			}
-			if stream == nil {
-				stream, _ = client.CheckGrpcConnectivity()
-			}
+
+			stream, _ = client.CheckGrpcConnectivity()
+
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				logger.InitLog.Infoln("PublishOnConfigChange is triggered.")
