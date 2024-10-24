@@ -1,4 +1,4 @@
-package factory
+package service
 
 import (
 	"context"
@@ -188,8 +188,8 @@ func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.Netwo
 		}
 		if rsp != oldRsp {
 			logger.GrpcLog.Infoln("stream message received")
+			logger.GrpcLog.Infof("network slices %d, RC of config pod %d", len(rsp.NetworkSlice), rsp.RestartCounter)
 		}
-		logger.GrpcLog.Infof("network slices %d, RC of config pod %d", len(rsp.NetworkSlice), rsp.RestartCounter)
 		if configPodRestartCounter == 0 || (configPodRestartCounter == rsp.RestartCounter) {
 			// first time connection or config update
 			configPodRestartCounter = rsp.RestartCounter
@@ -211,6 +211,5 @@ func (confClient *ConfigClient) subscribeToConfigPod(commChan chan *protos.Netwo
 		}
 		time.Sleep(time.Second * 10)
 		oldRsp = rsp
-		rsp = nil
 	}
 }

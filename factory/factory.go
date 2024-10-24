@@ -13,12 +13,10 @@ package factory
 import (
 	"fmt"
 	"os"
-	"time"
 
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/connectivity"
 	"gopkg.in/yaml.v2"
 )
 
@@ -66,57 +64,16 @@ func InitConfigFactory(f string) error {
 			UdrConfig.Configuration.WebuiUri = "webui:9876"
 		}
 		if os.Getenv("MANAGED_BY_CONFIG_POD") == "true" {
-			initLog.Infoln("MANAGED_BY_CONFIG_POD is true")
-			go manageGrpcClient(UdrConfig.Configuration.WebuiUri)
+			logger.InitLog.Infoln("MANAGED_BY_CONFIG_POD is true")
 		} else {
 			go func() {
-				initLog.Infoln("Use helm chart config ")
+				logger.InitLog.Infoln("use helm chart config ")
 				ConfigPodTrigger <- true
 			}()
 		}
 	}
 
 	return nil
-}
-
-// manageGrpcClient connects the config pod GRPC server and subscribes the config changes.
-// Then it updates UDR configuration.
-func manageGrpcClient(webuiUri string) {
-	var configChannel chan *protos.NetworkSliceResponse
-	var client ConfClient
-	var err error
-	for {
-		if client != nil {
-			_, err = client.CheckGrpcConnectivity()
-			if err != nil {
-				initLog.Infoln("Connectivity error, waiting 30 seconds")
-				time.Sleep(time.Second * 30)
-			}
-			time.Sleep(time.Second * 30)
-			if client.GetConfigClientConn().GetState() != connectivity.Ready {
-				err = client.GetConfigClientConn().Close()
-				if err != nil {
-					initLog.Infof("failing ConfigClient is not closed properly: %+v", err)
-				}
-				client = nil
-				continue
-			}
-			if configChannel == nil {
-				configChannel = client.PublishOnConfigChange(true)
-				initLog.Infoln("PublishOnConfigChange is triggered.")
-				ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-				go UdrConfig.updateConfig(configChannel, ConfigUpdateDbTrigger)
-				initLog.Infoln("UDR updateConfig is triggered.")
-			}
-		} else {
-			client, err = ConnectToConfigServer(webuiUri)
-			initLog.Infoln("Connecting to config server.")
-			if err != nil {
-				logger.InitLog.Errorf("%+v", err)
-			}
-			continue
-		}
-	}
 }
 
 func CheckConfigVersion() error {
