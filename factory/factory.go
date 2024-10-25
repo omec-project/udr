@@ -16,21 +16,6 @@ import (
 
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
-<<<<<<< HEAD
-=======
-	"go.uber.org/zap"
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-	"google.golang.org/grpc/connectivity"
->>>>>>> 4fa3dfc (fix: rename and organize a method)
-=======
->>>>>>> bd9df4e (fix: change method)
-=======
-	"google.golang.org/grpc/connectivity"
->>>>>>> 7bb8bf6 (modify subscribeToConfigPod)
-=======
->>>>>>> 12f8d52 (Trigger config updates in service)
 	"gopkg.in/yaml.v2"
 )
 

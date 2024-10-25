@@ -102,10 +102,9 @@ func manageGrpcClient(webuiUri string) {
 	var client grpcClient.ConfClient
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
+	count := 0
 	for {
 		if client != nil {
-			count := 0
-			logger.InitLog.Infoln("Checking the connectivity readiness")
 			if client.CheckGrpcConnectivity() != "ready" {
 				time.Sleep(time.Second * 30)
 				count++
@@ -115,8 +114,10 @@ func manageGrpcClient(webuiUri string) {
 						logger.InitLog.Infof("failing ConfigClient is not closed properly: %+v", err)
 					}
 					client = nil
+					count = 0
 				}
 				continue
+				logger.InitLog.Infoln("checking the connectivity readiness")
 			}
 
 			if stream == nil {
