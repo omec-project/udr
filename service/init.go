@@ -18,7 +18,6 @@ import (
 	"syscall"
 	"time"
 
-	grpcClient "github.com/omec-project/config5g/proto/client"
 	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/consumer"
@@ -99,13 +98,13 @@ func (udr *UDR) Initialize(c *cli.Context) error {
 // Then it updates UDR configuration.
 func manageGrpcClient(webuiUri string) {
 	var configChannel chan *protos.NetworkSliceResponse
-	var client grpcClient.ConfClient
+	var client ConfClient
 	var stream protos.ConfigService_NetworkSliceSubscribeClient
 	var err error
 	for {
 		if client != nil {
 			logger.InitLog.Infoln("Checking the connectivity readiness")
-			time.Sleep(time.Second * 60)
+			time.Sleep(time.Second * 120)
 			if client.CheckGrpcConnectivity() != "ready" {
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
@@ -132,7 +131,7 @@ func manageGrpcClient(webuiUri string) {
 			}
 
 		} else {
-			client, err = grpcClient.ConnectToConfigServer(webuiUri)
+			client, err = ConnectToConfigServer(webuiUri)
 			stream = nil
 			configChannel = nil
 			logger.InitLog.Infoln("Connecting to config server.")
