@@ -103,14 +103,18 @@ func manageGrpcClient(webuiUri string) {
 	var err error
 	for {
 		if client != nil {
+			count := 0
 			logger.InitLog.Infoln("Checking the connectivity readiness")
-			time.Sleep(time.Second * 120)
 			if client.CheckGrpcConnectivity() != "ready" {
-				err = client.GetConfigClientConn().Close()
-				if err != nil {
-					logger.InitLog.Infof("failing ConfigClient is not closed properly: %+v", err)
+				time.Sleep(time.Second * 30)
+				count++
+				if count > 5 {
+					err = client.GetConfigClientConn().Close()
+					if err != nil {
+						logger.InitLog.Infof("failing ConfigClient is not closed properly: %+v", err)
+					}
+					client = nil
 				}
-				client = nil
 				continue
 			}
 

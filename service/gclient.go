@@ -167,9 +167,8 @@ func (confClient *ConfigClient) CheckGrpcConnectivity() (state string) {
 // It returns a stream if subscription is successful else returns nil.
 func (confClient *ConfigClient) SubscribeToConfigServer() (stream protos.ConfigService_NetworkSliceSubscribeClient, err error) {
 	logger.GrpcLog.Debugln("SubscribeToConfigServer")
-	hostname := os.Getenv("HOSTNAME")
-	// randomId := hostname + "-" + strconv.Itoa(rand.Int())
-	rreq := &protos.NetworkSliceRequest{RestartCounter: selfRestartCounter, ClientId: hostname, MetadataRequested: confClient.MetadataRequested}
+	clientId := os.Getenv("HOSTNAME")
+	rreq := &protos.NetworkSliceRequest{RestartCounter: selfRestartCounter, ClientId: clientId, MetadataRequested: confClient.MetadataRequested}
 	if stream, err = confClient.Client.NetworkSliceSubscribe(context.Background(), rreq); err != nil {
 		return stream, fmt.Errorf("failed to subscribe: %v", err)
 	}
@@ -216,6 +215,6 @@ func (confClient *ConfigClient) sendMessagesToChannel(commChan chan *protos.Netw
 		} else {
 			logger.GrpcLog.Errorln("config pod is restarted and no config received")
 		}
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * 5)
 	}
 }
