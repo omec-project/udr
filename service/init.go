@@ -116,8 +116,8 @@ func manageGrpcClient(webuiUri string) {
 					client = nil
 					count = 0
 				}
-				continue
 				logger.InitLog.Infoln("checking the connectivity readiness")
+				continue
 			}
 
 			if stream == nil {
@@ -135,7 +135,6 @@ func manageGrpcClient(webuiUri string) {
 				go factory.UdrConfig.UpdateConfig(configChannel, factory.ConfigUpdateDbTrigger)
 				logger.InitLog.Infoln("UDR updateConfig is triggered.")
 			}
-
 		} else {
 			client, err = grpcClient.ConnectToConfigServer(webuiUri)
 			stream = nil
