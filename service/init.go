@@ -115,7 +115,9 @@ func manageGrpcClient(webuiUri string) {
 				continue
 			}
 
-			stream, _ = client.CheckGrpcConnectivity()
+			if stream == nil {
+				stream, _ = client.CheckGrpcConnectivity()
+			}
 
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)

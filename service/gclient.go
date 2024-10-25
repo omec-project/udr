@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/omec-project/config5g/logger"
@@ -150,11 +151,12 @@ func (confClient *ConfigClient) GetConfigClientConn() *grpc.ClientConn {
 // if connectivity is Ready. It returns a stream if connection is successful else returns nil.
 func (confClient *ConfigClient) CheckGrpcConnectivity() (stream protos.ConfigService_NetworkSliceSubscribeClient, err error) {
 	logger.GrpcLog.Debugln("connectToGrpcServer")
-	myid := os.Getenv("HOSTNAME")
+	hostname := os.Getenv("HOSTNAME")
+	randomId := hostname + "-" + strconv.Itoa(rand.Int())
 	status := confClient.Conn.GetState()
 	if status == connectivity.Ready {
 		logger.GrpcLog.Debugln("connectivity ready")
-		rreq := &protos.NetworkSliceRequest{RestartCounter: selfRestartCounter, ClientId: myid, MetadataRequested: confClient.MetadataRequested}
+		rreq := &protos.NetworkSliceRequest{RestartCounter: selfRestartCounter, ClientId: randomId, MetadataRequested: confClient.MetadataRequested}
 		if stream, err = confClient.Client.NetworkSliceSubscribe(context.Background(), rreq); err != nil {
 			return stream, fmt.Errorf("failed to subscribe: %v", err)
 		}
