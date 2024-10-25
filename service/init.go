@@ -33,7 +33,6 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"google.golang.org/grpc/connectivity"
 )
 
 type UDR struct{}
@@ -106,7 +105,7 @@ func manageGrpcClient(webuiUri string) {
 		if client != nil {
 			logger.InitLog.Infoln("Checking the connectivity readiness")
 			time.Sleep(time.Second * 60)
-			if client.GetConfigClientConn().GetState() != connectivity.Ready {
+			if client.CheckGrpcConnectivity() != "ready" {
 				err = client.GetConfigClientConn().Close()
 				if err != nil {
 					logger.InitLog.Infof("failing ConfigClient is not closed properly: %+v", err)
@@ -116,7 +115,11 @@ func manageGrpcClient(webuiUri string) {
 			}
 
 			if stream == nil {
-				stream, _ = client.CheckGrpcConnectivity()
+				stream, err = client.SubscribeToConfigServer()
+				if err != nil {
+					logger.InitLog.Infof("failing SubscribeToConfigServer: %+v", err)
+					continue
+				}
 			}
 
 			if configChannel == nil {
@@ -129,6 +132,7 @@ func manageGrpcClient(webuiUri string) {
 
 		} else {
 			client, err = ConnectToConfigServer(webuiUri)
+			stream = nil
 			logger.InitLog.Infoln("Connecting to config server.")
 			if err != nil {
 				logger.InitLog.Errorf("%+v", err)
