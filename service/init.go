@@ -139,7 +139,7 @@ func manageGrpcClient(webuiUri string) {
 			client, err = grpcClient.ConnectToConfigServer(webuiUri)
 			stream = nil
 			configChannel = nil
-			logger.InitLog.Infoln("Connecting to config server.")
+			logger.InitLog.Infoln("connecting to config server.")
 			if err != nil {
 				logger.InitLog.Errorf("%+v", err)
 			}
