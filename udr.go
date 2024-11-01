@@ -1,7 +1,6 @@
+// Copyright 2024-present Intel Corporation
 // Copyright 2019 free5GC.org
-//
 // SPDX-License-Identifier: Apache-2.0
-//
 
 package main
 
@@ -10,21 +9,22 @@ import (
 	"os"
 
 	"github.com/omec-project/udr/logger"
-	udr_service "github.com/omec-project/udr/service"
+	"github.com/omec-project/udr/service"
 	"github.com/urfave/cli"
 )
 
-var UDR = &udr_service.UDR{}
+var UDR = &service.UDR{}
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "udr"
 	logger.AppLog.Infoln(app.Name)
-	app.Usage = "-free5gccfg common configuration file -udrcfg udr configuration file"
+	app.Usage = "Unified Data Repository"
+	app.UsageText = "udr -cfg <udr_config_file.conf>"
 	app.Action = action
 	app.Flags = UDR.GetCliCmd()
 	if err := app.Run(os.Args); err != nil {
-		logger.AppLog.Errorf("UDR Run error: %v", err)
+		logger.AppLog.Fatalf("UDR run error: %v", err)
 	}
 }
 
