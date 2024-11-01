@@ -15,7 +15,7 @@ import (
 
 // Webui URL is not set then default Webui URL value is returned
 func TestGetDefaultWebuiUrl(t *testing.T) {
-	if err := InitConfigFactory("config.example.yaml"); err != nil {
+	if err := InitConfigFactory("udr_config.yaml"); err != nil {
 		logger.CfgLog.Errorf("error in InitConfigFactory: %v", err)
 	}
 	got := UdrConfig.Configuration.WebuiUri
