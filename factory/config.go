@@ -25,6 +25,7 @@ type Config struct {
 	Info          *Info              `yaml:"info"`
 	Configuration *Configuration     `yaml:"configuration"`
 	Logger        *utilLogger.Logger `yaml:"logger"`
+	CfgLocation   string
 }
 
 type Info struct {
@@ -108,15 +109,15 @@ func (c *Config) addSmPolicyInfo(nwSlice *protos.NetworkSlice, dbUpdateChannel c
 func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbUpdateChannel chan *UpdateDb) bool {
 	var minConfig bool
 	for rsp := range commChannel {
-		logger.GrpcLog.Infoln("Received updateConfig in the udr app : ", rsp)
+		logger.GrpcLog.Infoln("received updateConfig in the udr app:", rsp)
 		for _, ns := range rsp.NetworkSlice {
-			logger.GrpcLog.Infoln("Network Slice Name ", ns.Name)
+			logger.GrpcLog.Infoln("network slice name", ns.Name)
 			if ns.Site != nil {
-				logger.GrpcLog.Infoln("Network Slice has site name present ")
+				logger.GrpcLog.Infoln("network slice has site name present")
 				site := ns.Site
-				logger.GrpcLog.Infoln("Site name ", site.SiteName)
+				logger.GrpcLog.Infoln("site name", site.SiteName)
 				if site.Plmn != nil {
-					logger.GrpcLog.Infoln("Plmn mcc ", site.Plmn.Mcc)
+					logger.GrpcLog.Infoln("plmn mcc", site.Plmn.Mcc)
 					plmn := PlmnSupportItem{}
 					plmn.PlmnId.Mnc = site.Plmn.Mnc
 					plmn.PlmnId.Mcc = site.Plmn.Mcc
@@ -131,12 +132,12 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 						UdrConfig.Configuration.PlmnSupportList = append(UdrConfig.Configuration.PlmnSupportList, plmn)
 					}
 				} else {
-					logger.GrpcLog.Infoln("Plmn not present in the message ")
+					logger.GrpcLog.Infoln("plmn not present in the message")
 				}
 			}
 			err := c.addSmPolicyInfo(ns, dbUpdateChannel)
 			if err != nil {
-				logger.GrpcLog.Errorf("Error in adding sm policy info to db %v", err)
+				logger.GrpcLog.Errorf("error in adding sm policy info to db %v", err)
 			}
 		}
 		if !minConfig {
@@ -144,17 +145,17 @@ func (c *Config) updateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 			if len(UdrConfig.Configuration.PlmnSupportList) > 0 {
 				minConfig = true
 				ConfigPodTrigger <- true
-				logger.GrpcLog.Infoln("Send config trigger to main routine")
+				logger.GrpcLog.Infoln("send config trigger to main routine")
 			}
 		} else {
 			// all slices deleted
 			if len(UdrConfig.Configuration.PlmnSupportList) == 0 {
 				minConfig = false
 				ConfigPodTrigger <- false
-				logger.GrpcLog.Infoln("Send config trigger to main routine")
+				logger.GrpcLog.Infoln("send config trigger to main routine")
 			} else {
 				ConfigPodTrigger <- true
-				logger.GrpcLog.Infoln("Send config trigger to main routine")
+				logger.GrpcLog.Infoln("send config trigger to main routine")
 			}
 		}
 	}

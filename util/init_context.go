@@ -11,20 +11,18 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/omec-project/openapi/models"
-	udr_context "github.com/omec-project/udr/context"
+	"github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/factory"
 	"github.com/omec-project/udr/logger"
 )
 
-func InitUdrContext(context *udr_context.UDRContext) {
+func InitUdrContext(context *context.UDRContext) {
 	config := factory.UdrConfig
 	logger.UtilLog.Infof("udrconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 	configuration := config.Configuration
 	context.NfId = uuid.New().String()
 	context.RegisterIPv4 = factory.UDR_DEFAULT_IPV4 // default localhost
 	context.SBIPort = factory.UDR_DEFAULT_PORT_INT  // default port
-	context.Key = UdrKeyPath                        // default key path
-	context.PEM = UdrPemPath                        // default PEM path
 	if sbi := configuration.Sbi; sbi != nil {
 		context.UriScheme = models.UriScheme(sbi.Scheme)
 		if sbi.RegisterIPv4 != "" {
@@ -44,11 +42,11 @@ func InitUdrContext(context *udr_context.UDRContext) {
 
 		context.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
 		if context.BindingIPv4 != "" {
-			logger.UtilLog.Info("Parsing ServerIPv4 address from ENV Variable.")
+			logger.UtilLog.Infoln("parsing ServerIPv4 address from ENV variable")
 		} else {
 			context.BindingIPv4 = sbi.BindingIPv4
 			if context.BindingIPv4 == "" {
-				logger.UtilLog.Warn("Error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default.")
+				logger.UtilLog.Warnln("error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default")
 				context.BindingIPv4 = "0.0.0.0"
 			}
 		}
@@ -56,7 +54,7 @@ func InitUdrContext(context *udr_context.UDRContext) {
 	if configuration.NrfUri != "" {
 		context.NrfUri = configuration.NrfUri
 	} else {
-		logger.UtilLog.Warn("NRF Uri is empty! Using localhost as NRF IPv4 address.")
+		logger.UtilLog.Warnln("NRF Uri is empty. Using localhost as NRF IPv4 address")
 		context.NrfUri = fmt.Sprintf("%s://%s:%d", context.UriScheme, "127.0.0.1", 29510)
 	}
 }

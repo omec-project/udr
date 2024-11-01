@@ -25,7 +25,7 @@ func Test_nrf_url_is_not_overwritten_when_registering(t *testing.T) {
 	svr.EnableHTTP2 = true
 	svr.StartTLS()
 	defer svr.Close()
-	if err := factory.InitConfigFactory("../factory/config.example.yaml"); err != nil {
+	if err := factory.InitConfigFactory("../factory/udr_config.yaml"); err != nil {
 		t.Fatalf("Could not read example configuration file")
 	}
 	self := context.UDR_Self()

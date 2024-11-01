@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 	"time"
@@ -28,7 +29,6 @@ import (
 	"github.com/omec-project/udr/util"
 	"github.com/omec-project/util/http2_util"
 	utilLogger "github.com/omec-project/util/logger"
-	"github.com/omec-project/util/path_util"
 	"github.com/urfave/cli"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -39,7 +39,7 @@ type UDR struct{}
 type (
 	// Config information.
 	Config struct {
-		udrcfg string
+		cfg string
 	}
 )
 
@@ -47,12 +47,9 @@ var config Config
 
 var udrCLi = []cli.Flag{
 	cli.StringFlag{
-		Name:  "free5gccfg",
-		Usage: "common config file",
-	},
-	cli.StringFlag{
-		Name:  "udrcfg",
-		Usage: "config file",
+		Name:     "cfg",
+		Usage:    "udr config file",
+		Required: true,
 	},
 }
 
@@ -67,19 +64,20 @@ func (*UDR) GetCliCmd() (flags []cli.Flag) {
 
 func (udr *UDR) Initialize(c *cli.Context) error {
 	config = Config{
-		udrcfg: c.String("udrcfg"),
+		cfg: c.String("cfg"),
 	}
 
-	if config.udrcfg != "" {
-		if err := factory.InitConfigFactory(config.udrcfg); err != nil {
-			return err
-		}
-	} else {
-		DefaultUdrConfigPath := path_util.Free5gcPath("free5gc/config/udrcfg.yaml")
-		if err := factory.InitConfigFactory(DefaultUdrConfigPath); err != nil {
-			return err
-		}
+	absPath, err := filepath.Abs(config.cfg)
+	if err != nil {
+		logger.CfgLog.Errorln(err)
+		return err
 	}
+
+	if err := factory.InitConfigFactory(absPath); err != nil {
+		return err
+	}
+
+	factory.UdrConfig.CfgLocation = absPath
 
 	udr.setLogLevel()
 
@@ -157,8 +155,6 @@ func (udr *UDR) Start() {
 
 	go metrics.InitMetrics()
 
-	udrLogPath := util.UdrLogPath
-
 	self := context.UDR_Self()
 	util.InitUdrContext(self)
 
@@ -175,7 +171,8 @@ func (udr *UDR) Start() {
 	go udr.registerNF()
 	go udr.configUpdateDb()
 
-	server, err := http2_util.NewServer(addr, udrLogPath, router)
+	sslLog := filepath.Dir(factory.UdrConfig.CfgLocation) + "/sslkey.log"
+	server, err := http2_util.NewServer(addr, sslLog, router)
 	if server == nil {
 		logger.InitLog.Errorf("initialize HTTP server failed: %+v", err)
 		return
@@ -199,10 +196,10 @@ func (udr *UDR) Start() {
 
 func (udr *UDR) Exec(c *cli.Context) error {
 	// UDR.Initialize(cfgPath, c)
-	logger.InitLog.Debugln("args:", c.String("udrcfg"))
+	logger.InitLog.Debugln("args:", c.String("cfg"))
 	args := udr.FilterCli(c)
 	logger.InitLog.Debugln("filter:", args)
-	command := exec.Command("./udr", args...)
+	command := exec.Command("udr", args...)
 
 	if err := udr.Initialize(c); err != nil {
 		return err
@@ -262,7 +259,7 @@ func (udr *UDR) Terminate() {
 	} else {
 		logger.InitLog.Infoln("deregister from NRF successfully")
 	}
-	logger.InitLog.Infoln("udr terminated")
+	logger.InitLog.Infoln("UDR terminated")
 }
 
 func (udr *UDR) configUpdateDb() {
@@ -287,14 +284,14 @@ func (udr *UDR) StartKeepAliveTimer(nfProfile models.NfProfile) {
 	if nfProfile.HeartBeatTimer == 0 {
 		nfProfile.HeartBeatTimer = 60
 	}
-	logger.InitLog.Infof("started KeepAlive Timer: %v sec", nfProfile.HeartBeatTimer)
+	logger.InitLog.Infof("started KeepAlive timer: %v sec", nfProfile.HeartBeatTimer)
 	// AfterFunc starts timer and waits for KeepAliveTimer to elapse and then calls udr.UpdateNF function
 	KeepAliveTimer = time.AfterFunc(time.Duration(nfProfile.HeartBeatTimer)*time.Second, udr.UpdateNF)
 }
 
 func (udr *UDR) StopKeepAliveTimer() {
 	if KeepAliveTimer != nil {
-		logger.InitLog.Infoln("stopped KeepAlive Timer")
+		logger.InitLog.Infoln("stopped KeepAlive timer")
 		KeepAliveTimer.Stop()
 		KeepAliveTimer = nil
 	}
@@ -303,7 +300,7 @@ func (udr *UDR) StopKeepAliveTimer() {
 func (udr *UDR) BuildAndSendRegisterNFInstance() (prof models.NfProfile, err error) {
 	self := context.UDR_Self()
 	profile := consumer.BuildNFInstance(self)
-	logger.InitLog.Infof("udr Profile Registering to NRF: %v", profile)
+	logger.InitLog.Infof("UDR profile registering to NRF: %v", profile)
 	// Indefinite attempt to register until success
 	profile, _, self.NfId, err = consumer.SendRegisterNFInstance(self.NrfUri, self.NfId, profile)
 	return profile, err
@@ -350,7 +347,7 @@ func (udr *UDR) UpdateNF() {
 		// use hearbeattimer value with received timer value from NRF
 		heartBeatTimer = nfProfile.HeartBeatTimer
 	}
-	logger.InitLog.Debugf("restarted KeepAlive Timer: %v sec", heartBeatTimer)
+	logger.InitLog.Debugf("restarted KeepAlive timer: %v sec", heartBeatTimer)
 	// restart timer with received HeartBeatTimer value
 	KeepAliveTimer = time.AfterFunc(time.Duration(heartBeatTimer)*time.Second, udr.UpdateNF)
 }
