@@ -95,3 +95,8 @@ test: .coverage
 			-v \
 			./ ./...
 
+fmt:
+	@go fmt ./...
+
+golint:
+	@docker run --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:latest golangci-lint run -v --config /app/.golangci.yml
