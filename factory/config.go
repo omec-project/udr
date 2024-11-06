@@ -80,6 +80,7 @@ var (
 
 func init() {
 	ConfigPodTrigger = make(chan bool)
+	ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
 }
 
 func (c *Config) GetVersion() string {

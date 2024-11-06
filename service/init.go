@@ -136,7 +136,6 @@ func manageGrpcClient(webuiUri string) {
 			if configChannel == nil {
 				configChannel = client.PublishOnConfigChange(true, stream)
 				logger.InitLog.Infoln("PublishOnConfigChange is triggered")
-				factory.ConfigUpdateDbTrigger = make(chan *factory.UpdateDb, 10)
 				go factory.UdrConfig.UpdateConfig(configChannel, factory.ConfigUpdateDbTrigger)
 				logger.InitLog.Infoln("UDR updateConfig is triggered")
 			}
