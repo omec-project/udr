@@ -23,6 +23,8 @@ import (
 	utilLogger "github.com/omec-project/util/logger"
 )
 
+var subsToNotifyStr = "subs-to-notify"
+
 // Route is the information for every URI.
 type Route struct {
 	// Name is the name of this Route.
@@ -65,7 +67,7 @@ func subMsgDispatchHandlerFunc(c *gin.Context) {
 			return
 		}
 		// Sepcial case
-		if subsToNotify == "subs-to-notify" && strings.Contains(route.Pattern, "subs-to-notify") && route.Method == c.Request.Method {
+		if subsToNotify == subsToNotifyStr && strings.Contains(route.Pattern, subsToNotifyStr) && route.Method == c.Request.Method {
 			c.Params = append(c.Params, gin.Param{Key: "subsId", Value: c.Param("servingPlmnId")})
 			route.HandlerFunc(c)
 			return
@@ -108,18 +110,18 @@ func eeMsgDispatchHandlerFunc(c *gin.Context) {
 	c.String(http.StatusMethodNotAllowed, "Method Not Allowed")
 }
 
-// Handler to distinguish "subs-to-notify" from ":influenceId".
+// Handler to distinguish subsToNotifyStr from ":influenceId".
 func appInfluDataMsgDispatchHandlerFunc(c *gin.Context) {
 	influID := c.Param("influenceId")
 	for _, route := range appInfluDataRoutes {
 		if route.Method == c.Request.Method {
-			if influID == "subs-to-notify" {
-				if strings.Contains(route.Pattern, "subs-to-notify") {
+			if influID == subsToNotifyStr {
+				if strings.Contains(route.Pattern, subsToNotifyStr) {
 					route.HandlerFunc(c)
 					return
 				}
 			} else {
-				if !strings.Contains(route.Pattern, "subs-to-notify") {
+				if !strings.Contains(route.Pattern, subsToNotifyStr) {
 					route.HandlerFunc(c)
 					return
 				}
@@ -137,7 +139,7 @@ func expoMsgDispatchHandlerFunc(c *gin.Context) {
 			route.HandlerFunc(c)
 			return
 		}
-		if subsToNotify == "subs-to-notify" && strings.Contains(route.Pattern, "subs-to-notify") && route.Method == c.Request.Method {
+		if subsToNotify == subsToNotifyStr && strings.Contains(route.Pattern, subsToNotifyStr) && route.Method == c.Request.Method {
 			route.HandlerFunc(c)
 			return
 		}
@@ -180,7 +182,7 @@ func AddService(engine *gin.Engine) *gin.RouterGroup {
 	 * '/application-data/influenceData/:influenceId' and
 	 * '/application-data/influenceData/subs-to-notify' patterns will be conflicted.
 	 * Only can use '/application-data/influenceData/:influenceId' pattern and
-	 * use a dispatch handler to distinguish "subs-to-notify" from ":influenceId".
+	 * use a dispatch handler to distinguish subsToNotifyStr from ":influenceId".
 	 */
 	appInfluDataPattern := "/application-data/influenceData/:influenceId"
 	group.Any(appInfluDataPattern, appInfluDataMsgDispatchHandlerFunc)
@@ -310,7 +312,7 @@ var routes = Routes{
 	 * '/application-data/influenceData/:influenceId' and
 	 * '/application-data/influenceData/subs-to-notify' patterns will be conflicted.
 	 * Only can use '/application-data/influenceData/:influenceId' pattern.
-	 * Here ":influenceId" value should be "subs-to-notify".
+	 * Here ":influenceId" value should be subsToNotifyStr.
 	 */
 	{
 		"HTTPApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete",
