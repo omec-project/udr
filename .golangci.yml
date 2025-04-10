@@ -29,7 +29,6 @@ linters:
     - staticcheck
     - unconvert
     - whitespace
-  disable:
   settings:
     errcheck:
       check-type-assertions: false
