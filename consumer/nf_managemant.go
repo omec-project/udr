@@ -96,16 +96,17 @@ var SendRegisterNFInstance = func(nrfUri, nfInstanceId string, profile models.Nf
 		}()
 
 		status := res.StatusCode
-		if status == http.StatusOK {
+		switch status {
+		case http.StatusOK:
 			// NFUpdate
 			return prof, resouceNrfUri, retrieveNfInstanceId, err
-		} else if status == http.StatusCreated {
+		case http.StatusCreated:
 			// NFRegister
 			resourceUri := res.Header.Get("Location")
 			resouceNrfUri = resourceUri[:strings.Index(resourceUri, "/nnrf-nfm/")]
 			retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
 			return prof, resouceNrfUri, retrieveNfInstanceId, err
-		} else {
+		default:
 			logger.ConsumerLog.Errorln("handler returned wrong status code", status)
 			logger.ConsumerLog.Errorln("NRF return wrong status code", status)
 		}

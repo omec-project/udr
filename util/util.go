@@ -30,13 +30,14 @@ func ProblemDetailsMalformedReqSyntax(detail string) *models.ProblemDetails {
 
 func ProblemDetailsNotFound(cause string) *models.ProblemDetails {
 	title := ""
-	if cause == "USER_NOT_FOUND" {
+	switch cause {
+	case "USER_NOT_FOUND":
 		title = "User not found"
-	} else if cause == "SUBSCRIPTION_NOT_FOUND" {
+	case "SUBSCRIPTION_NOT_FOUND":
 		title = "Subscription not found"
-	} else if cause == "AMFSUBSCRIPTION_NOT_FOUND" {
+	case "AMFSUBSCRIPTION_NOT_FOUND":
 		title = "AMF Subscription not found"
-	} else {
+	default:
 		title = "Data not found"
 	}
 	return &models.ProblemDetails{

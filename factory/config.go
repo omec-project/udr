@@ -122,7 +122,7 @@ func (c *Config) UpdateConfig(commChannel chan *protos.NetworkSliceResponse, dbU
 					plmn := PlmnSupportItem{}
 					plmn.PlmnId.Mnc = site.Plmn.Mnc
 					plmn.PlmnId.Mcc = site.Plmn.Mcc
-					var found bool = false
+					found := false
 					for _, cplmn := range UdrConfig.Configuration.PlmnSupportList {
 						if (cplmn.PlmnId.Mnc == plmn.PlmnId.Mnc) && (cplmn.PlmnId.Mcc == plmn.PlmnId.Mcc) {
 							found = true
