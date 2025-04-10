@@ -1289,10 +1289,11 @@ func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Re
 
 	response, status := PolicyDataSponsorConnectivityDataSponsorIdGetProcedure(collName, sponsorId)
 
-	if status == http.StatusOK {
+	switch status {
+	case http.StatusOK:
 		stats.IncrementUdrPolicyDataStats("get", "sponsor-connectivity-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
-	} else if status == http.StatusNoContent {
+	case http.StatusNoContent:
 		stats.IncrementUdrPolicyDataStats("get", "sponsor-connectivity-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 	}
@@ -1885,10 +1886,11 @@ func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwr
 
 	response, status := PolicyDataUesUeIdUePolicySetPutProcedure(collName, ueId, UePolicySet)
 
-	if status == http.StatusNoContent {
+	switch status {
+	case http.StatusNoContent:
 		stats.IncrementUdrPolicyDataStats("create", "ue-policy-set", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else if status == http.StatusCreated {
+	case http.StatusCreated:
 		stats.IncrementUdrPolicyDataStats("create", "ue-policy-set", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusCreated, nil, response)
 	}
@@ -3080,10 +3082,11 @@ func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 
 	response, status := CreateSmfContextNon3gppProcedure(SmfRegistration, collName, ueId, pduSessionId)
 
-	if status == http.StatusCreated {
+	switch status {
+	case http.StatusCreated:
 		stats.IncrementUdrSubscriptionDataStats("create", "smf-registrations", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusCreated, nil, response)
-	} else if status == http.StatusOK {
+	case http.StatusOK:
 		stats.IncrementUdrSubscriptionDataStats("create", "smf-registrations", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	}
