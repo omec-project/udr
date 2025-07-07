@@ -6,7 +6,7 @@ info:
   description: UDR initial local configuration
 
 configuration:
-  webuiUri: myspecialwebui:9872 # a valid URI of Webui
+  webuiUri: http://myspecialwebui:9872 # a valid URI of Webui
   sbi: # Service Based Interface
     scheme: https
     registerIPv4: 127.0.0.4
