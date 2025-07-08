@@ -133,7 +133,7 @@ func TestNfRegistrationService_ConfigChanged_RetryIfRegisterNFFails(t *testing.T
 	go StartNfRegistrationService(ctx, ch)
 	ch <- []models.PlmnId{{Mcc: "001", Mnc: "01"}}
 
-	time.Sleep(2 * RETRY_TIME)
+	time.Sleep(2 * retryTime)
 
 	if called < 2 {
 		t.Error("Expected to retry register to NRF")
