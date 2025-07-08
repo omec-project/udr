@@ -85,7 +85,7 @@ var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof models.NfPro
 	client := Nnrf_NFManagement.NewAPIClient(configuration)
 
 	receivedNfProfile, res, err := client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfProfile.NfInstanceId, nfProfile)
-	logger.ConsumerLog.Debugln("RegisterNFInstance done using profile: %+v", nfProfile)
+	logger.ConsumerLog.Debugf("RegisterNFInstance done using profile: %+v", nfProfile)
 
 	if err != nil {
 		return models.NfProfile{}, "", err

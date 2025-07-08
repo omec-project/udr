@@ -8,7 +8,6 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
@@ -50,18 +49,6 @@ func ToBsonM(data interface{}) bson.M {
 		logger.UtilLog.Error(err)
 	}
 	return putData
-}
-
-func SnssaiHexToModels(hexString string) (*models.Snssai, error) {
-	sst, err := strconv.ParseInt(hexString[:2], 16, 32)
-	if err != nil {
-		return nil, err
-	}
-	sNssai := &models.Snssai{
-		Sst: int32(sst),
-		Sd:  hexString[2:],
-	}
-	return sNssai, nil
 }
 
 func SnssaiModelsToHex(snssai models.Snssai) string {
