@@ -267,3 +267,54 @@ func TestHeartbeatNF_WhenNfUpdateFails_ThenNfRegistersIsCalled(t *testing.T) {
 		t.Error("expected keepAliveTimer to be initialized by startKeepAliveTimer")
 	}
 }
+
+func TestStartKeepAliveTimer_UsesProfileTimerOnlyWhenGreaterThanZero(t *testing.T) {
+	testCases := []struct {
+		name             string
+		profileTime      int32
+		expectedDuration time.Duration
+	}{
+		{
+			name:             "Profile heartbeat time is zero, use default time",
+			profileTime:      0,
+			expectedDuration: 60 * time.Second,
+		},
+		{
+			name:             "Profile heartbeat time is smaller than zero, use default time",
+			profileTime:      -5,
+			expectedDuration: 60 * time.Second,
+		},
+		{
+			name:             "Profile heartbeat time is greater than zero, use profile time",
+			profileTime:      15,
+			expectedDuration: 15 * time.Second,
+		},
+		{
+			name:             "Profile heartbeat time is greater than default time, use profile time",
+			profileTime:      90,
+			expectedDuration: 90 * time.Second,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			keepAliveTimer = time.NewTimer(25 * time.Second)
+			defer func() {
+				if keepAliveTimer != nil {
+					keepAliveTimer.Stop()
+				}
+			}()
+			var capturedDuration time.Duration
+
+			afterFunc = func(d time.Duration, _ func()) *time.Timer {
+				capturedDuration = d
+				return time.NewTimer(25 * time.Second)
+			}
+			defer func() { afterFunc = time.AfterFunc }()
+
+			startKeepAliveTimer(tc.profileTime, nil)
+			if tc.expectedDuration != capturedDuration {
+				t.Errorf("Expected %v duration, got %v", tc.expectedDuration, capturedDuration)
+			}
+		})
+	}
+}

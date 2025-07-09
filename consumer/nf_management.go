@@ -126,7 +126,7 @@ var SendDeregisterNFInstance = func() error {
 	if res == nil {
 		return fmt.Errorf("no response from server")
 	}
-	if res.StatusCode == 204 {
+	if res.StatusCode == http.StatusNoContent {
 		return nil
 	}
 	return fmt.Errorf("unexpected response code")
@@ -156,7 +156,7 @@ var SendUpdateNFInstance = func(patchItem []models.PatchItem) (receivedNfProfile
 	if res == nil {
 		return models.NfProfile{}, nil, fmt.Errorf("no response from server")
 	}
-	if res.StatusCode == 200 || res.StatusCode == 204 {
+	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusNoContent {
 		return receivedNfProfile, nil, nil
 	}
 	return models.NfProfile{}, nil, fmt.Errorf("unexpected response code")

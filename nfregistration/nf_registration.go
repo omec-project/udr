@@ -22,6 +22,7 @@ var (
 	keepAliveTimer      *time.Timer
 	keepAliveTimerMutex sync.Mutex
 	registerCtxMutex    sync.Mutex
+	afterFunc           = time.AfterFunc
 )
 
 const (
@@ -152,12 +153,12 @@ func startKeepAliveTimer(profileHeartbeatTimer int32, plmnConfig []models.PlmnId
 	defer keepAliveTimerMutex.Unlock()
 	stopKeepAliveTimer()
 	heartbeatTimer := defaultHeartbeatTimer
-	if profileHeartbeatTimer <= 0 {
+	if profileHeartbeatTimer > 0 {
 		heartbeatTimer = profileHeartbeatTimer
 	}
 	heartbeatFunction := func() { heartbeatNF(plmnConfig) }
 	// AfterFunc starts timer and waits for keepAliveTimer to elapse and then calls heartbeatNF function
-	keepAliveTimer = time.AfterFunc(time.Duration(heartbeatTimer)*time.Second, heartbeatFunction)
+	keepAliveTimer = afterFunc(time.Duration(heartbeatTimer)*time.Second, heartbeatFunction)
 	logger.NrfRegistrationLog.Debugf("started heartbeat timer: %v sec", heartbeatTimer)
 }
 
