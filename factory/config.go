@@ -11,9 +11,6 @@
 package factory
 
 import (
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
-	"github.com/omec-project/openapi/models"
-	"github.com/omec-project/udr/logger"
 	utilLogger "github.com/omec-project/util/logger"
 )
 
@@ -40,16 +37,10 @@ const (
 )
 
 type Configuration struct {
-	Sbi             *Sbi              `yaml:"sbi"`
-	Mongodb         *Mongodb          `yaml:"mongodb"`
-	NrfUri          string            `yaml:"nrfUri"`
-	WebuiUri        string            `yaml:"webuiUri"`
-	PlmnSupportList []PlmnSupportItem `yaml:"plmnSupportList,omitempty"`
-}
-
-type PlmnSupportItem struct {
-	PlmnId     models.PlmnId   `yaml:"plmnId"`
-	SNssaiList []models.Snssai `yaml:"snssaiList,omitempty"`
+	Sbi      *Sbi     `yaml:"sbi"`
+	Mongodb  *Mongodb `yaml:"mongodb"`
+	NrfUri   string   `yaml:"nrfUri"`
+	WebuiUri string   `yaml:"webuiUri"`
 }
 
 type Sbi struct {
@@ -73,92 +64,9 @@ type Mongodb struct {
 	AuthUrl        string `yaml:"authUrl"`
 }
 
-var (
-	ConfigPodTrigger      chan bool
-	ConfigUpdateDbTrigger chan *UpdateDb
-)
-
-func init() {
-	ConfigPodTrigger = make(chan bool)
-	ConfigUpdateDbTrigger = make(chan *UpdateDb, 10)
-}
-
 func (c *Config) GetVersion() string {
 	if c.Info != nil && c.Info.Version != "" {
 		return c.Info.Version
 	}
 	return ""
-}
-
-func (c *Config) addSmPolicyInfo(nwSlice *protos.NetworkSlice, dbUpdateChannel chan *UpdateDb) error {
-	for _, devGrp := range nwSlice.DeviceGroup {
-		for _, imsi := range devGrp.Imsi {
-			smPolicyEntry := &SmPolicyUpdateEntry{
-				Imsi:   imsi,
-				Dnn:    devGrp.IpDomainDetails.DnnName,
-				Snssai: nwSlice.Nssai,
-			}
-			dbUpdate := &UpdateDb{
-				SmPolicyTable: smPolicyEntry,
-			}
-			dbUpdateChannel <- dbUpdate
-		}
-	}
-	return nil
-}
-
-func (c *Config) UpdateConfig(commChannel chan *protos.NetworkSliceResponse, dbUpdateChannel chan *UpdateDb) bool {
-	var minConfig bool
-	for rsp := range commChannel {
-		logger.GrpcLog.Infoln("received updateConfig in the udr app:", rsp)
-		for _, ns := range rsp.NetworkSlice {
-			logger.GrpcLog.Infoln("network slice name", ns.Name)
-			if ns.Site != nil {
-				logger.GrpcLog.Infoln("network slice has site name present")
-				site := ns.Site
-				logger.GrpcLog.Infoln("site name", site.SiteName)
-				if site.Plmn != nil {
-					logger.GrpcLog.Infoln("plmn mcc", site.Plmn.Mcc)
-					plmn := PlmnSupportItem{}
-					plmn.PlmnId.Mnc = site.Plmn.Mnc
-					plmn.PlmnId.Mcc = site.Plmn.Mcc
-					found := false
-					for _, cplmn := range UdrConfig.Configuration.PlmnSupportList {
-						if (cplmn.PlmnId.Mnc == plmn.PlmnId.Mnc) && (cplmn.PlmnId.Mcc == plmn.PlmnId.Mcc) {
-							found = true
-							break
-						}
-					}
-					if !found {
-						UdrConfig.Configuration.PlmnSupportList = append(UdrConfig.Configuration.PlmnSupportList, plmn)
-					}
-				} else {
-					logger.GrpcLog.Infoln("plmn not present in the message")
-				}
-			}
-			err := c.addSmPolicyInfo(ns, dbUpdateChannel)
-			if err != nil {
-				logger.GrpcLog.Errorf("error in adding sm policy info to db %v", err)
-			}
-		}
-		if !minConfig {
-			// first slice Created
-			if len(UdrConfig.Configuration.PlmnSupportList) > 0 {
-				minConfig = true
-				ConfigPodTrigger <- true
-				logger.GrpcLog.Infoln("send config trigger to main routine")
-			}
-		} else {
-			// all slices deleted
-			if len(UdrConfig.Configuration.PlmnSupportList) == 0 {
-				minConfig = false
-				ConfigPodTrigger <- false
-				logger.GrpcLog.Infoln("send config trigger to main routine")
-			} else {
-				ConfigPodTrigger <- true
-				logger.GrpcLog.Infoln("send config trigger to main routine")
-			}
-		}
-	}
-	return true
 }

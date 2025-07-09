@@ -93,10 +93,6 @@ func (context *UDRContext) Reset() {
 	context.Name = "udr"
 }
 
-func (context *UDRContext) GetIPv4Uri() string {
-	return fmt.Sprintf("%s://%s:%d", context.UriScheme, context.RegisterIPv4, context.SBIPort)
-}
-
 func (context *UDRContext) GetIPv4GroupUri(udrServiceType UDRServiceType) string {
 	var serviceUri string
 

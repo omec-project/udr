@@ -17,11 +17,3 @@ configuration:
     url: http://dummy
     authKeysDbName: authentication
     authUrl: http://dummy
-  plmnSupportList:
-    - plmnId:
-        mcc: "208"
-        mnc: "93"
-      snssaiList:
-        - sst: 1
-          sd: "010203"
-

@@ -12,48 +12,41 @@ package factory
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"gopkg.in/yaml.v2"
 )
 
 var UdrConfig Config
 
-type UpdateDb struct {
-	SmPolicyTable *SmPolicyUpdateEntry
-}
-
-type SmPolicyUpdateEntry struct {
-	Snssai *protos.NSSAI
-	Imsi   string
-	Dnn    string
-}
-
 // TODO: Support configuration update from REST api
 func InitConfigFactory(f string) error {
-	if content, err := os.ReadFile(f); err != nil {
+	content, err := os.ReadFile(f)
+	if err != nil {
 		return err
-	} else {
-		UdrConfig = Config{}
+	}
+	UdrConfig = Config{}
 
-		if yamlErr := yaml.Unmarshal(content, &UdrConfig); yamlErr != nil {
-			return yamlErr
-		}
-		if UdrConfig.Configuration.Mongodb.AuthUrl == "" {
-			authUrl := UdrConfig.Configuration.Mongodb.Url
-			UdrConfig.Configuration.Mongodb.AuthUrl = authUrl
-		}
-		if UdrConfig.Configuration.Mongodb.AuthKeysDbName == "" {
-			UdrConfig.Configuration.Mongodb.AuthKeysDbName = "authentication"
-		}
-		if UdrConfig.Configuration.WebuiUri == "" {
-			UdrConfig.Configuration.WebuiUri = "webui:9876"
-		}
+	if err = yaml.Unmarshal(content, &UdrConfig); err != nil {
+		return err
+	}
+	if UdrConfig.Configuration.Mongodb.AuthUrl == "" {
+		authUrl := UdrConfig.Configuration.Mongodb.Url
+		UdrConfig.Configuration.Mongodb.AuthUrl = authUrl
+	}
+	if UdrConfig.Configuration.Mongodb.AuthKeysDbName == "" {
+		UdrConfig.Configuration.Mongodb.AuthKeysDbName = "authentication"
 	}
 
-	return nil
+	if UdrConfig.Configuration.WebuiUri == "" {
+		UdrConfig.Configuration.WebuiUri = "http://webui:5001"
+		logger.CfgLog.Infof("webuiUri not set in configuration file. Using %v", UdrConfig.Configuration.WebuiUri)
+		return nil
+	}
+	err = validateWebuiUri(UdrConfig.Configuration.WebuiUri)
+	return err
 }
 
 func CheckConfigVersion() error {
@@ -66,5 +59,19 @@ func CheckConfigVersion() error {
 
 	logger.CfgLog.Infof("config version [%s]", currentVersion)
 
+	return nil
+}
+
+func validateWebuiUri(uri string) error {
+	parsedUrl, err := url.ParseRequestURI(uri)
+	if err != nil {
+		return err
+	}
+	if parsedUrl.Scheme != "http" && parsedUrl.Scheme != "https" {
+		return fmt.Errorf("unsupported scheme for webuiUri: %s", parsedUrl.Scheme)
+	}
+	if parsedUrl.Hostname() == "" {
+		return fmt.Errorf("missing host in webuiUri")
+	}
 	return nil
 }
