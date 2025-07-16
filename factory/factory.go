@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"os"
 
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
+	protos "github.com/5GC-DEV/config5g-cdac/proto/sdcoreConfig"
 	"github.com/omec-project/udr/logger"
 	"gopkg.in/yaml.v2"
 )

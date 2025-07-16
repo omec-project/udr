@@ -11,7 +11,7 @@
 package factory
 
 import (
-	protos "github.com/omec-project/config5g/proto/sdcoreConfig"
+	protos "github.com/5GC-DEV/config5g-cdac/proto/sdcoreConfig"
 	"github.com/omec-project/openapi/models"
 	"github.com/omec-project/udr/logger"
 	utilLogger "github.com/omec-project/util/logger"
@@ -93,15 +93,18 @@ func (c *Config) GetVersion() string {
 func (c *Config) addSmPolicyInfo(nwSlice *protos.NetworkSlice, dbUpdateChannel chan *UpdateDb) error {
 	for _, devGrp := range nwSlice.DeviceGroup {
 		for _, imsi := range devGrp.Imsi {
-			smPolicyEntry := &SmPolicyUpdateEntry{
-				Imsi:   imsi,
-				Dnn:    devGrp.IpDomainDetails.DnnName,
-				Snssai: nwSlice.Nssai,
+			// Iterate over the IpDomainDetails slice
+			for _, ipDomain := range devGrp.IpDomainDetails {
+				smPolicyEntry := &SmPolicyUpdateEntry{
+					Imsi:   imsi,
+					Dnn:    ipDomain.DnnName, // Access DnnName from the IpDomain struct
+					Snssai: nwSlice.Nssai,
+				}
+				dbUpdate := &UpdateDb{
+					SmPolicyTable: smPolicyEntry,
+				}
+				dbUpdateChannel <- dbUpdate
 			}
-			dbUpdate := &UpdateDb{
-				SmPolicyTable: smPolicyEntry,
-			}
-			dbUpdateChannel <- dbUpdate
 		}
 	}
 	return nil
