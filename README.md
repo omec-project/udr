@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
 Implements 3gpp 29.504 specification. Provides service to PCF, UDM. UDR supports
 SBI interface and any other network function can use the service.
 
-## UDR block diagram
-![UDR Block Diagram](/docs/images/README-UDR.png)
+## UDR flow diagram
+![UDR Flow Diagram](/docs/images/README-UDR.png)
 
 ## Dynamic Network configuration (via webconsole)
 
