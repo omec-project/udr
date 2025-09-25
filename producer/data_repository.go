@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	jsonpatch "github.com/evanphx/json-patch"
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/mitchellh/mapstructure"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
