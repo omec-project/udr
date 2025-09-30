@@ -5,10 +5,10 @@ go 1.24.0
 require (
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0
-	github.com/mitchellh/mapstructure v1.5.0
-	github.com/omec-project/openapi v1.6.3
-	github.com/omec-project/util v1.5.3
+	github.com/omec-project/openapi v1.6.4
+	github.com/omec-project/util v1.5.4
 	github.com/prometheus/client_golang v1.23.2
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.4.1
@@ -64,7 +64,7 @@ require (
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/oauth2 v0.30.0 // indirect
+	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect

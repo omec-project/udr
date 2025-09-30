@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
