@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/omec-project/openapi/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestStartPollingService_Success(t *testing.T) {
@@ -221,8 +220,9 @@ func TestFetchPlmnConfig(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			handler := func(w http.ResponseWriter, r *http.Request) {
 				accept := r.Header.Get("Accept")
-				assert.Equal(t, "application/json", accept)
-
+				if accept != "application/json" {
+					t.Errorf("Accept header mismatch. got = %q, want = %q", accept, "application/json")
+				}
 				w.Header().Set("Content-Type", tc.contentType)
 				w.WriteHeader(tc.statusCode)
 				_, err = w.Write([]byte(tc.responseBody))
