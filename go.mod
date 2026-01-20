@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/gin-gonic/gin v1.11.0
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/omec-project/openapi v1.6.5
 	github.com/omec-project/util v1.5.7
