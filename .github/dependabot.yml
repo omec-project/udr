@@ -2,7 +2,7 @@
 # Copyright 2023 Canonical Ltd.
 # Copyright 2024-present Intel Corporation
 
-# Timeline for each  ecosystem is intentionally staggered to spread
+# Timeline for each ecosystem is intentionally staggered to spread
 # Dependabot PRs over the week.
 version: 2
 updates:
