@@ -47,13 +47,6 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 			isDeregisterNFCalled = false
 			originalDeregisterNF := consumer.SendDeregisterNFInstance
 			originalRegisterNF := registerNF
-			defer func() {
-				consumer.SendDeregisterNFInstance = originalDeregisterNF
-				registerNF = originalRegisterNF
-				if keepAliveTimer != nil {
-					keepAliveTimer.Stop()
-				}
-			}()
 
 			consumer.SendDeregisterNFInstance = tc.sendDeregisterNFInstanceMock
 			registerNF = func(ctx context.Context, newPlmnConfig []models.PlmnId) {
@@ -61,11 +54,29 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 			}
 
 			ch := make(chan []models.PlmnId, 1)
-			ctx := t.Context()
-			go StartNfRegistrationService(ctx, ch)
-			ch <- []models.PlmnId{}
+			ctx, cancel := context.WithCancel(context.Background())
+			done := make(chan struct{})
+			go func() {
+				StartNfRegistrationService(ctx, ch)
+				close(done)
+			}()
+			defer func() {
+				cancel()
+				<-done
+				consumer.SendDeregisterNFInstance = originalDeregisterNF
+				registerNF = originalRegisterNF
+				keepAliveTimerMutex.Lock()
+				if keepAliveTimer != nil {
+					keepAliveTimer.Stop()
+					keepAliveTimer = nil
+				}
+				keepAliveTimerMutex.Unlock()
+			}()
 
+			ch <- []models.PlmnId{}
 			time.Sleep(100 * time.Millisecond)
+			cancel()
+			<-done
 
 			if keepAliveTimer != nil {
 				t.Errorf("expected keepAliveTimer to be nil after stopKeepAliveTimer")
@@ -83,12 +94,7 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTimer(t *testing.T) {
 	keepAliveTimer = nil
 	originalSendRegisterNFInstance := consumer.SendRegisterNFInstance
-	defer func() {
-		consumer.SendRegisterNFInstance = originalSendRegisterNFInstance
-		if keepAliveTimer != nil {
-			keepAliveTimer.Stop()
-		}
-	}()
+	originalRegisterNF := registerNF
 
 	registrations := []models.PlmnId{}
 	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
@@ -97,13 +103,36 @@ func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTi
 		return profile, "", nil
 	}
 
+	registerNFDone := make(chan struct{}, 1)
+	registerNF = func(ctx context.Context, plmnConfig []models.PlmnId) {
+		originalRegisterNF(ctx, plmnConfig)
+		registerNFDone <- struct{}{}
+	}
+
 	ch := make(chan []models.PlmnId, 1)
-	ctx := t.Context()
-	go StartNfRegistrationService(ctx, ch)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		StartNfRegistrationService(ctx, ch)
+		close(done)
+	}()
+	defer func() {
+		cancel()
+		<-done
+		registerNF = originalRegisterNF
+		consumer.SendRegisterNFInstance = originalSendRegisterNFInstance
+		keepAliveTimerMutex.Lock()
+		if keepAliveTimer != nil {
+			keepAliveTimer.Stop()
+			keepAliveTimer = nil
+		}
+		keepAliveTimerMutex.Unlock()
+	}()
+
 	newConfig := []models.PlmnId{{Mcc: "001", Mnc: "01"}}
 	ch <- newConfig
+	<-registerNFDone
 
-	time.Sleep(100 * time.Millisecond)
 	if keepAliveTimer == nil {
 		t.Error("expected keepAliveTimer to be initialized by startKeepAliveTimer")
 	}
@@ -114,12 +143,7 @@ func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTi
 
 func TestNfRegistrationService_ConfigChanged_RetryIfRegisterNFFails(t *testing.T) {
 	originalSendRegisterNFInstance := consumer.SendRegisterNFInstance
-	defer func() {
-		consumer.SendRegisterNFInstance = originalSendRegisterNFInstance
-		if keepAliveTimer != nil {
-			keepAliveTimer.Stop()
-		}
-	}()
+	originalRegisterNF := registerNF
 
 	called := 0
 	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
@@ -128,12 +152,37 @@ func TestNfRegistrationService_ConfigChanged_RetryIfRegisterNFFails(t *testing.T
 		return profile, "", errors.New("mock error")
 	}
 
-	ch := make(chan []models.PlmnId, 1)
-	ctx := t.Context()
-	go StartNfRegistrationService(ctx, ch)
-	ch <- []models.PlmnId{{Mcc: "001", Mnc: "01"}}
+	registerNFDone := make(chan struct{}, 1)
+	registerNF = func(ctx context.Context, plmnConfig []models.PlmnId) {
+		originalRegisterNF(ctx, plmnConfig)
+		registerNFDone <- struct{}{}
+	}
 
+	ch := make(chan []models.PlmnId, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		StartNfRegistrationService(ctx, ch)
+		close(done)
+	}()
+	defer func() {
+		cancel()
+		<-done
+		registerNF = originalRegisterNF
+		consumer.SendRegisterNFInstance = originalSendRegisterNFInstance
+		keepAliveTimerMutex.Lock()
+		if keepAliveTimer != nil {
+			keepAliveTimer.Stop()
+			keepAliveTimer = nil
+		}
+		keepAliveTimerMutex.Unlock()
+	}()
+
+	ch <- []models.PlmnId{{Mcc: "001", Mnc: "01"}}
 	time.Sleep(2 * retryTime)
+	cancel()
+	<-done
+	<-registerNFDone
 
 	if called < 2 {
 		t.Error("Expected to retry register to NRF")
@@ -143,13 +192,8 @@ func TestNfRegistrationService_ConfigChanged_RetryIfRegisterNFFails(t *testing.T
 
 func TestNfRegistrationService_WhenConfigChanged_ThenPreviousRegistrationIsCancelled(t *testing.T) {
 	originalRegisterNf := registerNF
-	defer func() {
-		registerNF = originalRegisterNf
-		if keepAliveTimer != nil {
-			keepAliveTimer.Stop()
-		}
-	}()
 
+	registered := make(chan struct{}, 2)
 	var registrations []struct {
 		ctx    context.Context
 		config []models.PlmnId
@@ -159,23 +203,39 @@ func TestNfRegistrationService_WhenConfigChanged_ThenPreviousRegistrationIsCance
 			ctx    context.Context
 			config []models.PlmnId
 		}{registerCtx, newPlmnConfig})
+		registered <- struct{}{}
 		<-registerCtx.Done() // Wait until registration is cancelled
 	}
 
 	ch := make(chan []models.PlmnId, 1)
-	ctx := t.Context()
-	go StartNfRegistrationService(ctx, ch)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		StartNfRegistrationService(ctx, ch)
+		close(done)
+	}()
+	defer func() {
+		cancel()
+		<-done
+		registerNF = originalRegisterNf
+		keepAliveTimerMutex.Lock()
+		if keepAliveTimer != nil {
+			keepAliveTimer.Stop()
+			keepAliveTimer = nil
+		}
+		keepAliveTimerMutex.Unlock()
+	}()
+
 	firstConfig := []models.PlmnId{{Mcc: "001", Mnc: "01"}}
 	ch <- firstConfig
-
-	time.Sleep(10 * time.Millisecond)
+	<-registered
 	if len(registrations) != 1 {
 		t.Error("expected one registration to the NRF")
 	}
 
 	secondConfig := []models.PlmnId{{Mcc: "002", Mnc: "02"}}
 	ch <- secondConfig
-	time.Sleep(10 * time.Millisecond)
+	<-registered
 	if len(registrations) != 2 {
 		t.Error("expected 2 registrations to the NRF")
 	}
