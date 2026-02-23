@@ -78,7 +78,10 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 			cancel()
 			<-done
 
-			if keepAliveTimer != nil {
+			keepAliveTimerMutex.Lock()
+			timerIsNil := keepAliveTimer == nil
+			keepAliveTimerMutex.Unlock()
+			if !timerIsNil {
 				t.Errorf("expected keepAliveTimer to be nil after stopKeepAliveTimer")
 			}
 			if !isDeregisterNFCalled {
@@ -92,7 +95,9 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 }
 
 func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTimer(t *testing.T) {
+	keepAliveTimerMutex.Lock()
 	keepAliveTimer = nil
+	keepAliveTimerMutex.Unlock()
 	originalSendRegisterNFInstance := consumer.SendRegisterNFInstance
 	originalRegisterNF := registerNF
 
@@ -133,7 +138,10 @@ func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTi
 	ch <- newConfig
 	<-registerNFDone
 
-	if keepAliveTimer == nil {
+	keepAliveTimerMutex.Lock()
+	timer := keepAliveTimer
+	keepAliveTimerMutex.Unlock()
+	if timer == nil {
 		t.Error("expected keepAliveTimer to be initialized by startKeepAliveTimer")
 	}
 	if !reflect.DeepEqual(registrations, newConfig) {
