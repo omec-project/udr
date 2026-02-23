@@ -52,9 +52,6 @@ func TestStartPollingService_Success(t *testing.T) {
 func TestStartPollingService_RetryAfterFailure(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	originalFetchPlmnConfig := fetchPlmnConfig
-	defer func() {
-		fetchPlmnConfig = originalFetchPlmnConfig
-	}()
 
 	callCount := 0
 	fetchPlmnConfig = func(poller *nfConfigPoller, pollingEndpoint string) ([]models.PlmnId, error) {
@@ -62,11 +59,17 @@ func TestStartPollingService_RetryAfterFailure(t *testing.T) {
 		return nil, errors.New("mock failure")
 	}
 	plmnChan := make(chan []models.PlmnId, 1)
-	go StartPollingService(ctx, "http://dummy", plmnChan)
+	done := make(chan struct{})
+	go func() {
+		StartPollingService(ctx, "http://dummy", plmnChan)
+		close(done)
+	}()
 
 	time.Sleep(4 * initialPollingInterval)
 	cancel()
-	<-ctx.Done()
+	<-done
+
+	fetchPlmnConfig = originalFetchPlmnConfig
 
 	if callCount < 2 {
 		t.Error("Expected to retry after failure")
