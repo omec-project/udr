@@ -7,12 +7,9 @@
 package service
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"sync"
@@ -121,19 +118,6 @@ func (udr *UDR) setLogLevel() {
 	}
 }
 
-func (udr *UDR) FilterCli(c *cli.Command) (args []string) {
-	for _, flag := range udr.GetCliCmd() {
-		name := flag.Names()[0]
-		value := fmt.Sprint(c.Generic(name))
-		if value == "" {
-			continue
-		}
-
-		args = append(args, "--"+name, value)
-	}
-	return args
-}
-
 func (udr *UDR) Start() {
 	// get config file info
 	config := factory.UdrConfig
@@ -201,60 +185,6 @@ func (udr *UDR) Start() {
 	if err != nil {
 		logger.InitLog.Fatalf("http server setup failed: %+v", err)
 	}
-}
-
-func (udr *UDR) Exec(c *cli.Command) error {
-	// UDR.Initialize(cfgPath, c)
-	logger.InitLog.Debugln("args:", c.String("cfg"))
-	args := udr.FilterCli(c)
-	logger.InitLog.Debugln("filter:", args)
-	command := exec.Command("udr", args...)
-
-	if err := udr.Initialize(c); err != nil {
-		return err
-	}
-
-	var stdout io.ReadCloser
-	if readCloser, err := command.StdoutPipe(); err != nil {
-		logger.InitLog.Fatalln(err)
-	} else {
-		stdout = readCloser
-	}
-	wg := sync.WaitGroup{}
-	wg.Add(3)
-	go func() {
-		in := bufio.NewScanner(stdout)
-		for in.Scan() {
-			logger.InitLog.Debugln(in.Text())
-		}
-		wg.Done()
-	}()
-
-	var stderr io.ReadCloser
-	if readCloser, err := command.StderrPipe(); err != nil {
-		logger.InitLog.Fatalln(err)
-	} else {
-		stderr = readCloser
-	}
-	go func() {
-		in := bufio.NewScanner(stderr)
-		for in.Scan() {
-			logger.InitLog.Debugln(in.Text())
-		}
-		wg.Done()
-	}()
-
-	var err error
-	go func() {
-		if errormessage := command.Start(); err != nil {
-			logger.InitLog.Errorln("command.Start Failed")
-			err = errormessage
-		}
-		wg.Done()
-	}()
-
-	wg.Wait()
-	return err
 }
 
 func (udr *UDR) Terminate(cancelServices context.CancelFunc, wg *sync.WaitGroup) {
