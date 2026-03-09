@@ -19,8 +19,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/omec-project/udr/logger"
-	utilLogger "github.com/omec-project/util/logger"
 )
 
 var subsToNotifyStr = "subs-to-notify"
@@ -39,13 +37,6 @@ type Route struct {
 
 // Routes is the list of the generated Route.
 type Routes []Route
-
-// NewRouter returns a new router.
-func NewRouter() *gin.Engine {
-	router := utilLogger.NewGinWithZap(logger.GinLog)
-	AddService(router)
-	return router
-}
 
 func subMsgShortDispatchHandlerFunc(c *gin.Context) {
 	op := c.Param("ueId")
