@@ -63,18 +63,6 @@ func deleteDataFromDB(collName string, filter bson.M) error {
 	return errDelOne
 }
 
-func HandleCreateAccessAndMobilityData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleDeleteAccessAndMobilityData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleQueryAccessAndMobilityData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
 func HandleQueryAmData(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infoln("handle QueryAmData")
 
@@ -1038,18 +1026,6 @@ func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]in
 		}
 	}
 	return matchedPfds
-}
-
-func HandleExposureDataSubsToNotifyPost(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleExposureDataSubsToNotifySubIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleExposureDataSubsToNotifySubIdPut(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2483,18 +2459,6 @@ func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, 
 	} else {
 		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
-}
-
-func HandleCreateSessionManagementData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleDeleteSessionManagementData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
-}
-
-func HandleQuerySessionManagementData(request *httpwrapper.Request) *httpwrapper.Response {
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
 }
 
 func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Response {
