@@ -8,7 +8,7 @@ package callback
 import (
 	"context"
 
-	"github.com/omec-project/openapi/Nudr_DataRepository"
+	"github.com/omec-project/openapi/Nudr_DR"
 	"github.com/omec-project/openapi/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
@@ -16,19 +16,25 @@ import (
 
 func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 	udrSelf := udr_context.UDR_Self()
-	configuration := Nudr_DataRepository.NewConfiguration()
-	client := Nudr_DataRepository.NewAPIClient(configuration)
 
 	for _, subscriptionDataSubscription := range udrSelf.SubscriptionDataSubscriptions {
-		if ueId == subscriptionDataSubscription.UeId {
-			onDataChangeNotifyUrl := subscriptionDataSubscription.CallbackReference
+		if ueId == subscriptionDataSubscription.GetUeId() {
+			configuration := Nudr_DR.NewConfiguration()
+			serverConfig := &configuration.Servers[0]
+			if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
+				apiRootVar.DefaultValue = subscriptionDataSubscription.GetCallbackReference()
+				serverConfig.Variables["apiRoot"] = apiRootVar
+			}
+			client := Nudr_DR.NewAPIClient(configuration)
 
-			dataChangeNotify := models.DataChangeNotify{}
-			dataChangeNotify.UeId = ueId
-			dataChangeNotify.OriginalCallbackReference = []string{subscriptionDataSubscription.OriginalCallbackReference}
-			dataChangeNotify.NotifyItems = notifyItems
-			httpResponse, err := client.DataChangeNotifyCallbackDocumentApi.OnDataChangeNotify(context.TODO(),
-				onDataChangeNotifyUrl, dataChangeNotify)
+			dataChangeNotify := models.DataChangeNotify{
+				UeId:                      &ueId,
+				NotifyItems:               notifyItems,
+				OriginalCallbackReference: []string{subscriptionDataSubscription.GetOriginalCallbackReference()},
+			}
+			apiOnDataChangeRequestBodyCallbackReferencePostRequest := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePost(context.TODO())
+			apiOnDataChangeRequestBodyCallbackReferencePostRequest = apiOnDataChangeRequestBodyCallbackReferencePostRequest.Body(dataChangeNotify)
+			httpResponse, err := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePostExecute(apiOnDataChangeRequestBodyCallbackReferencePostRequest)
 			if err != nil {
 				if httpResponse == nil {
 					logger.HttpLog.Errorln(err.Error())
@@ -40,16 +46,23 @@ func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 	}
 }
 
-func SendPolicyDataChangeNotification(policyDataChangeNotification models.PolicyDataChangeNotification) {
+func SendPolicyDataChangeNotification(policyDataChangeNotification []models.PolicyDataChangeNotification) {
 	udrSelf := udr_context.UDR_Self()
 
 	for _, policyDataSubscription := range udrSelf.PolicyDataSubscriptions {
-		policyDataChangeNotificationUrl := policyDataSubscription.NotificationUri
+		configuration := Nudr_DR.NewConfiguration()
+		serverConfig := &configuration.Servers[0]
+		if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
+			apiRootVar.DefaultValue = policyDataSubscription.NotificationUri
+			serverConfig.Variables["apiRoot"] = apiRootVar
+		}
+		client := Nudr_DR.NewAPIClient(configuration)
 
-		configuration := Nudr_DataRepository.NewConfiguration()
-		client := Nudr_DataRepository.NewAPIClient(configuration)
-		httpResponse, err := client.PolicyDataChangeNotificationCallbackDocumentApi.PolicyDataChangeNotification(
-			context.TODO(), policyDataChangeNotificationUrl, policyDataChangeNotification)
+		apiPolicyDataChangeNotificationPostRequest := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPost(
+			context.TODO())
+		apiPolicyDataChangeNotificationPostRequest = apiPolicyDataChangeNotificationPostRequest.PolicyDataChangeNotification(policyDataChangeNotification)
+
+		httpResponse, err := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPostExecute(apiPolicyDataChangeNotificationPostRequest)
 		if err != nil {
 			if httpResponse == nil {
 				logger.HttpLog.Errorln(err.Error())

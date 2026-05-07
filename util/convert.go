@@ -53,5 +53,5 @@ func ToBsonM(data interface{}) bson.M {
 
 func SnssaiModelsToHex(snssai models.Snssai) string {
 	sst := fmt.Sprintf("%02x", snssai.Sst)
-	return sst + snssai.Sd
+	return sst + snssai.GetSd()
 }

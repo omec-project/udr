@@ -20,78 +20,80 @@ import (
 	"github.com/omec-project/udr/logger"
 )
 
-func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId) (models.NfProfile, error) {
+func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId) (*models.NFProfile, error) {
 	if udrContext == nil {
-		return models.NfProfile{}, fmt.Errorf("udr context has not been intialized. NF profile cannot be built")
+		return &models.NFProfile{}, fmt.Errorf("udr context has not been intialized. NF profile cannot be built")
 	}
-	var profile models.NfProfile
+	var profile models.NFProfile
 	config := factory.UdrConfig
 	profile.NfInstanceId = udrContext.NfId
-	profile.NfType = models.NfType_UDR
-	profile.NfStatus = models.NfStatus_REGISTERED
+	profile.NfType = models.NFTYPE_UDR
+	profile.NfStatus = models.NFSTATUS_REGISTERED
 	if len(plmnConfig) > 0 {
 		plmnCopy := make([]models.PlmnId, len(plmnConfig))
 		copy(plmnCopy, plmnConfig)
-		profile.PlmnList = &plmnCopy
+		profile.PlmnList = plmnCopy
 	}
 
 	version := config.Info.Version
 	tmpVersion := strings.Split(version, ".")
 	versionUri := "v" + tmpVersion[0]
 	apiPrefix := fmt.Sprintf("%s://%s:%d", udrContext.UriScheme, udrContext.RegisterIPv4, udrContext.SBIPort)
-	services := []models.NfService{
+	ipEndPoint := models.NewIpEndPoint()
+	ipEndPoint.SetIpv4Address(udrContext.RegisterIPv4)
+	ipEndPoint.SetTransport(models.TRANSPORTPROTOCOL_TCP)
+	ipEndPoint.SetPort(int32(udrContext.SBIPort))
+	services := []models.NFService{
 		{
 			ServiceInstanceId: "datarepository",
-			ServiceName:       models.ServiceName_NUDR_DR,
-			Versions: &[]models.NfServiceVersion{
+			ServiceName:       models.SERVICENAME_NUDR_DR,
+			Versions: []models.NFServiceVersion{
 				{
 					ApiFullVersion:  version,
 					ApiVersionInUri: versionUri,
 				},
 			},
 			Scheme:          udrContext.UriScheme,
-			NfServiceStatus: models.NfServiceStatus_REGISTERED,
-			ApiPrefix:       apiPrefix,
-			IpEndPoints: &[]models.IpEndPoint{
-				{
-					Ipv4Address: udrContext.RegisterIPv4,
-					Transport:   models.TransportProtocol_TCP,
-					Port:        int32(udrContext.SBIPort),
-				},
-			},
+			NfServiceStatus: models.NFSERVICESTATUS_REGISTERED,
+			ApiPrefix:       openapi.PtrString(apiPrefix),
+			IpEndPoints:     []models.IpEndPoint{*ipEndPoint},
 		},
 	}
-	profile.NfServices = &services
+	profile.NfServices = services
 	// TODO: finish the Udr Info
 	profile.UdrInfo = &models.UdrInfo{
 		SupportedDataSets: []models.DataSetId{
 			// models.DataSetId_APPLICATION,
 			// models.DataSetId_EXPOSURE,
 			// models.DataSetId_POLICY,
-			models.DataSetId_SUBSCRIPTION,
+			models.DATASETID_SUBSCRIPTION,
 		},
 	}
-	return profile, nil
+	return &profile, nil
 }
 
-var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof models.NfProfile, resourceNrfUri string, err error) {
+var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof *models.NFProfile, resourceNrfUri string, err error) {
 	udrSelf := udrContext.UDR_Self()
 	nfProfile, err := getNfProfile(udrSelf, plmnConfig)
 	if err != nil {
-		return models.NfProfile{}, "", err
+		return &models.NFProfile{}, "", err
 	}
 	configuration := Nnrf_NFManagement.NewConfiguration()
-	configuration.SetBasePath(udrSelf.NrfUri)
+	serverConfig := &configuration.Servers[0]
+	if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
+		apiRootVar.DefaultValue = udrSelf.NrfUri
+		serverConfig.Variables["apiRoot"] = apiRootVar
+	}
 	client := Nnrf_NFManagement.NewAPIClient(configuration)
 
-	receivedNfProfile, res, err := client.NFInstanceIDDocumentApi.RegisterNFInstance(context.TODO(), nfProfile.NfInstanceId, nfProfile)
-	logger.ConsumerLog.Debugf("RegisterNFInstance done using profile: %+v", nfProfile)
-
+	apiRegisterNFInstanceRequest := client.NFInstanceIDDocumentAPI.RegisterNFInstance(context.TODO(), nfProfile.NfInstanceId)
+	apiRegisterNFInstanceRequest = apiRegisterNFInstanceRequest.NFProfile(*nfProfile)
+	receivedNfProfile, res, err := client.NFInstanceIDDocumentAPI.RegisterNFInstanceExecute(apiRegisterNFInstanceRequest)
 	if err != nil {
-		return models.NfProfile{}, "", err
+		return &models.NFProfile{}, "", err
 	}
 	if res == nil {
-		return models.NfProfile{}, "", fmt.Errorf("no response from server")
+		return &models.NFProfile{}, "", fmt.Errorf("no response from server")
 	}
 
 	switch res.StatusCode {
@@ -116,10 +118,15 @@ var SendDeregisterNFInstance = func() error {
 	udrSelf := udrContext.UDR_Self()
 	// Set client and set url
 	configuration := Nnrf_NFManagement.NewConfiguration()
-	configuration.SetBasePath(udrSelf.NrfUri)
+	serverConfig := &configuration.Servers[0]
+	if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
+		apiRootVar.DefaultValue = udrSelf.NrfUri
+		serverConfig.Variables["apiRoot"] = apiRootVar
+	}
 	client := Nnrf_NFManagement.NewAPIClient(configuration)
 
-	res, err := client.NFInstanceIDDocumentApi.DeregisterNFInstance(context.Background(), udrSelf.NfId)
+	apiDeregisterNFInstanceRequest := client.NFInstanceIDDocumentAPI.DeregisterNFInstance(context.Background(), udrSelf.NfId)
+	res, err := client.NFInstanceIDDocumentAPI.DeregisterNFInstanceExecute(apiDeregisterNFInstanceRequest)
 	if err != nil {
 		return err
 	}
@@ -132,32 +139,38 @@ var SendDeregisterNFInstance = func() error {
 	return fmt.Errorf("unexpected response code")
 }
 
-var SendUpdateNFInstance = func(patchItem []models.PatchItem) (receivedNfProfile models.NfProfile, problemDetails *models.ProblemDetails, err error) {
+var SendUpdateNFInstance = func(patchItem []models.PatchItem) (receivedNfProfile *models.NFProfile, problemDetails *models.ProblemDetails, err error) {
 	logger.ConsumerLog.Debugln("send Update NFInstance")
 
 	udrSelf := udrContext.UDR_Self()
 	configuration := Nnrf_NFManagement.NewConfiguration()
-	configuration.SetBasePath(udrSelf.NrfUri)
+	serverConfig := &configuration.Servers[0]
+	if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
+		apiRootVar.DefaultValue = udrSelf.NrfUri
+		serverConfig.Variables["apiRoot"] = apiRootVar
+	}
 	client := Nnrf_NFManagement.NewAPIClient(configuration)
 
 	var res *http.Response
-	receivedNfProfile, res, err = client.NFInstanceIDDocumentApi.UpdateNFInstance(context.Background(), udrSelf.NfId, patchItem)
+	apiUpdateNFInstanceRequest := client.NFInstanceIDDocumentAPI.UpdateNFInstance(context.Background(), udrSelf.NfId)
+	apiUpdateNFInstanceRequest = apiUpdateNFInstanceRequest.PatchItem(patchItem)
+	receivedNfProfile, res, err = client.NFInstanceIDDocumentAPI.UpdateNFInstanceExecute(apiUpdateNFInstanceRequest)
 	if err != nil {
 		if openapiErr, ok := err.(openapi.GenericOpenAPIError); ok {
 			if model := openapiErr.Model(); model != nil {
 				if problem, ok := model.(models.ProblemDetails); ok {
-					return models.NfProfile{}, &problem, nil
+					return &models.NFProfile{}, &problem, nil
 				}
 			}
 		}
-		return models.NfProfile{}, nil, err
+		return &models.NFProfile{}, nil, err
 	}
 
 	if res == nil {
-		return models.NfProfile{}, nil, fmt.Errorf("no response from server")
+		return &models.NFProfile{}, nil, fmt.Errorf("no response from server")
 	}
 	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusNoContent {
 		return receivedNfProfile, nil, nil
 	}
-	return models.NfProfile{}, nil, fmt.Errorf("unexpected response code")
+	return &models.NFProfile{}, nil, fmt.Errorf("unexpected response code")
 }

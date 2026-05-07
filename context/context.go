@@ -74,7 +74,7 @@ func (context *UDRContext) GetIPv4GroupUri(udrServiceType UDRServiceType) string
 
 	switch udrServiceType {
 	case NUDR_DR:
-		serviceUri = "/nudr-dr/v1"
+		serviceUri = "/nudr-dr/v2"
 	default:
 		serviceUri = ""
 	}
