@@ -14,9 +14,9 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/omec-project/openapi"
-	"github.com/omec-project/openapi/models"
-	"github.com/omec-project/openapi/utils"
+	"github.com/omec-project/openapi/v2"
+	"github.com/omec-project/openapi/v2/models"
+	"github.com/omec-project/openapi/v2/utils"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
 	stats "github.com/omec-project/udr/metrics"

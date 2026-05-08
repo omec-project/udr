@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 	udrContext "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/factory"
 )

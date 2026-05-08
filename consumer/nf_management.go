@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/omec-project/openapi"
-	"github.com/omec-project/openapi/Nnrf_NFManagement"
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2"
+	"github.com/omec-project/openapi/v2/Nnrf_NFManagement"
+	"github.com/omec-project/openapi/v2/models"
 	udrContext "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/factory"
 	"github.com/omec-project/udr/logger"

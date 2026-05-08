@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 )
 
 var udrContext = UDRContext{}

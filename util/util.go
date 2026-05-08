@@ -8,7 +8,7 @@ package util
 import (
 	"net/http"
 
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 )
 
 func ProblemDetailsNotFound(cause string) *models.ProblemDetails {
