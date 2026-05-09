@@ -55,7 +55,7 @@ func HTTPCreateEeSubscriptions(c *gin.Context) {
 	}
 
 	req := httpwrapper.NewRequest(c.Request, eeSubscription)
-	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
+	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleCreateEeSubscriptions(req)
 
@@ -74,7 +74,7 @@ func HTTPCreateEeSubscriptions(c *gin.Context) {
 func HTTPQueryeesubscriptions(c *gin.Context) {
 	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
-	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
+	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleQueryeesubscriptions(req)
 
