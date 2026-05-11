@@ -67,6 +67,8 @@ func AddService(engine *gin.Engine) *gin.RouterGroup {
 		switch route.Method {
 		case http.MethodGet:
 			group.GET(ginPattern, handlerFunc)
+		case http.MethodOptions:
+			group.OPTIONS(ginPattern, handlerFunc)
 		case http.MethodPost:
 			group.POST(ginPattern, handlerFunc)
 		case http.MethodPut:
@@ -589,10 +591,10 @@ func getRoutes() []Route {
 			HTTPQueryIpSmGwContext,
 		},
 		{
-			"ReadIPTVCongifurationData",
+			"ReadIPTVConfigurationData",
 			http.MethodGet,
 			"/application-data/iptvConfigData",
-			HTTPReadIPTVCongifurationData,
+			HTTPReadIPTVConfigurationData,
 		},
 		{
 			"DeleteIndividualApplicationDataSubscription",
@@ -1033,10 +1035,10 @@ func getRoutes() []Route {
 			HTTPReadPolicyDataSubscriptions,
 		},
 		{
-			"QueryPorseData",
+			"QueryProseData",
 			http.MethodGet,
 			"/subscription-data/:ueId/prose-data",
-			HTTPQueryPorseData,
+			HTTPQueryProseData,
 		},
 		{
 			"QueryProvisionedData",
@@ -1393,10 +1395,10 @@ func getRoutes() []Route {
 			HTTPRemovesubscriptionDataSubscriptions,
 		},
 		{
-			"CreateIndividualSubcription",
+			"CreateIndividualSubscription",
 			http.MethodPost,
 			"/data-restoration-events",
-			HTTPCreateIndividualSubcription,
+			HTTPCreateIndividualSubscription,
 		},
 		{
 			"QueryTimeSyncSubscriptionData",

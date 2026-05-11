@@ -27,7 +27,7 @@ import (
 
 // Get /subscription-data/:ueId/prose-data
 // Retrieves the subscribed ProSe service Data of a UE
-func HTTPQueryPorseData(c *gin.Context) {
+func HTTPQueryProseData(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Get /subscription-data/:ueId/prose-data is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")
 }

@@ -27,7 +27,7 @@ import (
 
 // Get /application-data/iptvConfigData
 // Retrieve IPTV configuration Data
-func HTTPReadIPTVCongifurationData(c *gin.Context) {
+func HTTPReadIPTVConfigurationData(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Get /application-data/iptvConfigData is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")
 }

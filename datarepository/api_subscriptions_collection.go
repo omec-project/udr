@@ -27,7 +27,7 @@ import (
 
 // Post /data-restoration-events
 // subscribe to data restoration notifications
-func HTTPCreateIndividualSubcription(c *gin.Context) {
+func HTTPCreateIndividualSubscription(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Post /data-restoration-events is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")
 }

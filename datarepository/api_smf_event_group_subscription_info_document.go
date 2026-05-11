@@ -26,7 +26,7 @@ import (
 )
 
 // Put /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions
-// Create SMF Subscription Info for a group of UEs or any YE
+// Create SMF Subscription Info for a group of UEs or any UE
 func HTTPCreateSmfGroupSubscriptions(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Put /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")
