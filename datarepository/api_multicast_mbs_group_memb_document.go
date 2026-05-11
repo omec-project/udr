@@ -26,7 +26,7 @@ import (
 )
 
 // Put /subscription-data/group-data/mbs-group-membership/:externalGroupId
-// Create an individual 5G MBS Grouop
+// Create an individual 5G MBS Group
 func HTTPCreate5GmbsGroup(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Put /subscription-data/group-data/mbs-group-membership/:externalGroupId is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")

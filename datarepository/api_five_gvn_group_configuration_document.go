@@ -26,7 +26,7 @@ import (
 )
 
 // Put /subscription-data/group-data/5g-vn-groups/:externalGroupId
-// Create an individual 5G VN Grouop
+// Create an individual 5G VN Group
 func HTTPCreate5GVnGroup(c *gin.Context) {
 	logger.DataRepoLog.Warnln("Handle Put /subscription-data/group-data/5g-vn-groups/:externalGroupId is not implemented")
 	c.String(http.StatusNotImplemented, "501 not implemented")
