@@ -25,7 +25,7 @@ import (
 
 // Post /:request.body#/callbackReference
 func HTTPOnDataChangeRequestBodyCallbackReferencePost(c *gin.Context) {
-	detail := "Handle Post /:request.body#/callbackReference is not implemented"
+	detail := "Data change callback endpoint is not implemented"
 	logger.DataRepoLog.Warnln(detail)
 	writeNotImplementedProblem(c, detail)
 }
