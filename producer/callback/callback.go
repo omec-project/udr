@@ -49,7 +49,6 @@ func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 			apiOnDataChangeRequestBodyCallbackReferencePostRequest = apiOnDataChangeRequestBodyCallbackReferencePostRequest.Body(dataChangeNotify)
 			httpResponse, err := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePostExecute(apiOnDataChangeRequestBodyCallbackReferencePostRequest)
 			cancel()
-			defer closeCallbackResponseBody(httpResponse)
 			if err != nil {
 				if httpResponse == nil {
 					logger.HttpLog.Errorln(err.Error())
@@ -57,6 +56,7 @@ func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 					logger.HttpLog.Errorln(err.Error())
 				}
 			}
+			closeCallbackResponseBody(httpResponse)
 		}
 	}
 }
@@ -80,7 +80,6 @@ func SendPolicyDataChangeNotification(policyDataChangeNotification []models.Poli
 
 		httpResponse, err := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPostExecute(apiPolicyDataChangeNotificationPostRequest)
 		cancel()
-		defer closeCallbackResponseBody(httpResponse)
 		if err != nil {
 			if httpResponse == nil {
 				logger.HttpLog.Errorln(err.Error())
@@ -88,5 +87,6 @@ func SendPolicyDataChangeNotification(policyDataChangeNotification []models.Poli
 				logger.HttpLog.Errorln(err.Error())
 			}
 		}
+		closeCallbackResponseBody(httpResponse)
 	}
 }
