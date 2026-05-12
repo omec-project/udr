@@ -3,4 +3,4 @@
 
 package datarepository
 
-const notImplementedNotificationUriDetail = "Handle Post /:$request.body#/notificationUri is not implemented"
+const notImplementedNotificationUriDetail = "Notification callback endpoint is not implemented"
