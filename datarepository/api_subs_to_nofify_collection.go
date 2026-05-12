@@ -34,15 +34,17 @@ import (
 // Get /subscription-data/subs-to-notify
 // Retrieves the list of subscriptions
 func HTTPQuerySubsToNotify(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Get /subscription-data/subs-to-notify is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Get /subscription-data/subs-to-notify is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Delete /subscription-data/subs-to-notify
 // Deletes subscriptions identified by a given ue-id parameter
 func HTTPRemoveMultipleSubscriptionDataSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Delete /subscription-data/subs-to-notify is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Delete /subscription-data/subs-to-notify is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Post /subscription-data/subs-to-notify

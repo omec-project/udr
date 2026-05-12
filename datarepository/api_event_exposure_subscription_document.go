@@ -34,15 +34,17 @@ import (
 // Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId
 // Modify an individual ee subscription of a UE
 func HTTPModifyEesubscription(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId
 // Retrieve a eeSubscription
 func HTTPQueryeeSubscription(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Delete /subscription-data/:ueId/context-data/ee-subscriptions/:subsId

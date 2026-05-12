@@ -91,6 +91,7 @@ func HTTPQueryAuthSoR(c *gin.Context) {
 // Patch /subscription-data/:ueId/ue-update-confirmation-data/sor-data
 // Updates the ME support of SOR CMCI ME support of SOR-SNPN-SI  and ME support of SOR-SNPN-SI-LS information of a UE
 func HTTPUpdateAuthenticationSoR(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /subscription-data/:ueId/ue-update-confirmation-data/sor-data is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /subscription-data/:ueId/ue-update-confirmation-data/sor-data is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }

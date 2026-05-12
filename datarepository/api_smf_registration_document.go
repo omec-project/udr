@@ -111,6 +111,7 @@ func HTTPQuerySmfRegistration(c *gin.Context) {
 // Patch /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId
 // To modify the SMF context data of a UE in the UDR
 func HTTPUpdateSmfContext(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }

@@ -51,6 +51,7 @@ func HTTPReadSessionManagementPolicyData(c *gin.Context) {
 // Patch /policy-data/ues/:ueId/sm-data
 // Modify the session management policy data for a subscriber
 func HTTPUpdateSessionManagementPolicyData(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /policy-data/ues/:ueId/sm-data is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /policy-data/ues/:ueId/sm-data is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }

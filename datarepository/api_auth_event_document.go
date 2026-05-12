@@ -33,8 +33,9 @@ import (
 // Delete /subscription-data/:ueId/authentication-data/authentication-status
 // To remove the Authentication Status of a UE
 func HTTPDeleteAuthenticationStatus(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Delete /subscription-data/:ueId/authentication-data/authentication-status is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Delete /subscription-data/:ueId/authentication-data/authentication-status is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Get /subscription-data/:ueId/authentication-data/authentication-status

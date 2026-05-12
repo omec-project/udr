@@ -34,15 +34,17 @@ import (
 // Put /subscription-data/:ueId/operator-specific-data
 // To create an operator-specific data resource of a UE
 func HTTPCreateOperSpecData(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Put /subscription-data/:ueId/operator-specific-data is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Put /subscription-data/:ueId/operator-specific-data is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Delete /subscription-data/:ueId/operator-specific-data
 // To remove an operator-specific data resource of a UE
 func HTTPDeleteOperSpecData(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Delete /subscription-data/:ueId/operator-specific-data is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Delete /subscription-data/:ueId/operator-specific-data is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Patch /subscription-data/:ueId/operator-specific-data

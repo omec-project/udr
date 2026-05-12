@@ -33,15 +33,17 @@ import (
 // Patch /subscription-data/subs-to-notify/:subsId
 // Modify an individual subscriptionDataSubscription
 func HTTPModifysubscriptionDataSubscription(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /subscription-data/subs-to-notify/:subsId is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /subscription-data/subs-to-notify/:subsId is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Get /subscription-data/subs-to-notify/:subsId
 // Retrieves a individual subscriptionDataSubscription identified by subsId
 func HTTPQuerySubscriptionDataSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Get /subscription-data/subs-to-notify/:subsId is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Get /subscription-data/subs-to-notify/:subsId is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Delete /subscription-data/subs-to-notify/:subsId

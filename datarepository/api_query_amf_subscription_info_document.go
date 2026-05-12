@@ -33,8 +33,9 @@ import (
 // Get /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions
 // Retrieve AMF subscription Info for a group of UEs or any UE
 func HTTPGetAmfGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Get /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Get /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions

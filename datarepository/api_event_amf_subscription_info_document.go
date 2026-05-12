@@ -33,8 +33,9 @@ import (
 // Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions
 // Deletes AMF Subscription Info for an eeSubscription for a group of UEs or any UE
 func HTTPRemoveAmfGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Delete /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions

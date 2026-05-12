@@ -33,8 +33,9 @@ import (
 // Patch /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions
 // modify the AMF Subscription Info
 func HTTPModifyAmfGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Warnln("Handle Patch /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented")
-	c.String(http.StatusNotImplemented, "501 not implemented")
+	detail := "Handle Patch /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions is not implemented"
+	logger.DataRepoLog.Warnln(detail)
+	writeNotImplementedProblem(c, detail)
 }
 
 // Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions
