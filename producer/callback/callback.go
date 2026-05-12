@@ -7,12 +7,24 @@ package callback
 
 import (
 	"context"
+	"net/http"
+	"time"
 
 	"github.com/omec-project/openapi/v2/Nudr_DR"
 	"github.com/omec-project/openapi/v2/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
 )
+
+const callbackRequestTimeout = 5 * time.Second
+
+func closeCallbackResponseBody(httpResponse *http.Response) {
+	if httpResponse != nil && httpResponse.Body != nil {
+		if err := httpResponse.Body.Close(); err != nil {
+			logger.HttpLog.Errorf("callback response body close failed: %v", err)
+		}
+	}
+}
 
 func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 	udrSelf := udr_context.UDR_Self()
@@ -32,9 +44,12 @@ func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 				NotifyItems:               notifyItems,
 				OriginalCallbackReference: []string{subscriptionDataSubscription.GetOriginalCallbackReference()},
 			}
-			apiOnDataChangeRequestBodyCallbackReferencePostRequest := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePost(context.TODO())
+			ctx, cancel := context.WithTimeout(context.Background(), callbackRequestTimeout)
+			apiOnDataChangeRequestBodyCallbackReferencePostRequest := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePost(ctx)
 			apiOnDataChangeRequestBodyCallbackReferencePostRequest = apiOnDataChangeRequestBodyCallbackReferencePostRequest.Body(dataChangeNotify)
 			httpResponse, err := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePostExecute(apiOnDataChangeRequestBodyCallbackReferencePostRequest)
+			cancel()
+			defer closeCallbackResponseBody(httpResponse)
 			if err != nil {
 				if httpResponse == nil {
 					logger.HttpLog.Errorln(err.Error())
@@ -58,11 +73,14 @@ func SendPolicyDataChangeNotification(policyDataChangeNotification []models.Poli
 		}
 		client := Nudr_DR.NewAPIClient(configuration)
 
+		ctx, cancel := context.WithTimeout(context.Background(), callbackRequestTimeout)
 		apiPolicyDataChangeNotificationPostRequest := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPost(
-			context.TODO())
+			ctx)
 		apiPolicyDataChangeNotificationPostRequest = apiPolicyDataChangeNotificationPostRequest.PolicyDataChangeNotification(policyDataChangeNotification)
 
 		httpResponse, err := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPostExecute(apiPolicyDataChangeNotificationPostRequest)
+		cancel()
+		defer closeCallbackResponseBody(httpResponse)
 		if err != nil {
 			if httpResponse == nil {
 				logger.HttpLog.Errorln(err.Error())
