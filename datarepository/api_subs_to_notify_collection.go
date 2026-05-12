@@ -71,7 +71,6 @@ func HTTPSubscriptionDataSubscriptions(c *gin.Context) {
 	}
 
 	req := httpwrapper.NewRequest(c.Request, subscriptionDataSubscriptions)
-	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandlePostSubscriptionDataSubscriptions(req)
 
