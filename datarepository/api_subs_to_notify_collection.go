@@ -73,6 +73,9 @@ func HTTPSubscriptionDataSubscriptions(c *gin.Context) {
 	req := httpwrapper.NewRequest(c.Request, subscriptionDataSubscriptions)
 
 	rsp := producer.HandlePostSubscriptionDataSubscriptions(req)
+	for key, val := range rsp.Header {
+		c.Header(key, val[0])
+	}
 
 	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
 	if err != nil {

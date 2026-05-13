@@ -58,6 +58,9 @@ func HTTPCreateEeSubscriptions(c *gin.Context) {
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
 	rsp := producer.HandleCreateEeSubscriptions(req)
+	for key, val := range rsp.Header {
+		c.Header(key, val[0])
+	}
 
 	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
 	if err != nil {
