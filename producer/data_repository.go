@@ -611,7 +611,7 @@ func filterDataBySnssai(snssaiValues []string,
 				break
 			}
 			logger.DataRepoLog.Debugf("filterSnssai=%#v", filterSnssai)
-			if dataSnssai.Sd == filterSnssai.Sd && dataSnssai.Sst == filterSnssai.Sst {
+			if snssaiEqual(dataSnssai, filterSnssai) {
 				matchedDatas = append(matchedDatas, data)
 				break
 			}
@@ -809,7 +809,7 @@ func filterDataBySnssais(snssaiValue string,
 		}
 		logger.DataRepoLog.Debugf("dataSnssais=%#v", dataSnssais)
 		for _, v := range dataSnssais {
-			if v.Sd == filterSnssai.Sd && v.Sst == filterSnssai.Sst {
+			if snssaiEqual(v, filterSnssai) {
 				matchedDatas = append(matchedDatas, data)
 				break
 			}
@@ -2977,14 +2977,7 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 ) *models.SmSubsData {
 	filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
 
-	if !reflect.DeepEqual(singleNssai, models.Snssai{}) {
-		if singleNssai.GetSd() == "" {
-			filter["singlenssai.sst"] = singleNssai.Sst
-		} else {
-			filter["singlenssai.sst"] = singleNssai.Sst
-			filter["singlenssai.sd"] = singleNssai.Sd
-		}
-	}
+	addSingleNssaiFilter(filter, singleNssai)
 
 	if dnn != "" {
 		filter["dnnconfigurations."+dnn] = bson.M{"$exists": true}
@@ -3026,6 +3019,21 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 
 	response := models.ArrayOfSessionManagementSubscriptionDataAsSmSubsData(&typedSessionManagementSubscriptionDatas)
 	return &response
+}
+
+func snssaiEqual(left, right models.Snssai) bool {
+	return left.GetSst() == right.GetSst() && left.GetSd() == right.GetSd()
+}
+
+func addSingleNssaiFilter(filter bson.M, singleNssai models.Snssai) {
+	if reflect.DeepEqual(singleNssai, models.Snssai{}) {
+		return
+	}
+
+	filter["singlenssai.sst"] = singleNssai.GetSst()
+	if sd := singleNssai.GetSd(); sd != "" {
+		filter["singlenssai.sd"] = sd
+	}
 }
 
 func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {

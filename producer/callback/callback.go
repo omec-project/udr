@@ -6,11 +6,12 @@
 package callback
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
-	"github.com/omec-project/openapi/v2/Nudr_DR"
 	"github.com/omec-project/openapi/v2/models"
 	udr_context "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/logger"
@@ -26,28 +27,33 @@ func closeCallbackResponseBody(httpResponse *http.Response) {
 	}
 }
 
+func postCallbackJSON(ctx context.Context, callbackURI string, body any) (*http.Response, error) {
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, callbackURI, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	return http.DefaultClient.Do(request)
+}
+
 func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 	udrSelf := udr_context.UDR_Self()
 
 	for _, subscriptionDataSubscription := range udrSelf.SubscriptionDataSubscriptions {
 		if ueId == subscriptionDataSubscription.GetUeId() {
-			configuration := Nudr_DR.NewConfiguration()
-			serverConfig := &configuration.Servers[0]
-			if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
-				apiRootVar.DefaultValue = subscriptionDataSubscription.GetCallbackReference()
-				serverConfig.Variables["apiRoot"] = apiRootVar
-			}
-			client := Nudr_DR.NewAPIClient(configuration)
-
 			dataChangeNotify := models.DataChangeNotify{
 				UeId:                      &ueId,
 				NotifyItems:               notifyItems,
 				OriginalCallbackReference: []string{subscriptionDataSubscription.GetOriginalCallbackReference()},
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), callbackRequestTimeout)
-			apiOnDataChangeRequestBodyCallbackReferencePostRequest := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePost(ctx)
-			apiOnDataChangeRequestBodyCallbackReferencePostRequest = apiOnDataChangeRequestBodyCallbackReferencePostRequest.Body(dataChangeNotify)
-			httpResponse, err := client.SubsToNotifyCollectionCallbackDataChangeAPI.OnDataChangeRequestBodyCallbackReferencePostExecute(apiOnDataChangeRequestBodyCallbackReferencePostRequest)
+			httpResponse, err := postCallbackJSON(ctx, subscriptionDataSubscription.GetCallbackReference(), dataChangeNotify)
 			cancel()
 			if err != nil {
 				if httpResponse == nil {
@@ -65,20 +71,8 @@ func SendPolicyDataChangeNotification(policyDataChangeNotification []models.Poli
 	udrSelf := udr_context.UDR_Self()
 
 	for _, policyDataSubscription := range udrSelf.PolicyDataSubscriptions {
-		configuration := Nudr_DR.NewConfiguration()
-		serverConfig := &configuration.Servers[0]
-		if apiRootVar, exists := serverConfig.Variables["apiRoot"]; exists {
-			apiRootVar.DefaultValue = policyDataSubscription.NotificationUri
-			serverConfig.Variables["apiRoot"] = apiRootVar
-		}
-		client := Nudr_DR.NewAPIClient(configuration)
-
 		ctx, cancel := context.WithTimeout(context.Background(), callbackRequestTimeout)
-		apiPolicyDataChangeNotificationPostRequest := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPost(
-			ctx)
-		apiPolicyDataChangeNotificationPostRequest = apiPolicyDataChangeNotificationPostRequest.PolicyDataChangeNotification(policyDataChangeNotification)
-
-		httpResponse, err := client.PolicyDataSubscriptionsCollectionCallbackpolicyDataChangeNotificationAPI.PolicyDataChangeNotificationPostExecute(apiPolicyDataChangeNotificationPostRequest)
+		httpResponse, err := postCallbackJSON(ctx, policyDataSubscription.GetNotificationUri(), policyDataChangeNotification)
 		cancel()
 		if err != nil {
 			if httpResponse == nil {
