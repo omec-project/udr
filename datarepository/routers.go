@@ -1488,42 +1488,6 @@ func getRoutes() []Route {
 			HTTPQueryV2xData,
 		},
 		{
-			"ApplicationDataChangeNotifPost",
-			http.MethodPost,
-			"/:$request.body#/notificationUri",
-			HTTPApplicationDataChangeNotifPost,
-		},
-		{
-			"ExposureDataChangeNotificationPost",
-			http.MethodPost,
-			"/:$request.body#/notificationUri",
-			HTTPExposureDataChangeNotificationPost,
-		},
-		{
-			"TrafficInfluenceDataChangeNotificationPost",
-			http.MethodPost,
-			"/:$request.body#/notificationUri",
-			HTTPTrafficInfluenceDataChangeNotificationPost,
-		},
-		{
-			"PolicyDataChangeNotificationPost",
-			http.MethodPost,
-			"/:$request.body#/notificationUri",
-			HTTPPolicyDataChangeNotificationPost,
-		},
-		{
-			"StaleCheckNotificationRequestBodyUdmStaleCheckCallbackUriPost",
-			http.MethodPost,
-			"/:request.body#/udmStaleCheckCallbackUri",
-			HTTPStaleCheckNotificationRequestBodyUdmStaleCheckCallbackUriPost,
-		},
-		{
-			"OnDataChangeRequestBodyCallbackReferencePost",
-			http.MethodPost,
-			"/:request.body#/callbackReference",
-			HTTPOnDataChangeRequestBodyCallbackReferencePost,
-		},
-		{
 			"RestorationNotificationDataRestorationCallbackUriPost",
 			http.MethodPost,
 			"/:dataRestorationCallbackUri",
