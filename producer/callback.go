@@ -6,7 +6,8 @@
 package producer
 
 import (
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2"
+	"github.com/omec-project/openapi/v2/models"
 	"github.com/omec-project/udr/producer/callback"
 )
 
@@ -41,7 +42,7 @@ func PreHandlePolicyDataChangeNotification(ueId string, dataId string, value int
 	policyDataChangeNotification := models.PolicyDataChangeNotification{}
 
 	if ueId != "" {
-		policyDataChangeNotification.UeId = ueId
+		policyDataChangeNotification.UeId = openapi.PtrString(ueId)
 	}
 
 	switch v := value.(type) {
@@ -52,17 +53,17 @@ func PreHandlePolicyDataChangeNotification(ueId string, dataId string, value int
 	case models.SmPolicyData:
 		policyDataChangeNotification.SmPolicyData = &v
 	case models.UsageMonData:
-		policyDataChangeNotification.UsageMonId = dataId
+		policyDataChangeNotification.UsageMonId = openapi.PtrString(dataId)
 		policyDataChangeNotification.UsageMonData = &v
 	case models.SponsorConnectivityData:
-		policyDataChangeNotification.SponsorId = dataId
+		policyDataChangeNotification.SponsorId = openapi.PtrString(dataId)
 		policyDataChangeNotification.SponsorConnectivityData = &v
 	case models.BdtData:
-		policyDataChangeNotification.BdtRefId = dataId
+		policyDataChangeNotification.BdtRefId = openapi.PtrString(dataId)
 		policyDataChangeNotification.BdtData = &v
 	default:
 		return
 	}
 
-	go callback.SendPolicyDataChangeNotification(policyDataChangeNotification)
+	go callback.SendPolicyDataChangeNotification([]models.PolicyDataChangeNotification{policyDataChangeNotification})
 }

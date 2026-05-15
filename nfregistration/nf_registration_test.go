@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Intel Corporation
 // SPDX-FileCopyrightText: 2025 Canonical Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -15,7 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2"
+	"github.com/omec-project/openapi/v2/models"
 	"github.com/omec-project/udr/consumer"
 )
 
@@ -94,6 +96,55 @@ func TestNfRegistrationService_WhenEmptyConfig_ThenDeregisterNFAndStopTimer(t *t
 	}
 }
 
+func TestNfRegistrationService_WhenConfigBecomesNonEmptyAfterEmpty_ThenRegisterNFIsCalled(t *testing.T) {
+	originalDeregisterNF := DeregisterNF
+	originalRegisterNF := registerNF
+	defer func() {
+		DeregisterNF = originalDeregisterNF
+		registerNF = originalRegisterNF
+	}()
+
+	deregistered := make(chan struct{}, 1)
+	registered := make(chan []models.PlmnId, 1)
+
+	DeregisterNF = func() {
+		deregistered <- struct{}{}
+	}
+	registerNF = func(_ context.Context, newPlmnConfig []models.PlmnId) {
+		registered <- newPlmnConfig
+	}
+
+	ch := make(chan []models.PlmnId, 2)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		StartNfRegistrationService(ctx, ch)
+		close(done)
+	}()
+	defer func() {
+		cancel()
+		<-done
+	}()
+
+	ch <- []models.PlmnId{}
+	select {
+	case <-deregistered:
+	case <-time.After(time.Second):
+		t.Fatal("expected DeregisterNF to be called for empty config")
+	}
+
+	expectedConfig := []models.PlmnId{{Mcc: "001", Mnc: "01"}}
+	ch <- expectedConfig
+	select {
+	case gotConfig := <-registered:
+		if !reflect.DeepEqual(gotConfig, expectedConfig) {
+			t.Errorf("expected %+v config, received %+v", expectedConfig, gotConfig)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("expected registerNF to be called after receiving non-empty config")
+	}
+}
+
 func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTimer(t *testing.T) {
 	keepAliveTimerMutex.Lock()
 	keepAliveTimer = nil
@@ -102,8 +153,8 @@ func TestNfRegistrationService_WhenConfigChanged_ThenRegisterNFSuccessAndStartTi
 	originalRegisterNF := registerNF
 
 	registrations := []models.PlmnId{}
-	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
-		profile := models.NfProfile{HeartBeatTimer: 60}
+	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (*models.NFProfile, string, error) {
+		profile := &models.NFProfile{HeartBeatTimer: openapi.PtrInt32(60)}
 		registrations = append(registrations, plmnConfig...)
 		return profile, "", nil
 	}
@@ -154,8 +205,8 @@ func TestNfRegistrationService_ConfigChanged_RetryIfRegisterNFFails(t *testing.T
 	originalRegisterNF := registerNF
 
 	called := 0
-	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
-		profile := models.NfProfile{HeartBeatTimer: 60}
+	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (*models.NFProfile, string, error) {
+		profile := &models.NFProfile{HeartBeatTimer: openapi.PtrInt32(60)}
 		called++
 		return profile, "", errors.New("mock error")
 	}
@@ -283,12 +334,12 @@ func TestHeartbeatNF_Success(t *testing.T) {
 		}
 	}()
 
-	consumer.SendUpdateNFInstance = func(patchItem []models.PatchItem) (models.NfProfile, *models.ProblemDetails, error) {
-		return models.NfProfile{}, nil, nil
+	consumer.SendUpdateNFInstance = func(patchItem []models.PatchItem) (*models.NFProfile, *models.ProblemDetails, error) {
+		return &models.NFProfile{}, nil, nil
 	}
-	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
+	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (*models.NFProfile, string, error) {
 		calledRegister = true
-		profile := models.NfProfile{HeartBeatTimer: 60}
+		profile := &models.NFProfile{HeartBeatTimer: openapi.PtrInt32(60)}
 		return profile, "", nil
 	}
 	plmnConfig := []models.PlmnId{}
@@ -296,6 +347,47 @@ func TestHeartbeatNF_Success(t *testing.T) {
 
 	if calledRegister {
 		t.Errorf("expected registerNF to be called on error")
+	}
+	if keepAliveTimer == nil {
+		t.Error("expected keepAliveTimer to be initialized by startKeepAliveTimer")
+	}
+}
+
+func TestHeartbeatNF_UsesNfStatusPatchPath(t *testing.T) {
+	keepAliveTimer = time.NewTimer(60 * time.Second)
+	originalSendRegisterNFInstance := consumer.SendRegisterNFInstance
+	originalSendUpdateNFInstance := consumer.SendUpdateNFInstance
+	defer func() {
+		consumer.SendRegisterNFInstance = originalSendRegisterNFInstance
+		consumer.SendUpdateNFInstance = originalSendUpdateNFInstance
+		if keepAliveTimer != nil {
+			keepAliveTimer.Stop()
+		}
+	}()
+
+	var capturedPatchItems []models.PatchItem
+	consumer.SendUpdateNFInstance = func(patchItem []models.PatchItem) (*models.NFProfile, *models.ProblemDetails, error) {
+		capturedPatchItems = patchItem
+		return &models.NFProfile{}, nil, nil
+	}
+	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (*models.NFProfile, string, error) {
+		profile := &models.NFProfile{HeartBeatTimer: openapi.PtrInt32(60)}
+		return profile, "", nil
+	}
+
+	heartbeatNF(nil)
+
+	if len(capturedPatchItems) != 1 {
+		t.Fatalf("expected one patch item, got %d", len(capturedPatchItems))
+	}
+	if capturedPatchItems[0].Path != "/nfStatus" {
+		t.Fatalf("expected patch path /nfStatus, got %q", capturedPatchItems[0].Path)
+	}
+	if capturedPatchItems[0].Op != models.PATCHOPERATION_REPLACE {
+		t.Fatalf("expected replace operation, got %q", capturedPatchItems[0].Op)
+	}
+	if capturedPatchItems[0].Value != models.NFSTATUS_REGISTERED {
+		t.Fatalf("expected registered value, got %#v", capturedPatchItems[0].Value)
 	}
 	if keepAliveTimer == nil {
 		t.Error("expected keepAliveTimer to be initialized by startKeepAliveTimer")
@@ -315,12 +407,12 @@ func TestHeartbeatNF_WhenNfUpdateFails_ThenNfRegistersIsCalled(t *testing.T) {
 		}
 	}()
 
-	consumer.SendUpdateNFInstance = func(patchItem []models.PatchItem) (models.NfProfile, *models.ProblemDetails, error) {
-		return models.NfProfile{}, nil, errors.New("mock error")
+	consumer.SendUpdateNFInstance = func(patchItem []models.PatchItem) (*models.NFProfile, *models.ProblemDetails, error) {
+		return &models.NFProfile{}, nil, errors.New("mock error")
 	}
 
-	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (models.NfProfile, string, error) {
-		profile := models.NfProfile{HeartBeatTimer: 60}
+	consumer.SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (*models.NFProfile, string, error) {
+		profile := &models.NFProfile{HeartBeatTimer: openapi.PtrInt32(60)}
 		calledRegister = true
 		return profile, "", nil
 	}

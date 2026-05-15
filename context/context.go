@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 )
 
 var udrContext = UDRContext{}
@@ -74,7 +74,7 @@ func (context *UDRContext) GetIPv4GroupUri(udrServiceType UDRServiceType) string
 
 	switch udrServiceType {
 	case NUDR_DR:
-		serviceUri = "/nudr-dr/v1"
+		serviceUri = "/nudr-dr/v2"
 	default:
 		serviceUri = ""
 	}
