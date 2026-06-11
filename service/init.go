@@ -15,6 +15,7 @@ import (
 	"sync"
 	"syscall"
 
+	openapiLogger "github.com/omec-project/openapi/v2/logger"
 	"github.com/omec-project/openapi/v2/models"
 	udrContext "github.com/omec-project/udr/context"
 	"github.com/omec-project/udr/datarepository"
@@ -28,8 +29,6 @@ import (
 	"github.com/omec-project/util/http2_util"
 	utilLogger "github.com/omec-project/util/logger"
 	"github.com/urfave/cli/v3"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type UDR struct{}
@@ -81,41 +80,15 @@ func (udr *UDR) Initialize(c *cli.Command) error {
 }
 
 func (udr *UDR) setLogLevel() {
-	if factory.UdrConfig.Logger == nil {
+	cfgLogger := factory.UdrConfig.Logger
+	if cfgLogger == nil {
 		logger.InitLog.Warnln("UDR config without log level setting")
 		return
 	}
 
-	if factory.UdrConfig.Logger.UDR != nil {
-		if factory.UdrConfig.Logger.UDR.DebugLevel != "" {
-			if level, err := zapcore.ParseLevel(factory.UdrConfig.Logger.UDR.DebugLevel); err != nil {
-				logger.InitLog.Warnf("UDR Log level [%s] is invalid, set to [info] level",
-					factory.UdrConfig.Logger.UDR.DebugLevel)
-				logger.SetLogLevel(zap.InfoLevel)
-			} else {
-				logger.InitLog.Infof("UDR Log level is set to [%s] level", level)
-				logger.SetLogLevel(level)
-			}
-		} else {
-			logger.InitLog.Infoln("UDR Log level not set. Default set to [info] level")
-			logger.SetLogLevel(zap.InfoLevel)
-		}
-	}
-
-	if factory.UdrConfig.Logger.Util != nil {
-		if factory.UdrConfig.Logger.Util.DebugLevel != "" {
-			if level, err := zapcore.ParseLevel(factory.UdrConfig.Logger.Util.DebugLevel); err != nil {
-				utilLogger.UtilLog.Warnf("Util Log level [%s] is invalid, set to [info] level",
-					factory.UdrConfig.Logger.Util.DebugLevel)
-				utilLogger.SetLogLevel(zap.InfoLevel)
-			} else {
-				utilLogger.SetLogLevel(level)
-			}
-		} else {
-			utilLogger.UtilLog.Warnln("Util Log level not set. Default set to [info] level")
-			utilLogger.SetLogLevel(zap.InfoLevel)
-		}
-	}
+	utilLogger.ApplyLogSetting("UDR", cfgLogger.UDR, logger.InitLog, logger.SetLogLevel)
+	utilLogger.ApplyLogSetting("OpenApi", cfgLogger.OpenApi, openapiLogger.OpenapiLog, openapiLogger.SetLogLevel)
+	utilLogger.ApplyLogSetting("Util", cfgLogger.Util, utilLogger.UtilLog, utilLogger.SetLogLevel)
 }
 
 func (udr *UDR) Start() {
