@@ -24,15 +24,15 @@ func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId)
 	if udrContext == nil {
 		return &models.NFProfile{}, fmt.Errorf("udr context has not been intialized. NF profile cannot be built")
 	}
-	var profile models.NFProfile
+	profile := models.NewNFProfileWithDefaults()
 	config := factory.UdrConfig
-	profile.NfInstanceId = udrContext.NfId
-	profile.NfType = models.NFTYPE_UDR
-	profile.NfStatus = models.NFSTATUS_REGISTERED
+	profile.SetNfInstanceId(udrContext.NfId)
+	profile.SetNfType(models.NFTYPE_UDR)
+	profile.SetNfStatus(models.NFSTATUS_REGISTERED)
 	if len(plmnConfig) > 0 {
 		plmnCopy := make([]models.PlmnId, len(plmnConfig))
 		copy(plmnCopy, plmnConfig)
-		profile.PlmnList = plmnCopy
+		profile.SetPlmnList(plmnCopy)
 	}
 
 	version := config.Info.Version
@@ -43,33 +43,17 @@ func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId)
 	ipEndPoint.SetIpv4Address(udrContext.RegisterIPv4)
 	ipEndPoint.SetTransport(models.TRANSPORTPROTOCOL_TCP)
 	ipEndPoint.SetPort(int32(udrContext.SBIPort))
-	services := []models.NFService{
-		{
-			ServiceInstanceId: "datarepository",
-			ServiceName:       models.SERVICENAME_NUDR_DR,
-			Versions: []models.NFServiceVersion{
-				{
-					ApiFullVersion:  version,
-					ApiVersionInUri: versionUri,
-				},
-			},
-			Scheme:          udrContext.UriScheme,
-			NfServiceStatus: models.NFSERVICESTATUS_REGISTERED,
-			ApiPrefix:       openapi.PtrString(apiPrefix),
-			IpEndPoints:     []models.IpEndPoint{*ipEndPoint},
-		},
-	}
-	profile.NfServices = services
-	// TODO: finish the Udr Info
-	profile.UdrInfo = &models.UdrInfo{
-		SupportedDataSets: []models.DataSetId{
-			// models.DataSetId_APPLICATION,
-			// models.DataSetId_EXPOSURE,
-			// models.DataSetId_POLICY,
-			models.DATASETID_SUBSCRIPTION,
-		},
-	}
-	return &profile, nil
+	nfServiceVersion := models.NewNFServiceVersion(versionUri, version)
+	nfService := models.NewNFService("datarepository", models.SERVICENAME_NUDR_DR, []models.NFServiceVersion{*nfServiceVersion}, udrContext.UriScheme, models.NFSERVICESTATUS_REGISTERED)
+	nfService.SetApiPrefix(apiPrefix)
+	nfService.SetIpEndPoints([]models.IpEndPoint{*ipEndPoint})
+	profile.SetNfServices([]models.NFService{*nfService})
+	udrInfo := models.NewUdrInfo()
+	udrInfo.SetSupportedDataSets([]models.DataSetId{
+		models.DATASETID_SUBSCRIPTION,
+	})
+	profile.SetUdrInfo(*udrInfo)
+	return profile, nil
 }
 
 var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof *models.NFProfile, resourceNrfUri string, err error) {
@@ -86,7 +70,7 @@ var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof *models.NFPr
 	}
 	client := Nnrf_NFManagement.NewAPIClient(configuration)
 
-	apiRegisterNFInstanceRequest := client.NFInstanceIDDocumentAPI.RegisterNFInstance(context.TODO(), nfProfile.NfInstanceId)
+	apiRegisterNFInstanceRequest := client.NFInstanceIDDocumentAPI.RegisterNFInstance(context.TODO(), nfProfile.GetNfInstanceId())
 	apiRegisterNFInstanceRequest = apiRegisterNFInstanceRequest.NFProfile(*nfProfile)
 	receivedNfProfile, res, err := client.NFInstanceIDDocumentAPI.RegisterNFInstanceExecute(apiRegisterNFInstanceRequest)
 	if err != nil {

@@ -1548,7 +1548,7 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 				for _, element := range usageMonDataArray {
 					umData[element.LimitId] = element
 				}
-				smPolicyDataResp.UmData = &umData
+				smPolicyDataResp.SetUmData(umData)
 			}
 		}
 		return &smPolicyDataResp, nil
@@ -1628,7 +1628,7 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 				for _, element := range usageMonDataArray {
 					umData[element.LimitId] = element
 				}
-				smPolicyData.UmData = &umData
+				smPolicyData.SetUmData(umData)
 			}
 		}
 		PreHandlePolicyDataChangeNotification(ueId, "", smPolicyData)
@@ -2525,7 +2525,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.AmData = &tmp
+			provisionedDataSets.SetAmData(tmp)
 		}
 	}
 
@@ -2542,7 +2542,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.SmfSelData = &tmp
+			provisionedDataSets.SetSmfSelData(tmp)
 		}
 	}
 
@@ -2559,7 +2559,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.SmsSubsData = &tmp
+			provisionedDataSets.SetSmsSubsData(tmp)
 		}
 	}
 
@@ -2576,7 +2576,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.SmData = &tmp
+			provisionedDataSets.SetSmData(tmp)
 		}
 	}
 
@@ -2593,7 +2593,13 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.TraceData = tmp
+			if traceValue, ok := tmp.Get(), tmp.IsSet(); ok {
+				if traceValue == nil {
+					provisionedDataSets.SetTraceDataNil()
+				} else {
+					provisionedDataSets.SetTraceData(*traceValue)
+				}
+			}
 		}
 	}
 
@@ -2610,7 +2616,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			if err != nil {
 				panic(err)
 			}
-			provisionedDataSets.SmsMngData = &tmp
+			provisionedDataSets.SetSmsMngData(tmp)
 		}
 	}
 
@@ -2854,7 +2860,7 @@ func UpdatesdmsubscriptionsProcedure(ueId string, subsId string,
 	if !ok {
 		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
 	}
-	SdmSubscription.SubscriptionId = openapi.PtrString(subsId)
+	SdmSubscription.SetSubscriptionId(subsId)
 	UESubsData.SdmSubscriptions[subsId] = &SdmSubscription
 
 	return nil
@@ -2891,7 +2897,7 @@ func CreateSdmSubscriptionsProcedure(SdmSubscription models.SdmSubscription,
 	}
 
 	newSubscriptionID := strconv.Itoa(udrSelf.SdmSubscriptionIDGenerator)
-	SdmSubscription.SubscriptionId = openapi.PtrString(newSubscriptionID)
+	SdmSubscription.SetSubscriptionId(newSubscriptionID)
 	UESubsData.SdmSubscriptions[newSubscriptionID] = &SdmSubscription
 	udrSelf.SdmSubscriptionIDGenerator++
 
