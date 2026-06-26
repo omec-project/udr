@@ -14,6 +14,37 @@ import (
 	"github.com/omec-project/udr/factory"
 )
 
+func Test_getNfProfile_sets_subscription_udr_info(t *testing.T) {
+	origConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origConfig })
+	factory.UdrConfig = factory.Config{
+		Info: &factory.Info{Version: "1.0.0"},
+	}
+
+	prof, err := getNfProfile(&udrContext.UDRContext{
+		NfId:         "test-udr",
+		UriScheme:    models.URISCHEME_HTTP,
+		RegisterIPv4: "127.0.0.10",
+		SBIPort:      8000,
+	}, []models.PlmnId{{Mcc: "123", Mnc: "45"}})
+	if err != nil {
+		t.Fatalf("getNfProfile returned error: %v", err)
+	}
+
+	udrInfo, ok := prof.GetUdrInfoOk()
+	if !ok {
+		t.Fatal("expected UdrInfo to be set on NF profile")
+	}
+
+	supportedDataSets := udrInfo.GetSupportedDataSets()
+	if len(supportedDataSets) != 1 {
+		t.Fatalf("expected one supported data set, got %d", len(supportedDataSets))
+	}
+	if supportedDataSets[0] != models.DATASETID_SUBSCRIPTION {
+		t.Fatalf("expected supported data set %q, got %q", models.DATASETID_SUBSCRIPTION, supportedDataSets[0])
+	}
+}
+
 func Test_nrf_url_is_not_overwritten_when_registering(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPut && strings.Contains(r.URL.Path, "/nnrf-nfm/v1/nf-instances/") {

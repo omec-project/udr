@@ -47,11 +47,10 @@ func SendOnDataChangeNotify(ueId string, notifyItems []models.NotifyItem) {
 
 	for _, subscriptionDataSubscription := range udrSelf.SubscriptionDataSubscriptions {
 		if ueId == subscriptionDataSubscription.GetUeId() {
-			dataChangeNotify := models.DataChangeNotify{
-				UeId:                      &ueId,
-				NotifyItems:               notifyItems,
-				OriginalCallbackReference: []string{subscriptionDataSubscription.GetOriginalCallbackReference()},
-			}
+			dataChangeNotify := models.NewDataChangeNotify()
+			dataChangeNotify.SetUeId(ueId)
+			dataChangeNotify.SetNotifyItems(notifyItems)
+			dataChangeNotify.SetOriginalCallbackReference([]string{subscriptionDataSubscription.GetOriginalCallbackReference()})
 			ctx, cancel := context.WithTimeout(context.Background(), callbackRequestTimeout)
 			httpResponse, err := postCallbackJSON(ctx, subscriptionDataSubscription.GetCallbackReference(), dataChangeNotify)
 			cancel()
