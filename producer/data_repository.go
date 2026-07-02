@@ -49,7 +49,7 @@ func getDataFromDB(collName string, filter bson.M) (map[string]interface{}, *mod
 		logger.DataRepoLog.Warnln(errGetOne)
 	}
 	if data == nil {
-		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
+		return nil, utils.ProblemDetailsDataNotFound()
 	}
 
 	// Delete "_id" entry which is auto-inserted by MongoDB
@@ -75,9 +75,8 @@ func HandleQueryAmData(request *httpwrapper.Request) *httpwrapper.Response {
 
 	if problemDetails == nil {
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
-	} else {
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*map[string]interface{},
@@ -90,9 +89,8 @@ func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*
 	}
 	if accessAndMobilitySubscriptionData != nil {
 		return &accessAndMobilitySubscriptionData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -105,10 +103,9 @@ func HandleAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "amf-3gpp-access", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "amf-3gpp-access", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "amf-3gpp-access", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func AmfContext3gppProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
@@ -131,9 +128,8 @@ func AmfContext3gppProcedure(collName string, ueId string, patchItem []models.Pa
 		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -196,9 +192,8 @@ func QueryAmfContext3gppProcedure(collName string, ueId string) (*map[string]int
 
 	if amf3GppAccessRegistration != nil {
 		return &amf3GppAccessRegistration, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -214,10 +209,9 @@ func HandleAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "amf-non-3gpp-access", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "amf-non-3gpp-access", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "amf-non-3gpp-access", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func AmfContextNon3gppProcedure(ueId string, collName string, patchItem []models.PatchItem,
@@ -240,9 +234,8 @@ func AmfContextNon3gppProcedure(ueId string, collName string, patchItem []models
 		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -306,9 +299,8 @@ func QueryAmfContextNon3gppProcedure(collName string, ueId string) (*map[string]
 
 	if response != nil {
 		return &response, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleModifyAuthentication(request *httpwrapper.Request) *httpwrapper.Response {
@@ -323,10 +315,9 @@ func HandleModifyAuthentication(request *httpwrapper.Request) *httpwrapper.Respo
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "authentication-subscription", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "authentication-subscription", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "authentication-subscription", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func ModifyAuthenticationProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
@@ -355,9 +346,8 @@ func ModifyAuthenticationProcedure(collName string, ueId string, patchItem []mod
 		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandleQueryAuthSubsData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -394,9 +384,8 @@ func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]interf
 			authenticationSubscription["sequenceNumber"] = map[string]interface{}{"sqn": sequenceNumber}
 		}
 		return authenticationSubscription, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Response {
@@ -457,9 +446,8 @@ func QueryAuthSoRProcedure(collName string, ueId string) (map[string]interface{}
 
 	if sorData != nil {
 		return sorData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleCreateAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.Response {
@@ -523,9 +511,8 @@ func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[stri
 
 	if authEvent != nil {
 		return &authEvent, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleApplicationDataInfluenceDataGet(queryParams map[string][]string) *httpwrapper.Response {
@@ -1095,9 +1082,8 @@ func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId
 
 	if bdtData != nil {
 		return &bdtData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsDataNotFound()
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdPut(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1132,10 +1118,8 @@ func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId
 
 	if isExisted {
 		PreHandlePolicyDataChangeNotification("", bdtReferenceId, bdtData)
-		return putData
-	} else {
-		return putData
 	}
+	return putData
 }
 
 func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1189,9 +1173,8 @@ func PolicyDataPlmnsPlmnIdUePolicySetGetProcedure(collName string,
 
 	if uePolicySet != nil {
 		return &uePolicySet, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1228,9 +1211,8 @@ func PolicyDataSponsorConnectivityDataSponsorIdGetProcedure(collName string,
 
 	if sponsorConnectivityData != nil {
 		return &sponsorConnectivityData, http.StatusOK
-	} else {
-		return nil, http.StatusNoContent
 	}
+	return nil, http.StatusNoContent
 }
 
 func HandlePolicyDataSubsToNotifyPost(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1271,17 +1253,16 @@ func HandlePolicyDataSubsToNotifySubsIdDelete(request *httpwrapper.Request) *htt
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("delete", "subs-to-notify", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrPolicyDataStats("delete", "subs-to-notify", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("delete", "subs-to-notify", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PolicyDataSubsToNotifySubsIdDeleteProcedure(subsId string) (problemDetails *models.ProblemDetails) {
 	udrSelf := udr_context.UDR_Self()
 	_, ok := udrSelf.PolicyDataSubscriptions[subsId]
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(udrSelf.PolicyDataSubscriptions, subsId)
 
@@ -1299,10 +1280,9 @@ func HandlePolicyDataSubsToNotifySubsIdPut(request *httpwrapper.Request) *httpwr
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", "subs-to-notify", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
-	} else {
-		stats.IncrementUdrPolicyDataStats("update", "subs-to-notify", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("update", "subs-to-notify", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PolicyDataSubsToNotifySubsIdPutProcedure(subsId string,
@@ -1311,7 +1291,7 @@ func PolicyDataSubsToNotifySubsIdPutProcedure(subsId string,
 	udrSelf := udr_context.UDR_Self()
 	_, ok := udrSelf.PolicyDataSubscriptions[subsId]
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return nil, utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
 	udrSelf.PolicyDataSubscriptions[subsId] = &policyDataSubscription
@@ -1352,9 +1332,8 @@ func PolicyDataUesUeIdAmDataGetProcedure(collName string,
 
 	if amPolicyData != nil {
 		return &amPolicyData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1391,9 +1370,8 @@ func PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName string,
 	if operatorSpecificDataContainerMapCover != nil {
 		operatorSpecificDataContainerMap := operatorSpecificDataContainerMapCover["operatorSpecificDataContainerMap"]
 		return &operatorSpecificDataContainerMap, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1408,10 +1386,9 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPatch(request *httpwrapper.Reque
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(collName string, ueId string,
@@ -1429,9 +1406,8 @@ func PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(collName string, ueId s
 
 	if failure == nil {
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1552,9 +1528,8 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 			}
 		}
 		return &smPolicyDataResp, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1568,10 +1543,9 @@ func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapp
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", "sm-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrPolicyDataStats("update", "sm-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("update", "sm-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
@@ -1633,9 +1607,8 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 		}
 		PreHandlePolicyDataChangeNotification(ueId, "", smPolicyData)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1675,10 +1648,9 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *httpwrapper.Request) *h
 	if response != nil {
 		stats.IncrementUdrPolicyDataStats("get", "sm-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
-	} else {
-		stats.IncrementUdrPolicyDataStats("get", "sm-data", "FAILURE")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 	}
+	stats.IncrementUdrPolicyDataStats("get", "sm-data", "FAILURE")
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
 }
 
 func PolicyDataUesUeIdSmDataUsageMonIdGetProcedure(collName string, usageMonId string,
@@ -1756,9 +1728,8 @@ func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*ma
 
 	if uePolicySet != nil {
 		return &uePolicySet, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePolicyDataUesUeIdUePolicySetPatch(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1773,10 +1744,9 @@ func HandlePolicyDataUesUeIdUePolicySetPatch(request *httpwrapper.Request) *http
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", "ue-policy-set", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrPolicyDataStats("update", "ue-policy-set", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("update", "ue-policy-set", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
@@ -1800,9 +1770,8 @@ func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
 		}
 		PreHandlePolicyDataChangeNotification(ueId, "", uePolicySet)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1841,9 +1810,8 @@ func PolicyDataUesUeIdUePolicySetPutProcedure(collName string, ueId string,
 	}
 	if !isExisted {
 		return putData, http.StatusCreated
-	} else {
-		return nil, http.StatusNoContent
 	}
+	return nil, http.StatusNoContent
 }
 
 func HandleCreateAMFSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1858,10 +1826,9 @@ func HandleCreateAMFSubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("create", "amf-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("create", "amf-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("create", "amf-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func CreateAMFSubscriptionsProcedure(subsId string, ueId string,
@@ -1870,13 +1837,13 @@ func CreateAMFSubscriptionsProcedure(subsId string, ueId string,
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 	UESubsData := value.(*udr_context.UESubsData)
 
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
 	UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos = AmfSubscriptionInfo
@@ -1894,28 +1861,27 @@ func HandleRemoveAmfSubscriptionsInfo(request *httpwrapper.Request) *httpwrapper
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", "amf-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("delete", "amf-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("delete", "amf-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func RemoveAmfSubscriptionsInfoProcedure(subsId string, ueId string) *models.ProblemDetails {
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
 	if UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos == nil {
-		return util.ProblemDetailsNotFound("AMFSUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("AMF Subscription not found", http.StatusNotFound, "", utils.CauseAmfSubscriptionNotFound)
 	}
 
 	UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos = nil
@@ -1935,10 +1901,9 @@ func HandleModifyAmfSubscriptionInfo(request *httpwrapper.Request) *httpwrapper.
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "amf-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "amf-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "amf-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
@@ -1947,18 +1912,18 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 	UESubsData := value.(*udr_context.UESubsData)
 
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
 	if UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos == nil {
-		return util.ProblemDetailsNotFound("AMFSUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("AMF Subscription not found", http.StatusNotFound, "", utils.CauseAmfSubscriptionNotFound)
 	}
 	var patchJSON []byte
 	if patchJSONtemp, err := json.Marshal(patchItem); err != nil {
@@ -1969,7 +1934,7 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 	var patch jsonpatch.Patch
 	if patchtemp, err := jsonpatch.DecodePatch(patchJSON); err != nil {
 		logger.DataRepoLog.Errorln(err)
-		return util.ProblemDetailsModifyNotAllowed("PatchItem attributes are invalid")
+		return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "PatchItem attributes are invalid", utils.CauseModifyNotAllowed)
 	} else {
 		patch = patchtemp
 	}
@@ -1980,7 +1945,7 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 
 	modified, err := patch.Apply(original)
 	if err != nil {
-		return util.ProblemDetailsModifyNotAllowed("Occur error when applying PatchItem")
+		return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "Occur error when applying PatchItem", utils.CauseModifyNotAllowed)
 	}
 	var modifiedData []models.AmfSubscriptionInfo
 	err = json.Unmarshal(modified, &modifiedData)
@@ -2019,18 +1984,18 @@ func GetAmfSubscriptionInfoProcedure(subsId string, ueId string) (*[]models.AmfS
 
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return nil, utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return nil, utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
 	if UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos == nil {
-		return nil, util.ProblemDetailsNotFound("AMFSUBSCRIPTION_NOT_FOUND")
+		return nil, utils.ProblemDetailsWithCause("AMF Subscription not found", http.StatusNotFound, "", utils.CauseAmfSubscriptionNotFound)
 	}
 	return &UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos, nil
 }
@@ -2065,9 +2030,8 @@ func QueryEEDataProcedure(collName string, ueId string) (*map[string]interface{}
 
 	if eeProfileData != nil {
 		return &eeProfileData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleRemoveEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2081,24 +2045,23 @@ func HandleRemoveEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", "group-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("delete", "group-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("delete", "group-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func RemoveEeGroupSubscriptionsProcedure(ueGroupId string, subsId string) *models.ProblemDetails {
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UEGroupCollection.Load(ueGroupId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
 	_, ok = UEGroupSubsData.EeSubscriptions[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(UEGroupSubsData.EeSubscriptions, subsId)
 
@@ -2117,10 +2080,9 @@ func HandleUpdateEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "group-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "group-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "group-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func UpdateEeGroupSubscriptionsProcedure(ueGroupId string, subsId string,
@@ -2129,14 +2091,14 @@ func UpdateEeGroupSubscriptionsProcedure(ueGroupId string, subsId string,
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UEGroupCollection.Load(ueGroupId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
 	_, ok = UEGroupSubsData.EeSubscriptions[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	UEGroupSubsData.EeSubscriptions[subsId] = &EeSubscription
 
@@ -2207,7 +2169,7 @@ func QueryEeGroupSubscriptionsProcedure(ueGroupId string) ([]models.EeSubscripti
 
 	value, ok := udrSelf.UEGroupCollection.Load(ueGroupId)
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return nil, utils.ProblemDetailsUserNotFound()
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
@@ -2230,24 +2192,23 @@ func HandleRemoveeeSubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", "ee-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("delete", "ee-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("delete", "ee-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func RemoveeeSubscriptionsProcedure(ueId string, subsId string) *models.ProblemDetails {
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(UESubsData.EeSubscriptionCollection, subsId)
 	return nil
@@ -2265,10 +2226,9 @@ func HandleUpdateEesubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "ee-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "ee-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "ee-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func UpdateEesubscriptionsProcedure(ueId string, subsId string,
@@ -2277,14 +2237,14 @@ func UpdateEesubscriptionsProcedure(ueId string, subsId string,
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	UESubsData.EeSubscriptionCollection[subsId].EeSubscriptions = &EeSubscription
 
@@ -2356,7 +2316,7 @@ func QueryeesubscriptionsProcedure(ueId string) ([]models.EeSubscription, *model
 
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return nil, utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
@@ -2380,10 +2340,9 @@ func HandlePatchOperSpecData(request *httpwrapper.Request) *httpwrapper.Response
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrPolicyDataStats("update", "operator-specific-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func PatchOperSpecDataProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
@@ -2408,9 +2367,8 @@ func PatchOperSpecDataProcedure(collName string, ueId string, patchItem []models
 		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandleQueryOperSpecData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2446,9 +2404,8 @@ func QueryOperSpecDataProcedure(collName string, ueId string) (*map[string]inter
 
 	if operatorSpecificDataContainer != nil {
 		return &operatorSpecificDataContainer, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleGetppData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2482,9 +2439,8 @@ func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, 
 
 	if ppData != nil {
 		return &ppData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2622,9 +2578,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 
 	if !reflect.DeepEqual(provisionedDataSets, models.ProvisionedDataSets{}) {
 		return &provisionedDataSets, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleModifyPpData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2638,10 +2593,9 @@ func HandleModifyPpData(request *httpwrapper.Request) *httpwrapper.Response {
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "pp-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "pp-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "pp-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func ModifyPpDataProcedure(collName string, ueId string, patchItem []models.PatchItem) *models.ProblemDetails {
@@ -2666,9 +2620,8 @@ func ModifyPpDataProcedure(collName string, ueId string, patchItem []models.Patc
 		}
 		PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
 		return nil
-	} else {
-		return util.ProblemDetailsModifyNotAllowed("")
 	}
+	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
 }
 
 func HandleGetIdentityData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2702,9 +2655,8 @@ func GetIdentityDataProcedure(collName string, ueId string) (*map[string]interfa
 
 	if identityData != nil {
 		return &identityData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleGetOdbData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2738,9 +2690,8 @@ func GetOdbDataProcedure(collName string, ueId string) (*map[string]interface{},
 
 	if operatorDeterminedBarringData != nil {
 		return &operatorDeterminedBarringData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleGetSharedData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2787,9 +2738,8 @@ func GetSharedDataProcedure(collName string, sharedDataIds []string) (*[]map[str
 
 	if sharedDataArray != nil {
 		return &sharedDataArray, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsDataNotFound()
 }
 
 func HandleRemovesdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2803,24 +2753,23 @@ func HandleRemovesdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", "sdm-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("delete", "sdm-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("delete", "sdm-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func RemovesdmSubscriptionsProcedure(ueId string, subsId string) *models.ProblemDetails {
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.SdmSubscriptions[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(UESubsData.SdmSubscriptions, subsId)
 
@@ -2839,10 +2788,9 @@ func HandleUpdatesdmsubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", "sdm-subscriptions", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("update", "sdm-subscriptions", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("update", "sdm-subscriptions", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func UpdatesdmsubscriptionsProcedure(ueId string, subsId string,
@@ -2851,14 +2799,14 @@ func UpdatesdmsubscriptionsProcedure(ueId string, subsId string,
 	udrSelf := udr_context.UDR_Self()
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
 	_, ok = UESubsData.SdmSubscriptions[subsId]
 
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	SdmSubscription.SetSubscriptionId(subsId)
 	UESubsData.SdmSubscriptions[subsId] = &SdmSubscription
@@ -2934,7 +2882,7 @@ func QuerysdmsubscriptionsProcedure(ueId string) (*[]models.SdmSubscription, *mo
 
 	value, ok := udrSelf.UESubsCollection.Load(ueId)
 	if !ok {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
+		return nil, utils.ProblemDetailsUserNotFound()
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
@@ -3084,9 +3032,8 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 
 	if !isExisted {
 		return putData, http.StatusCreated
-	} else {
-		return putData, http.StatusOK
 	}
+	return putData, http.StatusOK
 }
 
 func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3152,9 +3099,8 @@ func QuerySmfRegistrationProcedure(collName string, ueId string,
 
 	if smfRegistration != nil {
 		return &smfRegistration, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleQuerySmfRegList(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3167,9 +3113,8 @@ func HandleQuerySmfRegList(request *httpwrapper.Request) *httpwrapper.Response {
 	stats.IncrementUdrSubscriptionDataStats("get", "smf-registrations", "SUCCESS")
 	if response == nil {
 		return httpwrapper.NewResponse(http.StatusOK, nil, []map[string]interface{}{})
-	} else {
-		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	}
+	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
 func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]interface{} {
@@ -3181,10 +3126,9 @@ func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]interf
 
 	if smfRegList != nil {
 		return &smfRegList
-	} else {
-		// Return empty array instead
-		return nil
 	}
+	// Return empty array instead
+	return nil
 }
 
 func HandleQuerySmfSelectData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3198,10 +3142,9 @@ func HandleQuerySmfSelectData(request *httpwrapper.Request) *httpwrapper.Respons
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("get", "provisioned-data", "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
-	} else {
-		stats.IncrementUdrSubscriptionDataStats("get", "provisioned-data", "FAILURE")
-		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 	}
+	stats.IncrementUdrSubscriptionDataStats("get", "provisioned-data", "FAILURE")
+	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
 func QuerySmfSelectDataProcedure(collName string, ueId string,
@@ -3215,9 +3158,8 @@ func QuerySmfSelectDataProcedure(collName string, ueId string,
 
 	if smfSelectionSubscriptionData != nil {
 		return &smfSelectionSubscriptionData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleCreateSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3292,9 +3234,8 @@ func QuerySmsfContext3gppProcedure(collName string, ueId string) (*map[string]in
 
 	if smsfRegistration != nil {
 		return &smsfRegistration, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleCreateSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3369,9 +3310,8 @@ func QuerySmsfContextNon3gppProcedure(collName string, ueId string) (*map[string
 
 	if smsfRegistration != nil {
 		return &smsfRegistration, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleQuerySmsMngData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3406,9 +3346,8 @@ func QuerySmsMngDataProcedure(collName string, ueId string,
 
 	if smsManagementSubscriptionData != nil {
 		return &smsManagementSubscriptionData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandleQuerySmsData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3445,9 +3384,8 @@ func QuerySmsDataProcedure(collName string, ueId string,
 
 	if smsSubscriptionData != nil {
 		return &smsSubscriptionData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func HandlePostSubscriptionDataSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3500,7 +3438,7 @@ func RemovesubscriptionDataSubscriptionsProcedure(subsId string) *models.Problem
 	udrSelf := udr_context.UDR_Self()
 	_, ok := udrSelf.SubscriptionDataSubscriptions[subsId]
 	if !ok {
-		return util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(udrSelf.SubscriptionDataSubscriptions, subsId)
 	return nil
@@ -3540,7 +3478,6 @@ func QueryTraceDataProcedure(collName string, ueId string,
 
 	if traceData != nil {
 		return &traceData, nil
-	} else {
-		return nil, util.ProblemDetailsNotFound("USER_NOT_FOUND")
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
