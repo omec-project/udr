@@ -1491,20 +1491,7 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 
 	if !reflect.DeepEqual(snssai, models.Snssai{}) {
 		hexSnssai := util.SnssaiModelsToHex(snssai)
-
-		if dnn != "" {
-			filter["$expr"] = bson.M{
-				"$ne": bson.A{
-					bson.M{"$getField": bson.M{
-						"field": bson.M{"$literal": dnn},
-						"input": "$smPolicySnssaiData." + hexSnssai + ".smPolicyDnnData",
-					}},
-					nil,
-				},
-			}
-		} else {
-			filter["smPolicySnssaiData."+hexSnssai] = bson.M{"$exists": true}
-		}
+		addSmPolicySnssaiDnnFilter(filter, hexSnssai, dnn)
 	}
 
 	smPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2945,7 +2932,7 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 	addSingleNssaiFilter(filter, singleNssai)
 
 	if dnn != "" {
-		filter["dnnconfigurations."+dnn] = bson.M{"$exists": true}
+		addDotSafeKeyExistsFilter(filter, "dnnconfigurations", dnn)
 	}
 
 	sessionManagementSubscriptionDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
@@ -2998,6 +2985,37 @@ func addSingleNssaiFilter(filter bson.M, singleNssai models.Snssai) {
 	filter["singlenssai.sst"] = singleNssai.GetSst()
 	if sd := singleNssai.GetSd(); sd != "" {
 		filter["singlenssai.sd"] = sd
+	}
+}
+
+// addSmPolicySnssaiDnnFilter adds a MongoDB filter for the given hexSnssai and dnn.
+// When dnn is non-empty the filter uses $objectToArray/$in to check whether the
+// DNN key exists in smPolicyDnnData regardless of its stored value (including null).
+// This avoids dot-notation misinterpretation for DNNs that contain dots.
+func addSmPolicySnssaiDnnFilter(filter bson.M, hexSnssai, dnn string) {
+	if dnn != "" {
+		addDotSafeKeyExistsFilter(filter, "smPolicySnssaiData."+hexSnssai+".smPolicyDnnData", dnn)
+	} else {
+		filter["smPolicySnssaiData."+hexSnssai] = bson.M{"$exists": true}
+	}
+}
+
+// addDotSafeKeyExistsFilter adds a MongoDB $expr filter that checks whether key
+// exists as a field name within the object stored at path, safely handling keys
+// that contain dots (which MongoDB dot-notation would otherwise mis-interpret as
+// nested-field separators).
+func addDotSafeKeyExistsFilter(filter bson.M, path, key string) {
+	filter["$expr"] = bson.M{
+		"$in": bson.A{
+			bson.M{"$literal": key},
+			bson.M{"$map": bson.M{
+				"input": bson.M{"$objectToArray": bson.M{
+					"$ifNull": bson.A{"$" + path, bson.M{}},
+				}},
+				"as": "kv",
+				"in": "$$kv.k",
+			}},
+		},
 	}
 }
 

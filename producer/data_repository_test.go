@@ -35,3 +35,77 @@ func TestAddSingleNssaiFilterStoresSdAsString(t *testing.T) {
 		t.Fatalf("expected singlenssai.sst filter to be stored as int32 value, got %#v", filter["singlenssai.sst"])
 	}
 }
+
+func TestAddSmPolicySnssaiDnnFilterWithDnn(t *testing.T) {
+	filter := bson.M{}
+	hexSnssai := "01ABCDEF"
+	dnn := "internet.example"
+
+	addSmPolicySnssaiDnnFilter(filter, hexSnssai, dnn)
+
+	exprVal, ok := filter["$expr"]
+	if !ok {
+		t.Fatal("expected $expr key in filter when dnn is non-empty")
+	}
+	exprMap, ok := exprVal.(bson.M)
+	if !ok {
+		t.Fatalf("expected $expr to be bson.M, got %T", exprVal)
+	}
+	inVal, ok := exprMap["$in"]
+	if !ok {
+		t.Fatal("expected $in key inside $expr for dotted DNN")
+	}
+	inArr, ok := inVal.(bson.A)
+	if !ok || len(inArr) != 2 {
+		t.Fatalf("expected $in to be bson.A with 2 elements, got %#v", inVal)
+	}
+	literalMap, ok := inArr[0].(bson.M)
+	if !ok {
+		t.Fatalf("expected first $in element to be bson.M, got %T", inArr[0])
+	}
+	if literalMap["$literal"] != dnn {
+		t.Fatalf("expected $literal to be %q, got %#v", dnn, literalMap["$literal"])
+	}
+}
+
+func TestAddSmPolicySnssaiDnnFilterWithoutDnn(t *testing.T) {
+	filter := bson.M{}
+	hexSnssai := "01ABCDEF"
+
+	addSmPolicySnssaiDnnFilter(filter, hexSnssai, "")
+
+	expectedKey := "smPolicySnssaiData." + hexSnssai
+	val, ok := filter[expectedKey]
+	if !ok {
+		t.Fatalf("expected key %q in filter when dnn is empty", expectedKey)
+	}
+	existsMap, ok := val.(bson.M)
+	if !ok || existsMap["$exists"] != true {
+		t.Fatalf("expected $exists:true filter, got %#v", val)
+	}
+}
+
+func TestAddDotSafeKeyExistsFilterStructure(t *testing.T) {
+	filter := bson.M{}
+	addDotSafeKeyExistsFilter(filter, "dnnconfigurations", "internet.example")
+
+	exprMap, ok := filter["$expr"].(bson.M)
+	if !ok {
+		t.Fatal("expected $expr to be bson.M")
+	}
+	inArr, ok := exprMap["$in"].(bson.A)
+	if !ok || len(inArr) != 2 {
+		t.Fatalf("expected $in bson.A with 2 elements, got %#v", exprMap["$in"])
+	}
+	literalMap, ok := inArr[0].(bson.M)
+	if !ok || literalMap["$literal"] != "internet.example" {
+		t.Fatalf("expected $literal to be %q, got %#v", "internet.example", inArr[0])
+	}
+	mapExpr, ok := inArr[1].(bson.M)
+	if !ok {
+		t.Fatalf("expected second $in element to be bson.M, got %T", inArr[1])
+	}
+	if _, ok := mapExpr["$map"]; !ok {
+		t.Fatal("expected $map operator in second $in element")
+	}
+}
