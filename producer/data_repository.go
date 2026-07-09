@@ -1490,10 +1490,21 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 	filter := bson.M{"ueId": ueId}
 
 	if !reflect.DeepEqual(snssai, models.Snssai{}) {
-		filter["smPolicySnssaiData."+util.SnssaiModelsToHex(snssai)] = bson.M{"$exists": true}
-	}
-	if !reflect.DeepEqual(snssai, models.Snssai{}) && dnn != "" {
-		filter["smPolicySnssaiData."+util.SnssaiModelsToHex(snssai)+".smPolicyDnnData."+dnn] = bson.M{"$exists": true}
+		hexSnssai := util.SnssaiModelsToHex(snssai)
+
+		if dnn != "" {
+			filter["$expr"] = bson.M{
+				"$ne": bson.A{
+					bson.M{"$getField": bson.M{
+						"field": bson.M{"$literal": dnn},
+						"input": "$smPolicySnssaiData." + hexSnssai + ".smPolicyDnnData",
+					}},
+					nil,
+				},
+			}
+		} else {
+			filter["smPolicySnssaiData."+hexSnssai] = bson.M{"$exists": true}
+		}
 	}
 
 	smPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
