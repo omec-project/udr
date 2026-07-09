@@ -2932,7 +2932,11 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 	addSingleNssaiFilter(filter, singleNssai)
 
 	if dnn != "" {
-		addDotSafeKeyExistsFilter(filter, "dnnconfigurations", dnn)
+		if strings.Contains(dnn, ".") {
+			addDotSafeKeyExistsFilter(filter, "dnnconfigurations", dnn)
+		} else {
+			filter["dnnconfigurations."+dnn] = bson.M{"$exists": true}
+		}
 	}
 
 	sessionManagementSubscriptionDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
@@ -2989,12 +2993,17 @@ func addSingleNssaiFilter(filter bson.M, singleNssai models.Snssai) {
 }
 
 // addSmPolicySnssaiDnnFilter adds a MongoDB filter for the given hexSnssai and dnn.
-// When dnn is non-empty the filter uses $objectToArray/$in to check whether the
-// DNN key exists in smPolicyDnnData regardless of its stored value (including null).
-// This avoids dot-notation misinterpretation for DNNs that contain dots.
+// When dnn is non-empty and contains dots, the filter uses $objectToArray/$in to
+// check whether the DNN key exists in smPolicyDnnData, avoiding dot-notation
+// misinterpretation. For dot-free DNNs the simpler $exists predicate is used so
+// that indexes on the field can be leveraged.
 func addSmPolicySnssaiDnnFilter(filter bson.M, hexSnssai, dnn string) {
 	if dnn != "" {
-		addDotSafeKeyExistsFilter(filter, "smPolicySnssaiData."+hexSnssai+".smPolicyDnnData", dnn)
+		if strings.Contains(dnn, ".") {
+			addDotSafeKeyExistsFilter(filter, "smPolicySnssaiData."+hexSnssai+".smPolicyDnnData", dnn)
+		} else {
+			filter["smPolicySnssaiData."+hexSnssai+".smPolicyDnnData."+dnn] = bson.M{"$exists": true}
+		}
 	} else {
 		filter["smPolicySnssaiData."+hexSnssai] = bson.M{"$exists": true}
 	}

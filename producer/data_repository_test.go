@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const testHexSnssai = "01ABCDEF"
+
 func TestSnssaiEqualUsesSdValueSemantics(t *testing.T) {
 	left := models.Snssai{Sst: 1}
 	left.SetSd("ABCDEF")
@@ -36,9 +38,9 @@ func TestAddSingleNssaiFilterStoresSdAsString(t *testing.T) {
 	}
 }
 
-func TestAddSmPolicySnssaiDnnFilterWithDnn(t *testing.T) {
+func TestAddSmPolicySnssaiDnnFilterWithDottedDnn(t *testing.T) {
 	filter := bson.M{}
-	hexSnssai := "01ABCDEF"
+	hexSnssai := testHexSnssai
 	dnn := "internet.example"
 
 	addSmPolicySnssaiDnnFilter(filter, hexSnssai, dnn)
@@ -70,7 +72,7 @@ func TestAddSmPolicySnssaiDnnFilterWithDnn(t *testing.T) {
 
 func TestAddSmPolicySnssaiDnnFilterWithoutDnn(t *testing.T) {
 	filter := bson.M{}
-	hexSnssai := "01ABCDEF"
+	hexSnssai := testHexSnssai
 
 	addSmPolicySnssaiDnnFilter(filter, hexSnssai, "")
 
@@ -107,5 +109,26 @@ func TestAddDotSafeKeyExistsFilterStructure(t *testing.T) {
 	}
 	if _, ok := mapExpr["$map"]; !ok {
 		t.Fatal("expected $map operator in second $in element")
+	}
+}
+
+func TestAddSmPolicySnssaiDnnFilterWithDotFreeDnn(t *testing.T) {
+	filter := bson.M{}
+	hexSnssai := testHexSnssai
+	dnn := "internet"
+
+	addSmPolicySnssaiDnnFilter(filter, hexSnssai, dnn)
+
+	expectedKey := "smPolicySnssaiData." + hexSnssai + ".smPolicyDnnData." + dnn
+	val, ok := filter[expectedKey]
+	if !ok {
+		t.Fatalf("expected key %q in filter for dot-free dnn", expectedKey)
+	}
+	existsMap, ok := val.(bson.M)
+	if !ok || existsMap["$exists"] != true {
+		t.Fatalf("expected $exists:true filter for dot-free dnn, got %#v", val)
+	}
+	if _, hasExpr := filter["$expr"]; hasExpr {
+		t.Fatal("expected no $expr filter for dot-free dnn")
 	}
 }
