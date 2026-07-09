@@ -1490,10 +1490,8 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 	filter := bson.M{"ueId": ueId}
 
 	if !reflect.DeepEqual(snssai, models.Snssai{}) {
-		filter["smPolicySnssaiData."+util.SnssaiModelsToHex(snssai)] = bson.M{"$exists": true}
-	}
-	if !reflect.DeepEqual(snssai, models.Snssai{}) && dnn != "" {
-		filter["smPolicySnssaiData."+util.SnssaiModelsToHex(snssai)+".smPolicyDnnData."+dnn] = bson.M{"$exists": true}
+		hexSnssai := util.SnssaiModelsToHex(snssai)
+		addSmPolicySnssaiDnnFilter(filter, hexSnssai, dnn)
 	}
 
 	smPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2934,7 +2932,11 @@ func QuerySmDataProcedure(collName string, ueId string, servingPlmnId string,
 	addSingleNssaiFilter(filter, singleNssai)
 
 	if dnn != "" {
-		filter["dnnconfigurations."+dnn] = bson.M{"$exists": true}
+		if strings.Contains(dnn, ".") {
+			addDotSafeKeyExistsFilter(filter, "dnnconfigurations", dnn)
+		} else {
+			filter["dnnconfigurations."+dnn] = bson.M{"$exists": true}
+		}
 	}
 
 	sessionManagementSubscriptionDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
@@ -2987,6 +2989,49 @@ func addSingleNssaiFilter(filter bson.M, singleNssai models.Snssai) {
 	filter["singlenssai.sst"] = singleNssai.GetSst()
 	if sd := singleNssai.GetSd(); sd != "" {
 		filter["singlenssai.sd"] = sd
+	}
+}
+
+// addSmPolicySnssaiDnnFilter adds a MongoDB filter for the given hexSnssai and dnn.
+// When dnn is non-empty and contains dots, the filter uses $objectToArray/$in to
+// check whether the DNN key exists in smPolicyDnnData, avoiding dot-notation
+// misinterpretation. For dot-free DNNs the simpler $exists predicate is used so
+// that indexes on the field can be leveraged.
+func addSmPolicySnssaiDnnFilter(filter bson.M, hexSnssai, dnn string) {
+	if dnn != "" {
+		if strings.Contains(dnn, ".") {
+			addDotSafeKeyExistsFilter(filter, "smPolicySnssaiData."+hexSnssai+".smPolicyDnnData", dnn)
+		} else {
+			filter["smPolicySnssaiData."+hexSnssai+".smPolicyDnnData."+dnn] = bson.M{"$exists": true}
+		}
+	} else {
+		filter["smPolicySnssaiData."+hexSnssai] = bson.M{"$exists": true}
+	}
+}
+
+// addDotSafeKeyExistsFilter adds a MongoDB $expr filter that checks whether key
+// exists as a field name within the object stored at path, safely handling keys
+// that contain dots (which MongoDB dot-notation would otherwise mis-interpret as
+// nested-field separators). If filter already contains a $expr predicate, the
+// new condition is merged with the existing one using $and so that no prior
+// predicate is silently discarded.
+func addDotSafeKeyExistsFilter(filter bson.M, path, key string) {
+	newExpr := bson.M{
+		"$in": bson.A{
+			bson.M{"$literal": key},
+			bson.M{"$map": bson.M{
+				"input": bson.M{"$objectToArray": bson.M{
+					"$ifNull": bson.A{"$" + path, bson.M{}},
+				}},
+				"as": "kv",
+				"in": "$$kv.k",
+			}},
+		},
+	}
+	if existing, ok := filter["$expr"]; ok {
+		filter["$expr"] = bson.M{"$and": bson.A{existing, newExpr}}
+	} else {
+		filter["$expr"] = newExpr
 	}
 }
 
