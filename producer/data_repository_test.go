@@ -132,3 +132,33 @@ func TestAddSmPolicySnssaiDnnFilterWithDotFreeDnn(t *testing.T) {
 		t.Fatal("expected no $expr filter for dot-free dnn")
 	}
 }
+
+func TestAddDotSafeKeyExistsFilterMergesExistingExpr(t *testing.T) {
+	existingExpr := bson.M{"$eq": bson.A{"$status", "active"}}
+	filter := bson.M{"$expr": existingExpr}
+
+	addDotSafeKeyExistsFilter(filter, "dnnconfigurations", "internet.example")
+
+	andExpr, ok := filter["$expr"].(bson.M)
+	if !ok {
+		t.Fatalf("expected $expr to be bson.M after merge, got %T", filter["$expr"])
+	}
+	andArr, ok := andExpr["$and"].(bson.A)
+	if !ok || len(andArr) != 2 {
+		t.Fatalf("expected $and with 2 elements, got %#v", andExpr["$and"])
+	}
+	first, ok := andArr[0].(bson.M)
+	if !ok {
+		t.Fatalf("expected first $and element to be bson.M, got %T", andArr[0])
+	}
+	if _, hasEq := first["$eq"]; !hasEq {
+		t.Fatal("expected original $expr ($eq) to be preserved as first $and element")
+	}
+	newExpr, ok := andArr[1].(bson.M)
+	if !ok {
+		t.Fatalf("expected new $in expr as second $and element, got %T", andArr[1])
+	}
+	if _, hasIn := newExpr["$in"]; !hasIn {
+		t.Fatal("expected $in operator in merged $expr")
+	}
+}

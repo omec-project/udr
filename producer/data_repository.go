@@ -3012,9 +3012,11 @@ func addSmPolicySnssaiDnnFilter(filter bson.M, hexSnssai, dnn string) {
 // addDotSafeKeyExistsFilter adds a MongoDB $expr filter that checks whether key
 // exists as a field name within the object stored at path, safely handling keys
 // that contain dots (which MongoDB dot-notation would otherwise mis-interpret as
-// nested-field separators).
+// nested-field separators). If filter already contains a $expr predicate, the
+// new condition is merged with the existing one using $and so that no prior
+// predicate is silently discarded.
 func addDotSafeKeyExistsFilter(filter bson.M, path, key string) {
-	filter["$expr"] = bson.M{
+	newExpr := bson.M{
 		"$in": bson.A{
 			bson.M{"$literal": key},
 			bson.M{"$map": bson.M{
@@ -3025,6 +3027,11 @@ func addDotSafeKeyExistsFilter(filter bson.M, path, key string) {
 				"in": "$$kv.k",
 			}},
 		},
+	}
+	if existing, ok := filter["$expr"]; ok {
+		filter["$expr"] = bson.M{"$and": bson.A{existing, newExpr}}
+	} else {
+		filter["$expr"] = newExpr
 	}
 }
 
