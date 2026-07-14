@@ -22,8 +22,7 @@ import (
 	stats "github.com/omec-project/udr/metrics"
 	"github.com/omec-project/udr/util"
 	"github.com/omec-project/util/httpwrapper"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 const (
@@ -790,7 +789,7 @@ func filterDataBySnssais(snssaiValue string,
 	for _, data := range datas {
 		var dataSnssais []models.Snssai
 		if err := json.Unmarshal(
-			util.PrimitiveAToByte(data["snssais"].(primitive.A)), &dataSnssais); err != nil {
+			util.PrimitiveAToByte(data["snssais"].(bson.A)), &dataSnssais); err != nil {
 			logger.DataRepoLog.Warnln(err)
 			break
 		}
@@ -2477,7 +2476,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.AccessAndMobilitySubscriptionData
 			err := mapstructure.Decode(accessAndMobilitySubscriptionData, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode amData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			provisionedDataSets.SetAmData(tmp)
 		}
@@ -2494,7 +2494,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.SmfSelectionSubscriptionData
 			err := mapstructure.Decode(smfSelectionSubscriptionData, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode smfSelectionSubscriptionData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			provisionedDataSets.SetSmfSelData(tmp)
 		}
@@ -2511,7 +2512,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.SmsSubscriptionData
 			err := mapstructure.Decode(smsSubscriptionData, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode smsSubscriptionData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			provisionedDataSets.SetSmsSubsData(tmp)
 		}
@@ -2528,7 +2530,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.SmSubsData
 			err := mapstructure.Decode(sessionManagementSubscriptionDatas, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode smData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			provisionedDataSets.SetSmData(tmp)
 		}
@@ -2545,7 +2548,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.NullableTraceData
 			err := mapstructure.Decode(traceData, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode traceData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			if traceValue, ok := tmp.Get(), tmp.IsSet(); ok {
 				if traceValue == nil {
@@ -2568,7 +2572,8 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			var tmp models.SmsManagementSubscriptionData
 			err := mapstructure.Decode(smsManagementSubscriptionData, &tmp)
 			if err != nil {
-				panic(err)
+				logger.DataRepoLog.Errorf("decode smsMngData failed: %+v", err)
+				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
 			provisionedDataSets.SetSmsMngData(tmp)
 		}

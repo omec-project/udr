@@ -9,8 +9,7 @@ import (
 
 	"github.com/omec-project/udr/logger"
 	"github.com/omec-project/util/mongoapi"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type DBInterface interface {
@@ -19,7 +18,7 @@ type DBInterface interface {
 	RestfulAPIPutOneTimeout(collName string, filter bson.M, putData map[string]interface{}, timeout int32, timeField string) bool
 	RestfulAPIPutOne(collName string, filter bson.M, putData map[string]interface{}) (bool, error)
 	RestfulAPIPutOneNotUpdate(collName string, filter bson.M, putData map[string]interface{}) (bool, error)
-	RestfulAPIPutMany(collName string, filterArray []primitive.M, putDataArray []map[string]interface{}) error
+	RestfulAPIPutMany(collName string, filterArray []bson.M, putDataArray []map[string]interface{}) error
 	RestfulAPIDeleteOne(collName string, filter bson.M) error
 	RestfulAPIDeleteMany(collName string, filter bson.M) error
 	RestfulAPIMergePatch(collName string, filter bson.M, patchData map[string]interface{}) error
@@ -33,10 +32,6 @@ var (
 	CommonDBClient DBInterface
 	AuthDBClient   DBInterface
 )
-
-type MongoDBClient struct {
-	mongoapi.MongoClient
-}
 
 // Set CommonDBClient
 func setCommonDBClient(url string, dbname string) error {
