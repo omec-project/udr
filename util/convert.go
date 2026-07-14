@@ -11,7 +11,7 @@ import (
 
 	"github.com/omec-project/openapi/v2/models"
 	"github.com/omec-project/udr/logger"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func MapToByte(data map[string]interface{}) []byte {
