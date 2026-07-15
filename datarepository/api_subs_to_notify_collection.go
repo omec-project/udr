@@ -61,7 +61,7 @@ func HTTPSubscriptionDataSubscriptions(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&subscriptionDataSubscriptions, requestBody, "application/json")
+	err = openapi.Decode(&subscriptionDataSubscriptions, requestBody, ContentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -77,12 +77,12 @@ func HTTPSubscriptionDataSubscriptions(c *gin.Context) {
 		c.Header(key, val[0])
 	}
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }

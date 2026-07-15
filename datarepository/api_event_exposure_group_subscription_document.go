@@ -57,13 +57,13 @@ func HTTPRemoveEeGroupSubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleRemoveEeGroupSubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -81,7 +81,7 @@ func HTTPUpdateEeGroupSubscriptions(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&eeSubscription, requestBody, "application/json")
+	err = openapi.Decode(&eeSubscription, requestBody, ContentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -96,12 +96,12 @@ func HTTPUpdateEeGroupSubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleUpdateEeGroupSubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }

@@ -45,7 +45,7 @@ func HTTPCreateAuthenticationSoR(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&sorData, requestBody, "application/json")
+	err = openapi.Decode(&sorData, requestBody, ContentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -59,13 +59,13 @@ func HTTPCreateAuthenticationSoR(c *gin.Context) {
 
 	rsp := producer.HandleCreateAuthenticationSoR(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -78,13 +78,13 @@ func HTTPQueryAuthSoR(c *gin.Context) {
 
 	rsp := producer.HandleQueryAuthSoR(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }
 

@@ -45,7 +45,7 @@ func HTTPCreateSdmSubscriptions(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&sdmSubscription, requestBody, "application/json")
+	err = openapi.Decode(&sdmSubscription, requestBody, ContentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -62,13 +62,13 @@ func HTTPCreateSdmSubscriptions(c *gin.Context) {
 	for key, val := range rsp.Header {
 		c.Header(key, val[0])
 	}
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -81,12 +81,12 @@ func HTTPQuerysdmsubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleQuerysdmsubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
 	}
 }
