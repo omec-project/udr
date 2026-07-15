@@ -36,9 +36,8 @@ var (
 // Set CommonDBClient
 func setCommonDBClient(url string, dbname string) error {
 	mClient, errConnect := mongoapi.NewMongoClient(url, dbname)
-	if mClient.Client != nil {
+	if mClient != nil && mClient.Client != nil {
 		CommonDBClient = mClient
-		CommonDBClient.(*mongoapi.MongoClient).Client.Database(dbname)
 	}
 	return errConnect
 }
@@ -46,9 +45,8 @@ func setCommonDBClient(url string, dbname string) error {
 // Set AuthDBClient
 func setAuthDBClient(authurl string, authkeysdbname string) error {
 	mClient, errConnect := mongoapi.NewMongoClient(authurl, authkeysdbname)
-	if mClient.Client != nil {
+	if mClient != nil && mClient.Client != nil {
 		AuthDBClient = mClient
-		AuthDBClient.(*mongoapi.MongoClient).Client.Database(authkeysdbname)
 	}
 	return errConnect
 }
