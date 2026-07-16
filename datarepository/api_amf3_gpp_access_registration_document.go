@@ -31,8 +31,6 @@ import (
 	"github.com/omec-project/util/httpwrapper"
 )
 
-const ContentTypeJSON = "application/json"
-
 // Patch /subscription-data/:ueId/context-data/amf-3gpp-access
 // To modify the AMF context data of a UE using 3gpp access in the UDR
 func HTTPAmfContext3gpp(c *gin.Context) {
