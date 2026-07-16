@@ -39,22 +39,25 @@ func InitUdrContext(context *context.UDRContext) {
 				context.PEM = tls.Pem
 			}
 		}
-
-		context.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
-		if context.BindingIPv4 != "" {
-			logger.UtilLog.Infoln("parsing ServerIPv4 address from ENV variable")
-		} else {
-			context.BindingIPv4 = sbi.BindingIPv4
-			if context.BindingIPv4 == "" {
-				logger.UtilLog.Warnln("error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default")
-				context.BindingIPv4 = "0.0.0.0"
-			}
-		}
+		setBindingIPv4(context, sbi)
 	}
 	if configuration.NrfUri != "" {
 		context.NrfUri = configuration.NrfUri
 	} else {
 		logger.UtilLog.Warnln("NRF Uri is empty. Using localhost as NRF IPv4 address")
 		context.NrfUri = fmt.Sprintf("%s://%s:%d", context.UriScheme, "127.0.0.1", 29510)
+	}
+}
+
+func setBindingIPv4(context *context.UDRContext, sbi *factory.Sbi) {
+	context.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
+	if context.BindingIPv4 != "" {
+		logger.UtilLog.Infoln("parsing ServerIPv4 address from ENV variable")
+	} else {
+		context.BindingIPv4 = sbi.BindingIPv4
+		if context.BindingIPv4 == "" {
+			logger.UtilLog.Warnln("error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default")
+			context.BindingIPv4 = "0.0.0.0"
+		}
 	}
 }
