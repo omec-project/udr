@@ -45,7 +45,7 @@ func HTTPCreateSmsfContext3gpp(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&smsfRegistration, requestBody, "application/json")
+	err = openapi.Decode(&smsfRegistration, requestBody, contentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -59,13 +59,13 @@ func HTTPCreateSmsfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleCreateSmsfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -78,13 +78,13 @@ func HTTPDeleteSmsfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleDeleteSmsfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -97,12 +97,12 @@ func HTTPQuerySmsfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleQuerySmsfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
