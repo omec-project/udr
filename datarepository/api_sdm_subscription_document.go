@@ -57,13 +57,13 @@ func HTTPRemovesdmSubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleRemovesdmSubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -81,7 +81,7 @@ func HTTPUpdatesdmsubscriptions(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&sdmSubscription, requestBody, ContentTypeJSON)
+	err = openapi.Decode(&sdmSubscription, requestBody, contentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -96,12 +96,12 @@ func HTTPUpdatesdmsubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleUpdatesdmsubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, ContentTypeJSON)
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, ContentTypeJSON, responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }

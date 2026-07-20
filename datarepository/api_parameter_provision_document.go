@@ -39,12 +39,12 @@ func HTTPGetppData(c *gin.Context) {
 
 	rsp := producer.HandleGetppData(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }

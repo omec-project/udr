@@ -36,7 +36,7 @@ func TestHTTPCreateEeSubscriptions_UsesUeIdPathParam(t *testing.T) {
 		"/subscription-data/imsi-001010000000001/context-data/ee-subscriptions",
 		bytes.NewBufferString(`{}`),
 	)
-	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Content-Type", contentTypeJSON)
 	context, _ := gin.CreateTestContext(recorder)
 	context.Request = request
 	context.Params = gin.Params{{Key: "ueId", Value: "imsi-001010000000001"}}
