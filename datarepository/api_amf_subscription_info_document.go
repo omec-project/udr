@@ -45,7 +45,7 @@ func HTTPCreateAMFSubscriptions(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&amfSubscriptionInfoArray, requestBody, "application/json")
+	err = openapi.Decode(&amfSubscriptionInfoArray, requestBody, contentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -60,12 +60,12 @@ func HTTPCreateAMFSubscriptions(c *gin.Context) {
 
 	rsp := producer.HandleCreateAMFSubscriptions(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }

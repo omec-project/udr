@@ -45,7 +45,7 @@ func HTTPAmfContext3gpp(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&patchItemArray, requestBody, "application/json")
+	err = openapi.Decode(&patchItemArray, requestBody, contentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -59,13 +59,13 @@ func HTTPAmfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleAmfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -83,7 +83,7 @@ func HTTPCreateAmfContext3gpp(c *gin.Context) {
 		return
 	}
 
-	err = openapi.Decode(&amf3GppAccessRegistration, requestBody, "application/json")
+	err = openapi.Decode(&amf3GppAccessRegistration, requestBody, contentTypeJSON)
 	if err != nil {
 		problemDetail := "[Request Body] " + err.Error()
 		rsp := utils.ProblemDetailsMalformedRequestSyntax(problemDetail)
@@ -97,13 +97,13 @@ func HTTPCreateAmfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleCreateAmfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
 
@@ -116,12 +116,12 @@ func HTTPQueryAmfContext3gpp(c *gin.Context) {
 
 	rsp := producer.HandleQueryAmfContext3gpp(req)
 
-	responseBody, err := openapi.SetBody(rsp.Body, "application/json")
+	responseBody, err := openapi.SetBody(rsp.Body, contentTypeJSON)
 	if err != nil {
 		logger.DataRepoLog.Errorln(err)
 		problemDetails := utils.ProblemDetailsSystemFailure(err.Error())
 		c.JSON(http.StatusInternalServerError, problemDetails)
 	} else {
-		c.Data(rsp.Status, "application/json", responseBody.Bytes())
+		c.Data(rsp.Status, contentTypeJSON, responseBody.Bytes())
 	}
 }
