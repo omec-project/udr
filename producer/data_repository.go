@@ -1533,9 +1533,8 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 	}
 	if smPolicyData != nil {
 		return SmDataGetProcedureSmPolicyDataResponse(ueId, smPolicyData)
-	} else {
-		return nil, utils.ProblemDetailsUserNotFound()
 	}
+	return nil, utils.ProblemDetailsUserNotFound()
 }
 
 func SmDataGetProcedureSmPolicyDataResponse(
@@ -1547,26 +1546,24 @@ func SmDataGetProcedureSmPolicyDataResponse(
 	if err != nil {
 		logger.DataRepoLog.Warnln(err)
 	}
-	{
-		collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
-		filter := bson.M{"ueId": ueId}
-		usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
-		if errGetMany != nil {
-			logger.DataRepoLog.Warnln(errGetMany)
-		}
+	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
+	filter := bson.M{"ueId": ueId}
+	usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+	if errGetMany != nil {
+		logger.DataRepoLog.Warnln(errGetMany)
+	}
 
-		if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
-			var usageMonDataArray []models.UsageMonData
-			err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
-			if err != nil {
-				logger.DataRepoLog.Warnln(err)
-			}
-			umData := make(map[string]models.UsageMonData)
-			for _, element := range usageMonDataArray {
-				umData[element.LimitId] = element
-			}
-			smPolicyDataResp.SetUmData(umData)
+	if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
+		var usageMonDataArray []models.UsageMonData
+		err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
+		if err != nil {
+			logger.DataRepoLog.Warnln(err)
 		}
+		umData := make(map[string]models.UsageMonData)
+		for _, element := range usageMonDataArray {
+			umData[element.LimitId] = element
+		}
+		smPolicyDataResp.SetUmData(umData)
 	}
 	return &smPolicyDataResp, nil
 }
@@ -1631,26 +1628,24 @@ func SmDataPatchProcedureSuccessAll(
 		if err != nil {
 			logger.DataRepoLog.Warnln(err)
 		}
-		{
-			collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
-			filter := bson.M{"ueId": ueId}
-			usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
-			if errGetMany != nil {
-				logger.DataRepoLog.Warnln(errGetMany)
-			}
+		collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
+		filter := bson.M{"ueId": ueId}
+		usageMonDataMapArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
+		if errGetMany != nil {
+			logger.DataRepoLog.Warnln(errGetMany)
+		}
 
-			if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
-				var usageMonDataArray []models.UsageMonData
-				err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
-				if err != nil {
-					logger.DataRepoLog.Warnln(err)
-				}
-				umData := make(map[string]models.UsageMonData)
-				for _, element := range usageMonDataArray {
-					umData[element.LimitId] = element
-				}
-				smPolicyData.SetUmData(umData)
+		if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
+			var usageMonDataArray []models.UsageMonData
+			err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
+			if err != nil {
+				logger.DataRepoLog.Warnln(err)
 			}
+			umData := make(map[string]models.UsageMonData)
+			for _, element := range usageMonDataArray {
+				umData[element.LimitId] = element
+			}
+			smPolicyData.SetUmData(umData)
 		}
 		PreHandlePolicyDataChangeNotification(ueId, "", smPolicyData)
 		return nil
