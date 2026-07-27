@@ -617,21 +617,21 @@ func filterDataBySnssai(snssaiValues []string,
 	}
 	var matchedDatas []map[string]interface{}
 	for _, data := range datas {
-		var dataSnssai models.Snssai
+		dataSnssai := models.NewSnssaiWithDefaults()
 		if err := json.Unmarshal(
-			util.MapToByte(data["snssai"].(map[string]interface{})), &dataSnssai); err != nil {
+			util.MapToByte(data["snssai"].(map[string]interface{})), dataSnssai); err != nil {
 			logger.DataRepoLog.Warnln(err)
 			break
 		}
 		logger.DataRepoLog.Debugf("dataSnssai=%#v", dataSnssai)
 		for _, v := range snssaiValues {
-			var filterSnssai models.Snssai
-			if err := json.Unmarshal([]byte(v), &filterSnssai); err != nil {
+			filterSnssai := models.NewSnssaiWithDefaults()
+			if err := json.Unmarshal([]byte(v), filterSnssai); err != nil {
 				logger.DataRepoLog.Warnln(err)
 				break
 			}
 			logger.DataRepoLog.Debugf("filterSnssai=%#v", filterSnssai)
-			if snssaiEqual(dataSnssai, filterSnssai) {
+			if snssaiEqual(*dataSnssai, *filterSnssai) {
 				matchedDatas = append(matchedDatas, data)
 				break
 			}
@@ -815,8 +815,8 @@ func filterDataBySnssais(snssaiValue string,
 	datas []map[string]interface{},
 ) []map[string]interface{} {
 	var matchedDatas []map[string]interface{}
-	var filterSnssai models.Snssai
-	if err := json.Unmarshal([]byte(snssaiValue), &filterSnssai); err != nil {
+	filterSnssai := models.NewSnssaiWithDefaults()
+	if err := json.Unmarshal([]byte(snssaiValue), filterSnssai); err != nil {
 		logger.DataRepoLog.Warnln(err)
 	}
 	logger.DataRepoLog.Debugf("filterSnssai=%#v", filterSnssai)
@@ -829,7 +829,7 @@ func filterDataBySnssais(snssaiValue string,
 		}
 		logger.DataRepoLog.Debugf("dataSnssais=%#v", dataSnssais)
 		for _, v := range dataSnssais {
-			if snssaiEqual(v, filterSnssai) {
+			if snssaiEqual(v, *filterSnssai) {
 				matchedDatas = append(matchedDatas, data)
 				break
 			}
@@ -1541,8 +1541,8 @@ func SmDataGetProcedureSmPolicyDataResponse(
 	ueId string,
 	smPolicyData map[string]interface{},
 ) (*models.SmPolicyData, *models.ProblemDetails) {
-	var smPolicyDataResp models.SmPolicyData
-	err := json.Unmarshal(util.MapToByte(smPolicyData), &smPolicyDataResp)
+	smPolicyDataResp := models.NewSmPolicyDataWithDefaults()
+	err := json.Unmarshal(util.MapToByte(smPolicyData), smPolicyDataResp)
 	if err != nil {
 		logger.DataRepoLog.Warnln(err)
 	}
@@ -1565,7 +1565,7 @@ func SmDataGetProcedureSmPolicyDataResponse(
 		}
 		smPolicyDataResp.SetUmData(umData)
 	}
-	return &smPolicyDataResp, nil
+	return smPolicyDataResp, nil
 }
 
 func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1597,16 +1597,16 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 		if failure != nil {
 			successAll = false
 		} else {
-			var usageMonData models.UsageMonData
+			usageMonData := models.NewUsageMonDataWithDefaults()
 			usageMonDataBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 			if errGetOne != nil {
 				logger.DataRepoLog.Warnln(errGetOne)
 			}
-			err := json.Unmarshal(util.MapToByte(usageMonDataBsonM), &usageMonData)
+			err := json.Unmarshal(util.MapToByte(usageMonDataBsonM), usageMonData)
 			if err != nil {
 				logger.DataRepoLog.Warnln(err)
 			}
-			PreHandlePolicyDataChangeNotification(ueId, limitId, usageMonData)
+			PreHandlePolicyDataChangeNotification(ueId, limitId, *usageMonData)
 		}
 	}
 	return SmDataPatchProcedureSuccessAll(successAll, collName, ueId, filter)
@@ -1623,8 +1623,8 @@ func SmDataPatchProcedureSuccessAll(
 		if errGetOneNew != nil {
 			logger.DataRepoLog.Warnln(errGetOneNew)
 		}
-		var smPolicyData models.SmPolicyData
-		err := json.Unmarshal(util.MapToByte(smPolicyDataBsonM), &smPolicyData)
+		smPolicyData := models.NewSmPolicyDataWithDefaults()
+		err := json.Unmarshal(util.MapToByte(smPolicyDataBsonM), smPolicyData)
 		if err != nil {
 			logger.DataRepoLog.Warnln(err)
 		}
@@ -1647,7 +1647,7 @@ func SmDataPatchProcedureSuccessAll(
 			}
 			smPolicyData.SetUmData(umData)
 		}
-		PreHandlePolicyDataChangeNotification(ueId, "", smPolicyData)
+		PreHandlePolicyDataChangeNotification(ueId, "", *smPolicyData)
 		return nil
 	}
 	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
@@ -1801,16 +1801,16 @@ func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
 	failure := CommonDBClient.RestfulAPIMergePatch(collName, filter, patchData)
 
 	if failure == nil {
-		var uePolicySet models.UePolicySet
+		uePolicySet := models.NewUePolicySetWithDefaults()
 		uePolicySetBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 		if errGetOne != nil {
 			logger.DataRepoLog.Warnln(errGetOne)
 		}
-		err := json.Unmarshal(util.MapToByte(uePolicySetBsonM), &uePolicySet)
+		err := json.Unmarshal(util.MapToByte(uePolicySetBsonM), uePolicySet)
 		if err != nil {
 			logger.DataRepoLog.Warnln(err)
 		}
-		PreHandlePolicyDataChangeNotification(ueId, "", uePolicySet)
+		PreHandlePolicyDataChangeNotification(ueId, "", *uePolicySet)
 		return nil
 	}
 	return utils.ProblemDetailsWithCause("Modify not allowed", http.StatusForbidden, "", utils.CauseModifyNotAllowed)
@@ -2488,11 +2488,10 @@ func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, 
 func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Infoln("handle QueryProvisionedData")
 
-	var provisionedDataSets models.ProvisionedDataSets
 	ueId := request.Params["ueId"]
 	servingPlmnId := request.Params["servingPlmnId"]
 
-	response, problemDetails := QueryProvisionedDataProcedure(ueId, servingPlmnId, provisionedDataSets)
+	response, problemDetails := QueryProvisionedDataProcedure(ueId, servingPlmnId)
 
 	if response != nil {
 		stats.IncrementUdrSubscriptionDataStats("get", ProvisionedData, "SUCCESS")
@@ -2507,9 +2506,8 @@ func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Respo
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
-	provisionedDataSets models.ProvisionedDataSets,
-) (*models.ProvisionedDataSets, *models.ProblemDetails) {
+func QueryProvisionedDataProcedure(ueId string, servingPlmnId string) (*models.ProvisionedDataSets, *models.ProblemDetails) {
+	provisionedDataSets := models.NewProvisionedDataSets()
 	{
 		collName := "subscriptionData.provisionedData.amData"
 		filter := bson.M{"ueId": ueId, "servingPlmnId": servingPlmnId}
@@ -2518,13 +2516,13 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			logger.DataRepoLog.Warnln(errGetOne)
 		}
 		if accessAndMobilitySubscriptionData != nil {
-			var tmp models.AccessAndMobilitySubscriptionData
-			err := mapstructure.Decode(accessAndMobilitySubscriptionData, &tmp)
+			tmp := models.NewAccessAndMobilitySubscriptionData()
+			err := mapstructure.Decode(accessAndMobilitySubscriptionData, tmp)
 			if err != nil {
 				logger.DataRepoLog.Errorf("decode amData failed: %+v", err)
 				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
-			provisionedDataSets.SetAmData(tmp)
+			provisionedDataSets.SetAmData(*tmp)
 		}
 	}
 
@@ -2536,13 +2534,13 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			logger.DataRepoLog.Warnln(errGetOne)
 		}
 		if smfSelectionSubscriptionData != nil {
-			var tmp models.SmfSelectionSubscriptionData
-			err := mapstructure.Decode(smfSelectionSubscriptionData, &tmp)
+			tmp := models.NewSmfSelectionSubscriptionData()
+			err := mapstructure.Decode(smfSelectionSubscriptionData, tmp)
 			if err != nil {
 				logger.DataRepoLog.Errorf("decode smfSelectionSubscriptionData failed: %+v", err)
 				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
-			provisionedDataSets.SetSmfSelData(tmp)
+			provisionedDataSets.SetSmfSelData(*tmp)
 		}
 	}
 
@@ -2554,13 +2552,13 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			logger.DataRepoLog.Warnln(errGetOne)
 		}
 		if smsSubscriptionData != nil {
-			var tmp models.SmsSubscriptionData
-			err := mapstructure.Decode(smsSubscriptionData, &tmp)
+			tmp := models.NewSmsSubscriptionData()
+			err := mapstructure.Decode(smsSubscriptionData, tmp)
 			if err != nil {
 				logger.DataRepoLog.Errorf("decode smsSubscriptionData failed: %+v", err)
 				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
-			provisionedDataSets.SetSmsSubsData(tmp)
+			provisionedDataSets.SetSmsSubsData(*tmp)
 		}
 	}
 
@@ -2614,18 +2612,18 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string,
 			logger.DataRepoLog.Warnln(errGetOne)
 		}
 		if smsManagementSubscriptionData != nil {
-			var tmp models.SmsManagementSubscriptionData
-			err := mapstructure.Decode(smsManagementSubscriptionData, &tmp)
+			tmp := models.NewSmsManagementSubscriptionData()
+			err := mapstructure.Decode(smsManagementSubscriptionData, tmp)
 			if err != nil {
 				logger.DataRepoLog.Errorf("decode smsMngData failed: %+v", err)
 				return nil, utils.ProblemDetailsSystemFailure(err.Error())
 			}
-			provisionedDataSets.SetSmsMngData(tmp)
+			provisionedDataSets.SetSmsMngData(*tmp)
 		}
 	}
 
-	if !reflect.DeepEqual(provisionedDataSets, models.ProvisionedDataSets{}) {
-		return &provisionedDataSets, nil
+	if !reflect.DeepEqual(provisionedDataSets, models.NewProvisionedDataSets()) {
+		return provisionedDataSets, nil
 	}
 	return nil, utils.ProblemDetailsUserNotFound()
 }
