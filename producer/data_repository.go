@@ -621,14 +621,14 @@ func filterDataBySnssai(snssaiValues []string,
 		if err := json.Unmarshal(
 			util.MapToByte(data["snssai"].(map[string]interface{})), dataSnssai); err != nil {
 			logger.DataRepoLog.Warnln(err)
-			break
+			continue
 		}
 		logger.DataRepoLog.Debugf("dataSnssai=%#v", dataSnssai)
 		for _, v := range snssaiValues {
 			filterSnssai := models.NewSnssaiWithDefaults()
 			if err := json.Unmarshal([]byte(v), filterSnssai); err != nil {
 				logger.DataRepoLog.Warnln(err)
-				break
+				continue
 			}
 			logger.DataRepoLog.Debugf("filterSnssai=%#v", filterSnssai)
 			if snssaiEqual(*dataSnssai, *filterSnssai) {
@@ -825,7 +825,7 @@ func filterDataBySnssais(snssaiValue string,
 		if err := json.Unmarshal(
 			util.PrimitiveAToByte(data["snssais"].(bson.A)), &dataSnssais); err != nil {
 			logger.DataRepoLog.Warnln(err)
-			break
+			continue
 		}
 		logger.DataRepoLog.Debugf("dataSnssais=%#v", dataSnssais)
 		for _, v := range dataSnssais {
@@ -1598,7 +1598,7 @@ func PolicyDataUesUeIdSmDataPatchProcedure(collName string, ueId string,
 			successAll = false
 		} else {
 			usageMonData := models.NewUsageMonDataWithDefaults()
-			usageMonDataBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
+			usageMonDataBsonM, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filterTmp)
 			if errGetOne != nil {
 				logger.DataRepoLog.Warnln(errGetOne)
 			}
