@@ -31,6 +31,8 @@ func newBaseConfig() factory.Config {
 }
 
 func TestInitUdrContext_BasicFields(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = newBaseConfig()
 	ctx := &context.UDRContext{}
 
@@ -45,6 +47,8 @@ func TestInitUdrContext_BasicFields(t *testing.T) {
 }
 
 func TestInitUdrContext_DefaultValues(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -67,6 +71,8 @@ func TestInitUdrContext_DefaultValues(t *testing.T) {
 }
 
 func TestInitUdrContext_SbiConfig(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -97,6 +103,8 @@ func TestInitUdrContext_SbiConfig(t *testing.T) {
 }
 
 func TestInitUdrContext_SbiConfig_EmptyRegisterIPv4(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -124,6 +132,8 @@ func TestInitUdrContext_SbiConfig_EmptyRegisterIPv4(t *testing.T) {
 }
 
 func TestInitUdrContext_TLSConfig(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -155,6 +165,8 @@ func TestInitUdrContext_TLSConfig(t *testing.T) {
 }
 
 func TestInitUdrContext_TLSConfig_EmptyValues(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -189,6 +201,8 @@ func TestInitUdrContext_TLSConfig_EmptyValues(t *testing.T) {
 }
 
 func TestInitUdrContext_NrfUri_Set(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	expectedNrfUri := "https://10.0.0.2:29510"
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
@@ -214,6 +228,8 @@ func TestInitUdrContext_NrfUri_Set(t *testing.T) {
 }
 
 func TestInitUdrContext_NrfUri_Empty_UsesDefault(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -239,6 +255,8 @@ func TestInitUdrContext_NrfUri_Empty_UsesDefault(t *testing.T) {
 }
 
 func TestInitUdrContext_NilTLS(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
@@ -261,6 +279,8 @@ func TestInitUdrContext_NilTLS(t *testing.T) {
 }
 
 func TestInitUdrContext_NilSbi(t *testing.T) {
+	origUdrConfig := factory.UdrConfig
+	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
 			Version:     "1.0.0",
