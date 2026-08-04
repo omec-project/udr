@@ -4,6 +4,7 @@
 package producer
 
 import (
+	"maps"
 	"sync"
 	"time"
 
@@ -51,8 +52,8 @@ func newCachedDBClient(inner DBInterface) *cachedDBClient {
 	}
 }
 
-// cacheKey builds a zero-allocation stable key from the filter's ueId and
-// servingPlmnId fields, which are the only fields used by cacheable collections.
+// cacheKey builds a stable key from the filter's ueId and servingPlmnId fields,
+// which are the only fields used by cacheable collections.
 func cacheKey(collName string, filter bson.M) string {
 	ueId, _ := filter["ueId"].(string)
 	plmnId, _ := filter["servingPlmnId"].(string)
@@ -72,8 +73,7 @@ func (c *cachedDBClient) RestfulAPIGetOne(collName string, filter bson.M) (map[s
 	c.mu.RUnlock()
 
 	if hit && now.Before(entry.expiry) {
-		// Callers of cacheable collections are read-only; no clone needed.
-		return entry.data, nil
+		return maps.Clone(entry.data), nil
 	}
 
 	data, err := c.DBInterface.RestfulAPIGetOne(collName, filter)
@@ -82,7 +82,7 @@ func (c *cachedDBClient) RestfulAPIGetOne(collName string, filter bson.M) (map[s
 	}
 
 	c.mu.Lock()
-	c.entries[key] = cacheEntry{data: cloneStringMap(data), expiry: now.Add(cacheTTL)}
+	c.entries[key] = cacheEntry{data: maps.Clone(data), expiry: now.Add(cacheTTL)}
 	c.mu.Unlock()
 
 	return data, nil
@@ -131,16 +131,4 @@ func (c *cachedDBClient) RestfulAPIMergePatch(collName string, filter bson.M, pa
 func (c *cachedDBClient) RestfulAPIPost(collName string, filter bson.M, postData map[string]any) (bool, error) {
 	c.invalidate(collName, filter)
 	return c.DBInterface.RestfulAPIPost(collName, filter, postData)
-}
-
-// cloneStringMap returns a shallow copy so callers cannot mutate cached values.
-func cloneStringMap(m map[string]any) map[string]any {
-	if m == nil {
-		return nil
-	}
-	out := make(map[string]any, len(m))
-	for k, v := range m {
-		out[k] = v
-	}
-	return out
 }

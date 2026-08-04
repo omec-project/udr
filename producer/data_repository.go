@@ -549,7 +549,7 @@ func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[stri
 }
 
 func HandleApplicationDataInfluenceDataGet(queryParams map[string][]string) *httpwrapper.Response {
-	logger.DataRepoLog.Debugln("handle ApplicationDataInfluenceDataGet: queryParams=%#v", queryParams)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataGet: queryParams=%#v", queryParams)
 
 	influIDs := queryParams["influence-Ids"]
 	dnns := queryParams["dnns"]
@@ -744,7 +744,7 @@ func putApplicationDataIndividualInfluenceDataToDB(influID string,
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifyGet(queryParams map[string][]string) *httpwrapper.Response {
-	logger.DataRepoLog.Debugln("handle ApplicationDataInfluenceDataSubsToNotifyGet: queryParams=%#v", queryParams)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataSubsToNotifyGet: queryParams=%#v", queryParams)
 
 	dnn := queryParams["dnn"]
 	snssai := queryParams["snssai"]
