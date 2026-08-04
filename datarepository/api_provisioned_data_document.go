@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/:servingPlmnId/provisioned-data
 // Retrieve multiple provisioned data sets of a UE
 func HTTPQueryProvisionedData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["servingPlmnId"] = c.Params.ByName("servingPlmnId")

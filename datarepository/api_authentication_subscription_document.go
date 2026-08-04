@@ -34,7 +34,7 @@ import (
 // Patch /subscription-data/:ueId/authentication-data/authentication-subscription
 // modify the authentication subscription data of a UE
 func HTTPModifyAuthenticationSubscription(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Patch /subscription-data/:ueId/authentication-data/authentication-subscription")
+	logger.DataRepoLog.Debugln("Handle Patch /subscription-data/:ueId/authentication-data/authentication-subscription")
 	var patchItemArray []models.PatchItem
 
 	requestBody, err := c.GetRawData()

@@ -50,7 +50,7 @@ func HTTPQuerysdmSubscription(c *gin.Context) {
 // Delete /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId
 // Deletes a sdmsubscriptions
 func HTTPRemovesdmSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Delete /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId")
+	logger.DataRepoLog.Debugln("Handle Delete /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
@@ -70,7 +70,7 @@ func HTTPRemovesdmSubscriptions(c *gin.Context) {
 // Put /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId
 // Update an individual sdm subscriptions of a UE
 func HTTPUpdatesdmsubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/context-data/sdm-subscriptions/:subsId")
 	var sdmSubscription models.SdmSubscription
 
 	requestBody, err := c.GetRawData()

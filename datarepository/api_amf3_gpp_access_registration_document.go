@@ -34,7 +34,7 @@ import (
 // Patch /subscription-data/:ueId/context-data/amf-3gpp-access
 // To modify the AMF context data of a UE using 3gpp access in the UDR
 func HTTPAmfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Patch /subscription-data/:ueId/context-data/amf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Patch /subscription-data/:ueId/context-data/amf-3gpp-access")
 	var patchItemArray []models.PatchItem
 
 	requestBody, err := c.GetRawData()
@@ -72,7 +72,7 @@ func HTTPAmfContext3gpp(c *gin.Context) {
 // Put /subscription-data/:ueId/context-data/amf-3gpp-access
 // To store the AMF context data of a UE using 3gpp access in the UDR
 func HTTPCreateAmfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/context-data/amf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/context-data/amf-3gpp-access")
 	var amf3GppAccessRegistration models.Amf3GppAccessRegistration
 
 	requestBody, err := c.GetRawData()
@@ -110,7 +110,7 @@ func HTTPCreateAmfContext3gpp(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/amf-3gpp-access
 // Retrieves the AMF context data of a UE using 3gpp access
 func HTTPQueryAmfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/amf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/amf-3gpp-access")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

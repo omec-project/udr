@@ -32,7 +32,7 @@ import (
 // Get /policy-data/ues/:ueId/sm-data
 // Retrieves the session management policy data for a subscriber
 func HTTPReadSessionManagementPolicyData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /policy-data/ues/:ueId/sm-data")
+	logger.DataRepoLog.Debugln("Handle Get /policy-data/ues/:ueId/sm-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

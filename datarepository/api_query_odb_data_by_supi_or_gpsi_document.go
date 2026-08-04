@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/operator-determined-barring-data
 // Retrieve ODB Data data by SUPI or GPSI
 func HTTPGetOdbData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/operator-determined-barring-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/operator-determined-barring-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

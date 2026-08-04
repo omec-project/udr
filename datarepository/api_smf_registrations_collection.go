@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/context-data/smf-registrations
 // Retrieves the SMF registration list of a UE
 func HTTPQuerySmfRegList(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/smf-registrations")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/smf-registrations")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

@@ -34,7 +34,7 @@ import (
 // Post /subscription-data/:ueId/context-data/sdm-subscriptions
 // Create individual sdm subscription
 func HTTPCreateSdmSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Post /subscription-data/:ueId/context-data/sdm-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Post /subscription-data/:ueId/context-data/sdm-subscriptions")
 	var sdmSubscription models.SdmSubscription
 
 	requestBody, err := c.GetRawData()
@@ -75,7 +75,7 @@ func HTTPCreateSdmSubscriptions(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/sdm-subscriptions
 // Retrieves the sdm subscriptions of a UE
 func HTTPQuerysdmsubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/sdm-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/sdm-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

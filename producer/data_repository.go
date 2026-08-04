@@ -99,7 +99,7 @@ func deleteDataFromDB(collName string, filter bson.M) error {
 }
 
 func HandleQueryAmData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAmData")
+	logger.DataRepoLog.Debugln("handle QueryAmData")
 
 	collName := "subscriptionData.provisionedData.amData"
 	ueId := request.Params["ueId"]
@@ -127,7 +127,7 @@ func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*
 }
 
 func HandleAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle AmfContext3gpp")
+	logger.DataRepoLog.Debugln("handle AmfContext3gpp")
 	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
 	patchItem := request.Body.([]models.PatchItem)
 	ueId := request.Params["ueId"]
@@ -166,7 +166,7 @@ func AmfContext3gppProcedure(collName string, ueId string, patchItem []models.Pa
 }
 
 func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateAmfContext3gpp")
+	logger.DataRepoLog.Debugln("handle CreateAmfContext3gpp")
 
 	Amf3GppAccessRegistration := request.Body.(models.Amf3GppAccessRegistration)
 	ueId := request.Params["ueId"]
@@ -197,7 +197,7 @@ func CreateAmfContext3gppProcedure(collName string, ueId string,
 }
 
 func HandleQueryAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAmfContext3gpp")
+	logger.DataRepoLog.Debugln("handle QueryAmfContext3gpp")
 
 	ueId := request.Params["ueId"]
 	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
@@ -230,7 +230,7 @@ func QueryAmfContext3gppProcedure(collName string, ueId string) (*map[string]int
 }
 
 func HandleAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle AmfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle AmfContextNon3gpp")
 
 	ueId := request.Params["ueId"]
 	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
@@ -272,7 +272,7 @@ func AmfContextNon3gppProcedure(ueId string, collName string, patchItem []models
 }
 
 func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateAmfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle CreateAmfContextNon3gpp")
 
 	AmfNon3GppAccessRegistration := request.Body.(models.AmfNon3GppAccessRegistration)
 	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
@@ -303,7 +303,7 @@ func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon
 }
 
 func HandleQueryAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAmfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle QueryAmfContextNon3gpp")
 
 	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
@@ -337,7 +337,7 @@ func QueryAmfContextNon3gppProcedure(collName string, ueId string) (*map[string]
 }
 
 func HandleModifyAuthentication(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ModifyAuthentication")
+	logger.DataRepoLog.Debugln("handle ModifyAuthentication")
 
 	collName := "subscriptionData.authenticationData.authenticationSubscription"
 	ueId := request.Params["ueId"]
@@ -384,7 +384,7 @@ func ModifyAuthenticationProcedure(collName string, ueId string, patchItem []mod
 }
 
 func HandleQueryAuthSubsData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAuthSubsData")
+	logger.DataRepoLog.Debugln("handle QueryAuthSubsData")
 
 	collName := "subscriptionData.authenticationData.authenticationSubscription"
 	ueId := request.Params["ueId"]
@@ -422,7 +422,7 @@ func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]interf
 }
 
 func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateAuthenticationSoR")
+	logger.DataRepoLog.Debugln("handle CreateAuthenticationSoR")
 	putData := util.ToBsonM(request.Body)
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.ueUpdateConfirmationData.sorData"
@@ -449,7 +449,7 @@ func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson
 }
 
 func HandleQueryAuthSoR(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAuthSoR")
+	logger.DataRepoLog.Debugln("handle QueryAuthSoR")
 
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.ueUpdateConfirmationData.sorData"
@@ -484,7 +484,7 @@ func QueryAuthSoRProcedure(collName string, ueId string) (map[string]interface{}
 }
 
 func HandleCreateAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateAuthenticationStatus")
+	logger.DataRepoLog.Debugln("handle CreateAuthenticationStatus")
 
 	putData := util.ToBsonM(request.Body)
 	ueId := request.Params["ueId"]
@@ -512,7 +512,7 @@ func CreateAuthenticationStatusProcedure(collName string, ueId string, putData b
 }
 
 func HandleQueryAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryAuthenticationStatus")
+	logger.DataRepoLog.Debugln("handle QueryAuthenticationStatus")
 
 	ueId := request.Params["ueId"]
 	collName := SUBSCDATA_AUTHDATA_AUTHSTATUS
@@ -549,7 +549,7 @@ func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[stri
 }
 
 func HandleApplicationDataInfluenceDataGet(queryParams map[string][]string) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ApplicationDataInfluenceDataGet: queryParams=%#v", queryParams)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataGet: queryParams=%#v", queryParams)
 
 	influIDs := queryParams["influence-Ids"]
 	dnns := queryParams["dnns"]
@@ -641,7 +641,7 @@ func filterDataBySnssai(snssaiValues []string,
 }
 
 func HandleApplicationDataInfluenceDataInfluenceIdDelete(influID string) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataInfluenceDataInfluenceIdDelete: influID=%q", influID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdDelete: influID=%q", influID)
 
 	deleteApplicationDataIndividualInfluenceDataFromDB(influID)
 
@@ -661,7 +661,7 @@ func deleteApplicationDataIndividualInfluenceDataFromDB(influID string) {
 func HandleApplicationDataInfluenceDataInfluenceIdPatch(influID string,
 	trInfluDataPatch *models.TrafficInfluDataPatch,
 ) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataInfluenceDataInfluenceIdPatch: influID=%q", influID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdPatch: influID=%q", influID)
 
 	response, status := patchApplicationDataIndividualInfluenceDataToDB(influID, trInfluDataPatch)
 	stats.IncrementUdrApplicationDataStats("update", InfluenceData, "SUCCESS")
@@ -715,7 +715,7 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 func HandleApplicationDataInfluenceDataInfluenceIdPut(influID string,
 	trInfluData *models.TrafficInfluData,
 ) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataInfluenceDataInfluenceIdPut: influID=%q", influID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdPut: influID=%q", influID)
 
 	response, status := putApplicationDataIndividualInfluenceDataToDB(influID, trInfluData)
 
@@ -744,7 +744,7 @@ func putApplicationDataIndividualInfluenceDataToDB(influID string,
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifyGet(queryParams map[string][]string) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ApplicationDataInfluenceDataSubsToNotifyGet: queryParams=%#v", queryParams)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataSubsToNotifyGet: queryParams=%#v", queryParams)
 
 	dnn := queryParams["dnn"]
 	snssai := queryParams["snssai"]
@@ -839,7 +839,7 @@ func filterDataBySnssais(snssaiValue string,
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifyPost(trInfluSub *models.TrafficInfluSub) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ApplicationDataInfluenceDataSubsToNotifyPost")
+	logger.DataRepoLog.Debugln("handle ApplicationDataInfluenceDataSubsToNotifyPost")
 	udrSelf := udr_context.UDR_Self()
 
 	newSubscID := strconv.FormatUint(udrSelf.NewAppDataInfluDataSubscriptionID(), 10)
@@ -892,7 +892,7 @@ func deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID stri
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdGet(subscID string) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataInfluenceDataSubsToNotifySubscriptionIdGet: subscID=%s", subscID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataSubsToNotifySubscriptionIdGet: subscID=%s", subscID)
 
 	response, problemDetails := getApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID)
 
@@ -958,7 +958,7 @@ func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 }
 
 func HandleApplicationDataPfdsAppIdDelete(appID string) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataPfdsAppIdDelete: appID=%s", appID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsAppIdDelete: appID=%s", appID)
 
 	err := deleteApplicationDataIndividualPfdFromDB(appID)
 	if err == nil {
@@ -975,7 +975,7 @@ func deleteApplicationDataIndividualPfdFromDB(appID string) error {
 }
 
 func HandleApplicationDataPfdsAppIdGet(appID string) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataPfdsAppIdGet: appID=%s", appID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsAppIdGet: appID=%s", appID)
 
 	response, problemDetails := getApplicationDataIndividualPfdFromDB(appID)
 
@@ -993,7 +993,7 @@ func getApplicationDataIndividualPfdFromDB(appID string) (map[string]interface{}
 }
 
 func HandleApplicationDataPfdsAppIdPut(appID string, pfdDataForApp *models.PfdDataForApp) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataPfdsAppIdPut: appID=%s", appID)
+	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsAppIdPut: appID=%s", appID)
 
 	response, status := putApplicationDataIndividualPfdToDB(appID, pfdDataForApp)
 	if response != nil {
@@ -1020,7 +1020,7 @@ func putApplicationDataIndividualPfdToDB(appID string, pfdDataForApp *models.Pfd
 }
 
 func HandleApplicationDataPfdsGet(pfdsAppIDs []string) *httpwrapper.Response {
-	logger.DataRepoLog.Infof("handle ApplicationDataPfdsGet: pfdsAppIDs=%#v", pfdsAppIDs)
+	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsGet: pfdsAppIDs=%#v", pfdsAppIDs)
 
 	// TODO: Parse appID with separator ','
 	// Ex: "app1,app2,..."
@@ -1060,7 +1060,7 @@ func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]in
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataBdtDataBdtReferenceIdDelete")
+	logger.DataRepoLog.Debugln("handle PolicyDataBdtDataBdtReferenceIdDelete")
 
 	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
@@ -1084,7 +1084,7 @@ func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenc
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataBdtDataBdtReferenceIdGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataBdtDataBdtReferenceIdGet")
 
 	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
@@ -1120,7 +1120,7 @@ func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId
 }
 
 func HandlePolicyDataBdtDataBdtReferenceIdPut(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataBdtDataBdtReferenceIdPut")
+	logger.DataRepoLog.Debugln("handle PolicyDataBdtDataBdtReferenceIdPut")
 
 	collName := POLICYDATA_BDTDATA
 	bdtReferenceId := request.Params["bdtReferenceId"]
@@ -1156,7 +1156,7 @@ func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId
 }
 
 func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataBdtDataGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataBdtDataGet")
 
 	collName := POLICYDATA_BDTDATA
 
@@ -1175,7 +1175,7 @@ func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]inte
 }
 
 func HandlePolicyDataPlmnsPlmnIdUePolicySetGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataPlmnsPlmnIdUePolicySetGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataPlmnsPlmnIdUePolicySetGet")
 
 	collName := "policyData.plmns.uePolicySet"
 	plmnId := request.Params["plmnId"]
@@ -1211,7 +1211,7 @@ func PolicyDataPlmnsPlmnIdUePolicySetGetProcedure(collName string,
 }
 
 func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataSponsorConnectivityDataSponsorIdGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataSponsorConnectivityDataSponsorIdGet")
 
 	collName := "policyData.sponsorConnectivityData"
 	sponsorId := request.Params["sponsorId"]
@@ -1249,7 +1249,7 @@ func PolicyDataSponsorConnectivityDataSponsorIdGetProcedure(collName string,
 }
 
 func HandlePolicyDataSubsToNotifyPost(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataSubsToNotifyPost")
+	logger.DataRepoLog.Debugln("handle PolicyDataSubsToNotifyPost")
 
 	PolicyDataSubscription := request.Body.(models.PolicyDataSubscription)
 
@@ -1277,7 +1277,7 @@ func PolicyDataSubsToNotifyPostProcedure(PolicyDataSubscription models.PolicyDat
 }
 
 func HandlePolicyDataSubsToNotifySubsIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataSubsToNotifySubsIdDelete")
+	logger.DataRepoLog.Debugln("handle PolicyDataSubsToNotifySubsIdDelete")
 
 	subsId := request.Params["subsId"]
 
@@ -1303,7 +1303,7 @@ func PolicyDataSubsToNotifySubsIdDeleteProcedure(subsId string) (problemDetails 
 }
 
 func HandlePolicyDataSubsToNotifySubsIdPut(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataSubsToNotifySubsIdPut")
+	logger.DataRepoLog.Debugln("handle PolicyDataSubsToNotifySubsIdPut")
 
 	subsId := request.Params["subsId"]
 	policyDataSubscription := request.Body.(models.PolicyDataSubscription)
@@ -1333,7 +1333,7 @@ func PolicyDataSubsToNotifySubsIdPutProcedure(subsId string,
 }
 
 func HandlePolicyDataUesUeIdAmDataGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdAmDataGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdAmDataGet")
 
 	collName := "policyData.ues.amData"
 	ueId := request.Params["ueId"]
@@ -1370,7 +1370,7 @@ func PolicyDataUesUeIdAmDataGetProcedure(collName string,
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdOperatorSpecificDataGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdOperatorSpecificDataGet")
 
 	collName := POLICYDATA_UES_OPSPECDATA
 	ueId := request.Params["ueId"]
@@ -1408,7 +1408,7 @@ func PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName string,
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdOperatorSpecificDataPatch")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdOperatorSpecificDataPatch")
 
 	collName := POLICYDATA_UES_OPSPECDATA
 	ueId := request.Params["ueId"]
@@ -1444,7 +1444,7 @@ func PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(collName string, ueId s
 }
 
 func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdOperatorSpecificDataPut")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdOperatorSpecificDataPut")
 
 	// json.NewDecoder(c.Request.Body).Decode(&operatorSpecificDataContainerMap)
 
@@ -1478,7 +1478,7 @@ func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId str
 }
 
 func HandlePolicyDataUesUeIdSmDataGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdSmDataGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdSmDataGet")
 
 	collName := "policyData.ues.smData"
 	ueId := request.Params["ueId"]
@@ -1569,7 +1569,7 @@ func SmDataGetProcedureSmPolicyDataResponse(
 }
 
 func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdSmDataPatch")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdSmDataPatch")
 
 	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
@@ -1654,7 +1654,7 @@ func SmDataPatchProcedureSuccessAll(
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdSmDataUsageMonIdDelete")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdSmDataUsageMonIdDelete")
 
 	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
@@ -1679,7 +1679,7 @@ func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId stri
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdSmDataUsageMonIdGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdSmDataUsageMonIdGet")
 
 	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 	ueId := request.Params["ueId"]
@@ -1709,7 +1709,7 @@ func PolicyDataUesUeIdSmDataUsageMonIdGetProcedure(collName string, usageMonId s
 }
 
 func HandlePolicyDataUesUeIdSmDataUsageMonIdPut(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdSmDataUsageMonIdPut")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdSmDataUsageMonIdPut")
 
 	ueId := request.Params["ueId"]
 	usageMonId := request.Params["usageMonId"]
@@ -1738,7 +1738,7 @@ func PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName string, ueId string,
 }
 
 func HandlePolicyDataUesUeIdUePolicySetGet(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdUePolicySetGet")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdUePolicySetGet")
 
 	ueId := request.Params["ueId"]
 	collName := POLICYDATA_UES_UEPOLICYSET
@@ -1775,7 +1775,7 @@ func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*ma
 }
 
 func HandlePolicyDataUesUeIdUePolicySetPatch(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdUePolicySetPatch")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdUePolicySetPatch")
 
 	collName := POLICYDATA_UES_UEPOLICYSET
 	ueId := request.Params["ueId"]
@@ -1817,7 +1817,7 @@ func PolicyDataUesUeIdUePolicySetPatchProcedure(collName string, ueId string,
 }
 
 func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PolicyDataUesUeIdUePolicySetPut")
+	logger.DataRepoLog.Debugln("handle PolicyDataUesUeIdUePolicySetPut")
 
 	collName := POLICYDATA_UES_UEPOLICYSET
 	ueId := request.Params["ueId"]
@@ -1857,7 +1857,7 @@ func PolicyDataUesUeIdUePolicySetPutProcedure(collName string, ueId string,
 }
 
 func HandleCreateAMFSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateAMFSubscriptions")
+	logger.DataRepoLog.Debugln("handle CreateAMFSubscriptions")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -1893,7 +1893,7 @@ func CreateAMFSubscriptionsProcedure(subsId string, ueId string,
 }
 
 func HandleRemoveAmfSubscriptionsInfo(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle RemoveAmfSubscriptionsInfo")
+	logger.DataRepoLog.Debugln("handle RemoveAmfSubscriptionsInfo")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -1932,7 +1932,7 @@ func RemoveAmfSubscriptionsInfoProcedure(subsId string, ueId string) *models.Pro
 }
 
 func HandleModifyAmfSubscriptionInfo(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ModifyAmfSubscriptionInfo")
+	logger.DataRepoLog.Debugln("handle ModifyAmfSubscriptionInfo")
 
 	patchItem := request.Body.([]models.PatchItem)
 	ueId := request.Params["ueId"]
@@ -2000,7 +2000,7 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 }
 
 func HandleGetAmfSubscriptionInfo(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle GetAmfSubscriptionInfo")
+	logger.DataRepoLog.Debugln("handle GetAmfSubscriptionInfo")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -2043,7 +2043,7 @@ func GetAmfSubscriptionInfoProcedure(subsId string, ueId string) (*[]models.AmfS
 }
 
 func HandleQueryEEData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryEEData")
+	logger.DataRepoLog.Debugln("handle QueryEEData")
 
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.eeProfileData"
@@ -2077,7 +2077,7 @@ func QueryEEDataProcedure(collName string, ueId string) (*map[string]interface{}
 }
 
 func HandleRemoveEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle RemoveEeGroupSubscriptions")
+	logger.DataRepoLog.Debugln("handle RemoveEeGroupSubscriptions")
 
 	ueGroupId := request.Params["ueGroupId"]
 	subsId := request.Params["subsId"]
@@ -2111,7 +2111,7 @@ func RemoveEeGroupSubscriptionsProcedure(ueGroupId string, subsId string) *model
 }
 
 func HandleUpdateEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle UpdateEeGroupSubscriptions")
+	logger.DataRepoLog.Debugln("handle UpdateEeGroupSubscriptions")
 
 	ueGroupId := request.Params["ueGroupId"]
 	subsId := request.Params["subsId"]
@@ -2148,7 +2148,7 @@ func UpdateEeGroupSubscriptionsProcedure(ueGroupId string, subsId string,
 }
 
 func HandleCreateEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateEeGroupSubscriptions")
+	logger.DataRepoLog.Debugln("handle CreateEeGroupSubscriptions")
 
 	ueGroupId := request.Params["ueGroupId"]
 	EeSubscription := request.Body.(models.EeSubscription)
@@ -2187,7 +2187,7 @@ func CreateEeGroupSubscriptionsProcedure(ueGroupId string, EeSubscription models
 }
 
 func HandleQueryEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryEeGroupSubscriptions")
+	logger.DataRepoLog.Debugln("handle QueryEeGroupSubscriptions")
 
 	ueGroupId := request.Params["ueGroupId"]
 
@@ -2224,7 +2224,7 @@ func QueryEeGroupSubscriptionsProcedure(ueGroupId string) ([]models.EeSubscripti
 }
 
 func HandleRemoveeeSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle RemoveeeSubscriptions")
+	logger.DataRepoLog.Debugln("handle RemoveeeSubscriptions")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -2257,7 +2257,7 @@ func RemoveeeSubscriptionsProcedure(ueId string, subsId string) *models.ProblemD
 }
 
 func HandleUpdateEesubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle UpdateEesubscriptions")
+	logger.DataRepoLog.Debugln("handle UpdateEesubscriptions")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -2294,7 +2294,7 @@ func UpdateEesubscriptionsProcedure(ueId string, subsId string,
 }
 
 func HandleCreateEeSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateEeSubscriptions")
+	logger.DataRepoLog.Debugln("handle CreateEeSubscriptions")
 
 	ueId := request.Params["ueId"]
 	EeSubscription := request.Body.(models.EeSubscription)
@@ -2334,7 +2334,7 @@ func CreateEeSubscriptionsProcedure(ueId string, EeSubscription models.EeSubscri
 }
 
 func HandleQueryeesubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle Queryeesubscriptions")
+	logger.DataRepoLog.Debugln("handle Queryeesubscriptions")
 
 	ueId := request.Params["ueId"]
 
@@ -2371,7 +2371,7 @@ func QueryeesubscriptionsProcedure(ueId string) ([]models.EeSubscription, *model
 }
 
 func HandlePatchOperSpecData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PatchOperSpecData")
+	logger.DataRepoLog.Debugln("handle PatchOperSpecData")
 
 	collName := "subscriptionData.operatorSpecificData"
 	ueId := request.Params["ueId"]
@@ -2414,7 +2414,7 @@ func PatchOperSpecDataProcedure(collName string, ueId string, patchItem []models
 }
 
 func HandleQueryOperSpecData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryOperSpecData")
+	logger.DataRepoLog.Debugln("handle QueryOperSpecData")
 
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.operatorSpecificData"
@@ -2451,7 +2451,7 @@ func QueryOperSpecDataProcedure(collName string, ueId string) (*map[string]inter
 }
 
 func HandleGetppData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle GetppData")
+	logger.DataRepoLog.Debugln("handle GetppData")
 
 	collName := "subscriptionData.ppData"
 	ueId := request.Params["ueId"]
@@ -2486,7 +2486,7 @@ func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, 
 }
 
 func HandleQueryProvisionedData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryProvisionedData")
+	logger.DataRepoLog.Debugln("handle QueryProvisionedData")
 
 	ueId := request.Params["ueId"]
 	servingPlmnId := request.Params["servingPlmnId"]
@@ -2629,7 +2629,7 @@ func QueryProvisionedDataProcedure(ueId string, servingPlmnId string) (*models.P
 }
 
 func HandleModifyPpData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle ModifyPpData")
+	logger.DataRepoLog.Debugln("handle ModifyPpData")
 
 	collName := "subscriptionData.ppData"
 	patchItem := request.Body.([]models.PatchItem)
@@ -2671,7 +2671,7 @@ func ModifyPpDataProcedure(collName string, ueId string, patchItem []models.Patc
 }
 
 func HandleGetIdentityData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle GetIdentityData")
+	logger.DataRepoLog.Debugln("handle GetIdentityData")
 
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.identityData"
@@ -2706,7 +2706,7 @@ func GetIdentityDataProcedure(collName string, ueId string) (*map[string]interfa
 }
 
 func HandleGetOdbData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle GetOdbData")
+	logger.DataRepoLog.Debugln("handle GetOdbData")
 
 	ueId := request.Params["ueId"]
 	collName := "subscriptionData.operatorDeterminedBarringData"
@@ -2741,7 +2741,7 @@ func GetOdbDataProcedure(collName string, ueId string) (*map[string]interface{},
 }
 
 func HandleGetSharedData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle GetSharedData")
+	logger.DataRepoLog.Debugln("handle GetSharedData")
 
 	var sharedDataIds []string
 	if len(request.Query["shared-data-ids"]) != 0 {
@@ -2789,7 +2789,7 @@ func GetSharedDataProcedure(collName string, sharedDataIds []string) (*[]map[str
 }
 
 func HandleRemovesdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle RemovesdmSubscriptions")
+	logger.DataRepoLog.Debugln("handle RemovesdmSubscriptions")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -2823,7 +2823,7 @@ func RemovesdmSubscriptionsProcedure(ueId string, subsId string) *models.Problem
 }
 
 func HandleUpdatesdmsubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle Updatesdmsubscriptions")
+	logger.DataRepoLog.Debugln("handle Updatesdmsubscriptions")
 
 	ueId := request.Params["ueId"]
 	subsId := request.Params["subsId"]
@@ -2861,7 +2861,7 @@ func UpdatesdmsubscriptionsProcedure(ueId string, subsId string,
 }
 
 func HandleCreateSdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateSdmSubscriptions")
+	logger.DataRepoLog.Debugln("handle CreateSdmSubscriptions")
 
 	SdmSubscription := request.Body.(models.SdmSubscription)
 	collName := SUBSCDATA_CTXDATA_AMF_NON3GPPACCESS
@@ -2904,7 +2904,7 @@ func CreateSdmSubscriptionsProcedure(SdmSubscription models.SdmSubscription,
 }
 
 func HandleQuerysdmsubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle Querysdmsubscriptions")
+	logger.DataRepoLog.Debugln("handle Querysdmsubscriptions")
 
 	ueId := request.Params["ueId"]
 
@@ -2941,7 +2941,7 @@ func QuerysdmsubscriptionsProcedure(ueId string) (*[]models.SdmSubscription, *mo
 }
 
 func HandleQuerySmData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmData")
+	logger.DataRepoLog.Debugln("handle QuerySmData")
 
 	collName := "subscriptionData.provisionedData.smData"
 	ueId := request.Params["ueId"]
@@ -3084,7 +3084,7 @@ func addDotSafeKeyExistsFilter(filter bson.M, path, key string) {
 }
 
 func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateSmfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle CreateSmfContextNon3gpp")
 
 	SmfRegistration := request.Body.(models.SmfRegistration)
 	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
@@ -3130,7 +3130,7 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 }
 
 func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle DeleteSmfContext")
+	logger.DataRepoLog.Debugln("handle DeleteSmfContext")
 
 	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 	ueId := request.Params["ueId"]
@@ -3155,7 +3155,7 @@ func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string
 }
 
 func HandleQuerySmfRegistration(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmfRegistration")
+	logger.DataRepoLog.Debugln("handle QuerySmfRegistration")
 
 	ueId := request.Params["ueId"]
 	pduSessionId := request.Params["pduSessionId"]
@@ -3197,7 +3197,7 @@ func QuerySmfRegistrationProcedure(collName string, ueId string,
 }
 
 func HandleQuerySmfRegList(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmfRegList")
+	logger.DataRepoLog.Debugln("handle QuerySmfRegList")
 
 	collName := SUBSCDATA_CTXDATA_SMF_REGISTRATION
 	ueId := request.Params["ueId"]
@@ -3225,7 +3225,7 @@ func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]interf
 }
 
 func HandleQuerySmfSelectData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmfSelectData")
+	logger.DataRepoLog.Debugln("handle QuerySmfSelectData")
 
 	collName := "subscriptionData.provisionedData.smfSelectionSubscriptionData"
 	ueId := request.Params["ueId"]
@@ -3256,7 +3256,7 @@ func QuerySmfSelectDataProcedure(collName string, ueId string,
 }
 
 func HandleCreateSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateSmsfContext3gpp")
+	logger.DataRepoLog.Debugln("handle CreateSmsfContext3gpp")
 
 	SmsfRegistration := request.Body.(models.SmsfRegistration)
 	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
@@ -3279,7 +3279,7 @@ func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistrati
 }
 
 func HandleDeleteSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle DeleteSmsfContext3gpp")
+	logger.DataRepoLog.Debugln("handle DeleteSmsfContext3gpp")
 
 	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params["ueId"]
@@ -3298,7 +3298,7 @@ func DeleteSmsfContext3gppProcedure(collName string, ueId string) {
 }
 
 func HandleQuerySmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmsfContext3gpp")
+	logger.DataRepoLog.Debugln("handle QuerySmsfContext3gpp")
 
 	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params["ueId"]
@@ -3332,7 +3332,7 @@ func QuerySmsfContext3gppProcedure(collName string, ueId string) (*map[string]in
 }
 
 func HandleCreateSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle CreateSmsfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle CreateSmsfContextNon3gpp")
 
 	SmsfRegistration := request.Body.(models.SmsfRegistration)
 	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
@@ -3355,7 +3355,7 @@ func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration,
 }
 
 func HandleDeleteSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle DeleteSmsfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle DeleteSmsfContextNon3gpp")
 
 	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 	ueId := request.Params["ueId"]
@@ -3374,7 +3374,7 @@ func DeleteSmsfContextNon3gppProcedure(collName string, ueId string) {
 }
 
 func HandleQuerySmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmsfContextNon3gpp")
+	logger.DataRepoLog.Debugln("handle QuerySmsfContextNon3gpp")
 
 	ueId := request.Params["ueId"]
 	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
@@ -3408,7 +3408,7 @@ func QuerySmsfContextNon3gppProcedure(collName string, ueId string) (*map[string
 }
 
 func HandleQuerySmsMngData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmsMngData")
+	logger.DataRepoLog.Debugln("handle QuerySmsMngData")
 
 	collName := "subscriptionData.provisionedData.smsMngData"
 	ueId := request.Params["ueId"]
@@ -3444,7 +3444,7 @@ func QuerySmsMngDataProcedure(collName string, ueId string,
 }
 
 func HandleQuerySmsData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QuerySmsData")
+	logger.DataRepoLog.Debugln("handle QuerySmsData")
 
 	ueId := request.Params["ueId"]
 	servingPlmnId := request.Params["servingPlmnId"]
@@ -3482,7 +3482,7 @@ func QuerySmsDataProcedure(collName string, ueId string,
 }
 
 func HandlePostSubscriptionDataSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle PostSubscriptionDataSubscriptions")
+	logger.DataRepoLog.Debugln("handle PostSubscriptionDataSubscriptions")
 
 	SubscriptionDataSubscriptions := request.Body.(models.SubscriptionDataSubscriptions)
 
@@ -3512,7 +3512,7 @@ func PostSubscriptionDataSubscriptionsProcedure(
 }
 
 func HandleRemovesubscriptionDataSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle RemovesubscriptionDataSubscriptions")
+	logger.DataRepoLog.Debugln("handle RemovesubscriptionDataSubscriptions")
 
 	subsId := request.Params["subsId"]
 
@@ -3538,7 +3538,7 @@ func RemovesubscriptionDataSubscriptionsProcedure(subsId string) *models.Problem
 }
 
 func HandleQueryTraceData(request *httpwrapper.Request) *httpwrapper.Response {
-	logger.DataRepoLog.Infoln("handle QueryTraceData")
+	logger.DataRepoLog.Debugln("handle QueryTraceData")
 
 	collName := "subscriptionData.provisionedData.traceData"
 	ueId := request.Params["ueId"]

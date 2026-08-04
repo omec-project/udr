@@ -41,7 +41,7 @@ func HTTPRemoveAmfGroupSubscriptions(c *gin.Context) {
 // Delete /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions
 // Deletes AMF Subscription Info for an eeSubscription
 func HTTPRemoveAmfSubscriptionsInfo(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Delete /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Delete /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["subsId"] = c.Params.ByName("subsId")

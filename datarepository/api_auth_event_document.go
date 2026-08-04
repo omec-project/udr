@@ -41,7 +41,7 @@ func HTTPDeleteAuthenticationStatus(c *gin.Context) {
 // Get /subscription-data/:ueId/authentication-data/authentication-status
 // Retrieves the Authentication Status of a UE
 func HTTPQueryAuthenticationStatus(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/authentication-data/authentication-status")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/authentication-data/authentication-status")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

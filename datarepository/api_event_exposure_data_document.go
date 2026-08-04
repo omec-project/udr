@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/ee-profile-data
 // Retrieves the ee profile data of a UE
 func HTTPQueryEEData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/ee-profile-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/ee-profile-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

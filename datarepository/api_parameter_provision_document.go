@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/pp-data
 // Read the profile of a given UE
 func HTTPGetppData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/pp-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/pp-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

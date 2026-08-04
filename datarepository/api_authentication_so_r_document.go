@@ -34,7 +34,7 @@ import (
 // Put /subscription-data/:ueId/ue-update-confirmation-data/sor-data
 // To store the SoR acknowledgement information of a UE, ME support of SOR CMCI, and ME support of SOR-SNPN-SI and ME support of SOR-SNPN-SI-LS.
 func HTTPCreateAuthenticationSoR(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/ue-update-confirmation-data/sor-data")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/ue-update-confirmation-data/sor-data")
 	var sorData models.SorData
 
 	requestBody, err := c.GetRawData()
@@ -72,7 +72,7 @@ func HTTPCreateAuthenticationSoR(c *gin.Context) {
 // Get /subscription-data/:ueId/ue-update-confirmation-data/sor-data
 // Retrieves the SoR acknowledgement information of a UE, ME support of SOR CMCI ME support of SOR-SNPN-SI and ME support of SOR-SNPN-SI-LS
 func HTTPQueryAuthSoR(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/ue-update-confirmation-data/sor-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/ue-update-confirmation-data/sor-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

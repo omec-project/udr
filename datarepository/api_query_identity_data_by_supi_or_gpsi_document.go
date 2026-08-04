@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/identity-data
 // Retrieve identity data by SUPI or GPSI
 func HTTPGetIdentityData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/identity-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/identity-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

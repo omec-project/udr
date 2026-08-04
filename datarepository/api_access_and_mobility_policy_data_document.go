@@ -32,7 +32,7 @@ import (
 // Get /policy-data/ues/:ueId/am-data
 // Retrieves the access and mobility policy data for a subscriber
 func HTTPReadAccessAndMobilityPolicyData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /policy-data/ues/:ueId/am-data")
+	logger.DataRepoLog.Debugln("Handle Get /policy-data/ues/:ueId/am-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

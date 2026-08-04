@@ -34,7 +34,7 @@ import (
 // Put /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions
 // Create AmfSubscriptions for an individual ee subscriptions of a UE
 func HTTPCreateAMFSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
 	var amfSubscriptionInfoArray []models.AmfSubscriptionInfo
 
 	requestBody, err := c.GetRawData()
