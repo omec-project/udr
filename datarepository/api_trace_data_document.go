@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/trace-data
 // Retrieves the trace configuration data of a UE
 func HTTPQueryTraceData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/trace-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/trace-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["servingPlmnId"] = c.Params.ByName("servingPlmnId")

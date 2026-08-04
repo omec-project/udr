@@ -50,7 +50,7 @@ func HTTPDeleteOperSpecData(c *gin.Context) {
 // Patch /subscription-data/:ueId/operator-specific-data
 // To modify operator specific data of a UE
 func HTTPModifyOperSpecData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Patch /subscription-data/:ueId/operator-specific-data")
+	logger.DataRepoLog.Debugln("Handle Patch /subscription-data/:ueId/operator-specific-data")
 	var patchItemArray []models.PatchItem
 
 	requestBody, err := c.GetRawData()
@@ -88,7 +88,7 @@ func HTTPModifyOperSpecData(c *gin.Context) {
 // Get /subscription-data/:ueId/operator-specific-data
 // Retrieves the operator specific data of a UE
 func HTTPQueryOperSpecData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/operator-specific-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/operator-specific-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

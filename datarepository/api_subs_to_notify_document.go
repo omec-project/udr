@@ -49,7 +49,7 @@ func HTTPQuerySubscriptionDataSubscriptions(c *gin.Context) {
 // Delete /subscription-data/subs-to-notify/:subsId
 // Deletes a subscriptionDataSubscriptions
 func HTTPRemovesubscriptionDataSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Delete /subscription-data/subs-to-notify/:subsId")
+	logger.DataRepoLog.Debugln("Handle Delete /subscription-data/subs-to-notify/:subsId")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["subsId"] = c.Params.ByName("subsId")
 

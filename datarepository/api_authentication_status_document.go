@@ -34,7 +34,7 @@ import (
 // Put /subscription-data/:ueId/authentication-data/authentication-status
 // To store the Authentication Status data of a UE
 func HTTPCreateAuthenticationStatus(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/authentication-data/authentication-status")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/authentication-data/authentication-status")
 	var authEvent models.AuthEvent
 
 	requestBody, err := c.GetRawData()

@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/authentication-data/authentication-subscription
 // Retrieves the authentication subscription data of a UE
 func HTTPQueryAuthSubsData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/authentication-data/authentication-subscription")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/authentication-data/authentication-subscription")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

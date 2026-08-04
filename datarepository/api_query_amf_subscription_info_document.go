@@ -41,7 +41,7 @@ func HTTPGetAmfGroupSubscriptions(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions
 // Retrieve AMF subscription Info
 func HTTPGetAmfSubscriptionInfo(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["subsId"] = c.Params.ByName("subsId")

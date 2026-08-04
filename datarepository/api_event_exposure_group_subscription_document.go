@@ -50,7 +50,7 @@ func HTTPQueryEeGroupSubscription(c *gin.Context) {
 // Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId
 // Deletes a eeSubscription for a group of UEs or any UE
 func HTTPRemoveEeGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId")
+	logger.DataRepoLog.Debugln("Handle Delete /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 	req.Params["subsId"] = c.Params.ByName("subsId")
@@ -70,7 +70,7 @@ func HTTPRemoveEeGroupSubscriptions(c *gin.Context) {
 // Put /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId
 // Update an individual ee subscription of a group of UEs or any UE
 func HTTPUpdateEeGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId")
 	var eeSubscription models.EeSubscription
 
 	requestBody, err := c.GetRawData()

@@ -34,7 +34,7 @@ import (
 // Post /subscription-data/:ueId/context-data/ee-subscriptions
 // Create individual EE subscription
 func HTTPCreateEeSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Post /subscription-data/:ueId/context-data/ee-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Post /subscription-data/:ueId/context-data/ee-subscriptions")
 	var eeSubscription models.EeSubscription
 
 	requestBody, err := c.GetRawData()
@@ -75,7 +75,7 @@ func HTTPCreateEeSubscriptions(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/ee-subscriptions
 // Retrieves the ee subscriptions of a UE
 func HTTPQueryeesubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/ee-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

@@ -34,7 +34,7 @@ import (
 // Patch /subscription-data/:ueId/pp-data
 // modify the provisioned parameter data
 func HTTPModifyPpData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Patch /subscription-data/:ueId/pp-data")
+	logger.DataRepoLog.Debugln("Handle Patch /subscription-data/:ueId/pp-data")
 	var patchItemArray []models.PatchItem
 
 	requestBody, err := c.GetRawData()

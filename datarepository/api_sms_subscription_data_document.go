@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/sms-data
 // Retrieves the SMS subscription data of a UE
 func HTTPQuerySmsData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/sms-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/sms-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["servingPlmnId"] = c.Params.ByName("servingPlmnId")

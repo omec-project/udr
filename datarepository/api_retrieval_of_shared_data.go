@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/shared-data
 // retrieve shared data
 func HTTPGetSharedData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/shared-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/shared-data")
 	sharedDataIdArray := c.QueryArray("shared-data-ids")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Query["sharedDataIds"] = sharedDataIdArray

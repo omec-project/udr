@@ -34,7 +34,7 @@ import (
 // Put /subscription-data/:ueId/context-data/smsf-3gpp-access
 // Create the SMSF context data of a UE via 3GPP access
 func HTTPCreateSmsfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/context-data/smsf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/context-data/smsf-3gpp-access")
 	var smsfRegistration models.SmsfRegistration
 
 	requestBody, err := c.GetRawData()
@@ -72,7 +72,7 @@ func HTTPCreateSmsfContext3gpp(c *gin.Context) {
 // Delete /subscription-data/:ueId/context-data/smsf-3gpp-access
 // To remove the SMSF context data of a UE via 3GPP access
 func HTTPDeleteSmsfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Delete /subscription-data/:ueId/context-data/smsf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Delete /subscription-data/:ueId/context-data/smsf-3gpp-access")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 
@@ -91,7 +91,7 @@ func HTTPDeleteSmsfContext3gpp(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/smsf-3gpp-access
 // Retrieves the SMSF context data of a UE using 3gpp access
 func HTTPQuerySmsfContext3gpp(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/smsf-3gpp-access")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/smsf-3gpp-access")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 

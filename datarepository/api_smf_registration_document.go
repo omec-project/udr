@@ -34,7 +34,7 @@ import (
 // Put /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId
 // To create an individual SMF context data of a UE in the UDR
 func HTTPCreateOrUpdateSmfRegistration(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Put /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId")
+	logger.DataRepoLog.Debugln("Handle Put /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId")
 	var smfRegistration models.SmfRegistration
 
 	requestBody, err := c.GetRawData()
@@ -91,7 +91,7 @@ func HTTPDeleteSmfRegistration(c *gin.Context) {
 // Get /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId
 // Retrieves the individual SMF registration of a UE
 func HTTPQuerySmfRegistration(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/context-data/smf-registrations/:pduSessionId")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["pduSessionId"] = c.Params.ByName("pduSessionId")

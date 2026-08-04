@@ -33,7 +33,7 @@ import (
 // Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data
 // Retrieves the SMF selection subscription data of a UE
 func HTTPQuerySmfSelectData(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/:ueId/:servingPlmnId/provisioned-data/smf-selection-subscription-data")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueId"] = c.Params.ByName("ueId")
 	req.Params["servingPlmnId"] = c.Params.ByName("servingPlmnId")

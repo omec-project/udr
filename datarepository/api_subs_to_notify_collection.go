@@ -50,7 +50,7 @@ func HTTPRemoveMultipleSubscriptionDataSubscriptions(c *gin.Context) {
 // Post /subscription-data/subs-to-notify
 // Subscription data subscriptions
 func HTTPSubscriptionDataSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Post /subscription-data/subs-to-notify")
+	logger.DataRepoLog.Debugln("Handle Post /subscription-data/subs-to-notify")
 	var subscriptionDataSubscriptions models.SubscriptionDataSubscriptions
 
 	requestBody, err := c.GetRawData()

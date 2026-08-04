@@ -41,7 +41,7 @@ func HTTPModifyAmfGroupSubscriptions(c *gin.Context) {
 // Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions
 // modify the AMF Subscription Info
 func HTTPModifyAmfSubscriptionInfo(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Patch /subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions")
 	var patchItemArray []models.PatchItem
 
 	requestBody, err := c.GetRawData()

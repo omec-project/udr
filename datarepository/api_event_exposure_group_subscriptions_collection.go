@@ -34,7 +34,7 @@ import (
 // Post /subscription-data/group-data/:ueGroupId/ee-subscriptions
 // Create individual EE subscription for a group of UEs or any UE
 func HTTPCreateEeGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Post /subscription-data/group-data/:ueGroupId/ee-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Post /subscription-data/group-data/:ueGroupId/ee-subscriptions")
 	var eeSubscription models.EeSubscription
 	requestBody, err := c.GetRawData()
 	if err != nil {
@@ -71,7 +71,7 @@ func HTTPCreateEeGroupSubscriptions(c *gin.Context) {
 // Get /subscription-data/group-data/:ueGroupId/ee-subscriptions
 // Retrieves the ee subscriptions of a group of UEs or any UE
 func HTTPQueryEeGroupSubscriptions(c *gin.Context) {
-	logger.DataRepoLog.Infoln("Handle Get /subscription-data/group-data/:ueGroupId/ee-subscriptions")
+	logger.DataRepoLog.Debugln("Handle Get /subscription-data/group-data/:ueGroupId/ee-subscriptions")
 	req := httpwrapper.NewRequest(c.Request, nil)
 	req.Params["ueGroupId"] = c.Params.ByName("ueGroupId")
 
