@@ -4,9 +4,12 @@
 package producer
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/omec-project/openapi/v2/models"
+	udr_context "github.com/omec-project/udr/context"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -160,5 +163,71 @@ func TestAddDotSafeKeyExistsFilterMergesExistingExpr(t *testing.T) {
 	}
 	if _, hasIn := newExpr["$in"]; !hasIn {
 		t.Fatal("expected $in operator in merged $expr")
+	}
+}
+
+// TestCreateSdmSubscriptionsProcedureIsConcurrencySafe reproduces the crash
+// seen on a live core once registration concurrency rose: the UDM creates an
+// SDM subscription per registration, and unsynchronised access to
+// UESubsData.SdmSubscriptions aborted the process with "concurrent map
+// writes". Run with -race to also catch the shared ID generator.
+func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
+	const (
+		ueCount       = 8
+		perUeRequests = 64
+	)
+
+	// UESubsCollection is a process-wide singleton, so leaving these entries
+	// behind would make a second run in the same process (go test -count=2, or
+	// any later test reusing these IDs) see the accumulated subscriptions and
+	// fail the count assertion.
+	udrSelf := udr_context.UDR_Self()
+	ueIds := make([]string, 0, ueCount)
+	for u := 0; u < ueCount; u++ {
+		ueIds = append(ueIds, fmt.Sprintf("imsi-20893010000%04d", u))
+	}
+	clearUeSubs := func() {
+		for _, id := range ueIds {
+			udrSelf.UESubsCollection.Delete(id)
+		}
+	}
+	clearUeSubs()
+	t.Cleanup(clearUeSubs)
+
+	var wg sync.WaitGroup
+	for u := 0; u < ueCount; u++ {
+		ueId := fmt.Sprintf("imsi-20893010000%04d", u)
+		for r := 0; r < perUeRequests; r++ {
+			wg.Add(1)
+			go func(ueId string) {
+				defer wg.Done()
+				CreateSdmSubscriptionsProcedure(models.SdmSubscription{}, "subscriptionData.contextData.sdmSubscriptions", ueId)
+			}(ueId)
+		}
+	}
+	wg.Wait()
+
+	// Every request must be recorded, and each subscription must have a
+	// distinct ID: a racing generator would hand out duplicates and lose rows.
+	seen := make(map[string]string)
+	for u := 0; u < ueCount; u++ {
+		ueId := fmt.Sprintf("imsi-20893010000%04d", u)
+		value, ok := udrSelf.UESubsCollection.Load(ueId)
+		if !ok {
+			t.Fatalf("no UESubsData stored for %s", ueId)
+		}
+		subs := value.(*udr_context.UESubsData)
+		subs.Mtx.RLock()
+		got := len(subs.SdmSubscriptions)
+		for id := range subs.SdmSubscriptions {
+			if prev, dup := seen[id]; dup {
+				t.Errorf("subscription ID %s reused by %s and %s", id, prev, ueId)
+			}
+			seen[id] = ueId
+		}
+		subs.Mtx.RUnlock()
+		if got != perUeRequests {
+			t.Errorf("%s: got %d subscriptions, want %d", ueId, got, perUeRequests)
+		}
 	}
 }
