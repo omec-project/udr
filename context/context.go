@@ -8,6 +8,7 @@ package context
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/omec-project/openapi/v2/models"
 )
@@ -25,7 +26,6 @@ const (
 func init() {
 	UDR_Self().Name = "udr"
 	UDR_Self().EeSubscriptionIDGenerator = 1
-	UDR_Self().SdmSubscriptionIDGenerator = 1
 	UDR_Self().SubscriptionDataSubscriptionIDGenerator = 1
 	UDR_Self().PolicyDataSubscriptionIDGenerator = 1
 	UDR_Self().SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)
@@ -49,15 +49,30 @@ type UDRContext struct {
 	mtx                                     sync.RWMutex
 	SBIPort                                 int
 	EeSubscriptionIDGenerator               int
-	SdmSubscriptionIDGenerator              int
+	SdmSubscriptionIDGenerator              atomic.Int64
 	PolicyDataSubscriptionIDGenerator       int
 	SubscriptionDataSubscriptionIDGenerator int
 	appDataInfluDataSubscriptionIdGenerator uint64
 }
 
+// UESubsData holds the per-UE subscription maps.
+//
+// Mtx guards SdmSubscriptions. The UDM creates an SDM subscription per
+// registration, one goroutine per in-flight registration, so unsynchronised
+// access there aborts the process with "concurrent map writes".
+//
+// EeSubscriptionCollection is deliberately left alone. Its ~20 call sites read
+// and write it without taking Mtx, and CreateEeSubscriptionsProcedure still
+// installs the per-UE entry with Load followed by Store, so two hazards remain
+// on that path: concurrent map writes, and an entry replacement that discards
+// SDM subscriptions already recorded. Both predate this change and want the
+// same treatment applied here, but across every EE site rather than piecemeal --
+// guarding only some of them, or making concurrent EE creators share one
+// instance without guarding the map, converts a lost update into a crash.
 type UESubsData struct {
 	EeSubscriptionCollection map[subsId]*EeSubscriptionCollection
 	SdmSubscriptions         map[subsId]*models.SdmSubscription
+	Mtx                      sync.RWMutex
 }
 
 type UEGroupSubsData struct {

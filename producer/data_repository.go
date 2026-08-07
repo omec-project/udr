@@ -2812,9 +2812,10 @@ func RemovesdmSubscriptionsProcedure(ueId string, subsId string) *models.Problem
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
-	_, ok = UESubsData.SdmSubscriptions[subsId]
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 
-	if !ok {
+	if _, ok = UESubsData.SdmSubscriptions[subsId]; !ok {
 		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	delete(UESubsData.SdmSubscriptions, subsId)
@@ -2849,9 +2850,10 @@ func UpdatesdmsubscriptionsProcedure(ueId string, subsId string,
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
-	_, ok = UESubsData.SdmSubscriptions[subsId]
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 
-	if !ok {
+	if _, ok = UESubsData.SdmSubscriptions[subsId]; !ok {
 		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 	SdmSubscription.SetSubscriptionId(subsId)
@@ -2880,20 +2882,22 @@ func CreateSdmSubscriptionsProcedure(SdmSubscription models.SdmSubscription,
 ) (string, models.SdmSubscription) {
 	udrSelf := udr_context.UDR_Self()
 
-	value, ok := udrSelf.UESubsCollection.Load(ueId)
-	if !ok {
-		udrSelf.UESubsCollection.Store(ueId, new(udr_context.UESubsData))
-		value, _ = udrSelf.UESubsCollection.Load(ueId)
-	}
+	// LoadOrStore keeps concurrent creators for the same ueId on one instance;
+	// a Load/Store pair would let two goroutines install competing values.
+	value, _ := udrSelf.UESubsCollection.LoadOrStore(ueId, new(udr_context.UESubsData))
 	UESubsData := value.(*udr_context.UESubsData)
+
+	// Allocated before taking the lock: the generator is shared across every
+	// UE, so it must not be serialised behind a per-UE lock.
+	newSubscriptionID := strconv.FormatInt(udrSelf.SdmSubscriptionIDGenerator.Add(1), 10)
+	SdmSubscription.SetSubscriptionId(newSubscriptionID)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 	if UESubsData.SdmSubscriptions == nil {
 		UESubsData.SdmSubscriptions = make(map[string]*models.SdmSubscription)
 	}
-
-	newSubscriptionID := strconv.Itoa(udrSelf.SdmSubscriptionIDGenerator)
-	SdmSubscription.SetSubscriptionId(newSubscriptionID)
 	UESubsData.SdmSubscriptions[newSubscriptionID] = &SdmSubscription
-	udrSelf.SdmSubscriptionIDGenerator++
 
 	/* Contains the URI of the newly created resource, according
 	   to the structure: {apiRoot}/subscription-data/{ueId}/context-data/sdm-subscriptions/{subsId}' */
@@ -2934,9 +2938,11 @@ func QuerysdmsubscriptionsProcedure(ueId string) (*[]models.SdmSubscription, *mo
 	UESubsData := value.(*udr_context.UESubsData)
 	var sdmSubscriptionSlice []models.SdmSubscription
 
+	UESubsData.Mtx.RLock()
 	for _, v := range UESubsData.SdmSubscriptions {
 		sdmSubscriptionSlice = append(sdmSubscriptionSlice, *v)
 	}
+	UESubsData.Mtx.RUnlock()
 	return &sdmSubscriptionSlice, nil
 }
 
