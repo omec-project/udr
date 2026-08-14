@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
-	github.com/omec-project/openapi/v2 v2.1.5
+	github.com/omec-project/openapi/v2 v2.2.0
 	github.com/omec-project/util v1.8.4
 	github.com/prometheus/client_golang v1.24.1
 	github.com/urfave/cli/v3 v3.10.1
