@@ -582,11 +582,11 @@ func getApplicationDataInfluenceDatafromDB(influIDs, dnns, snssais,
 	matchedInfluDatas = filterDataByString("interGroupId", intGroupIDs, matchedInfluDatas)
 	matchedInfluDatas = filterDataByString("supi", supis, matchedInfluDatas)
 	matchedInfluDatas = filterDataBySnssai(snssais, matchedInfluDatas)
-	for i := 0; i < len(matchedInfluDatas); i++ {
+	for _, d := range matchedInfluDatas {
 		// Delete "_id" entry which is auto-inserted by MongoDB
-		delete(matchedInfluDatas[i], "_id")
+		delete(d, "_id")
 		// Delete "influenceId" entry which is added by us
-		delete(matchedInfluDatas[i], "influenceId")
+		delete(d, "influenceId")
 	}
 	return matchedInfluDatas
 }
@@ -802,11 +802,11 @@ func getApplicationDataInfluenceDataSubsToNotifyfromDB(dnn, snssai, intGroupID,
 	if len(snssai) != 0 {
 		matchedSubs = filterDataBySnssais(snssai[0], matchedSubs)
 	}
-	for i := 0; i < len(matchedSubs); i++ {
+	for _, d := range matchedSubs {
 		// Delete "_id" entry which is auto-inserted by MongoDB
-		delete(matchedSubs[i], "_id")
+		delete(d, "_id")
 		// Delete "subscriptionId" entry which is added by us
-		delete(matchedSubs[i], "subscriptionId")
+		delete(d, "subscriptionId")
 	}
 	return matchedSubs
 }
@@ -1039,8 +1039,8 @@ func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]in
 		if errGetMany != nil {
 			logger.DataRepoLog.Warnln(errGetMany)
 		}
-		for i := 0; i < len(matchedPfds); i++ {
-			delete(matchedPfds[i], "_id")
+		for _, d := range matchedPfds {
+			delete(d, "_id")
 		}
 	} else {
 		for _, v := range pfdsAppIDs {
