@@ -183,7 +183,7 @@ func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	// fail the count assertion.
 	udrSelf := udr_context.UDR_Self()
 	ueIds := make([]string, 0, ueCount)
-	for u := 0; u < ueCount; u++ {
+	for u := range ueCount {
 		ueIds = append(ueIds, fmt.Sprintf("imsi-20893010000%04d", u))
 	}
 	clearUeSubs := func() {
@@ -195,9 +195,9 @@ func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	t.Cleanup(clearUeSubs)
 
 	var wg sync.WaitGroup
-	for u := 0; u < ueCount; u++ {
+	for u := range ueCount {
 		ueId := fmt.Sprintf("imsi-20893010000%04d", u)
-		for r := 0; r < perUeRequests; r++ {
+		for range perUeRequests {
 			wg.Add(1)
 			go func(ueId string) {
 				defer wg.Done()
@@ -210,7 +210,7 @@ func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	// Every request must be recorded, and each subscription must have a
 	// distinct ID: a racing generator would hand out duplicates and lose rows.
 	seen := make(map[string]string)
-	for u := 0; u < ueCount; u++ {
+	for u := range ueCount {
 		ueId := fmt.Sprintf("imsi-20893010000%04d", u)
 		value, ok := udrSelf.UESubsCollection.Load(ueId)
 		if !ok {
