@@ -1,10 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 Canonical Ltd.
-
 info:
   version: 1.0.0
   description: UDR initial local configuration
-
 configuration:
   webuiUri: http://myspecialwebui:9872 # a valid URI of Webui
   sbi: # Service Based Interface
