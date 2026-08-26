@@ -25,7 +25,7 @@ const (
 
 func init() {
 	UDR_Self().Name = "udr"
-	UDR_Self().EeSubscriptionIDGenerator = 1
+	UDR_Self().EeSubscriptionIDGenerator.Store(1)
 	UDR_Self().SubscriptionDataSubscriptionIDGenerator = 1
 	UDR_Self().PolicyDataSubscriptionIDGenerator = 1
 	UDR_Self().SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)
@@ -48,7 +48,7 @@ type UDRContext struct {
 	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
 	mtx                                     sync.RWMutex
 	SBIPort                                 int
-	EeSubscriptionIDGenerator               int
+	EeSubscriptionIDGenerator               atomic.Int64
 	SdmSubscriptionIDGenerator              atomic.Int64
 	PolicyDataSubscriptionIDGenerator       int
 	SubscriptionDataSubscriptionIDGenerator int
@@ -57,26 +57,25 @@ type UDRContext struct {
 
 // UESubsData holds the per-UE subscription maps.
 //
-// Mtx guards SdmSubscriptions. The UDM creates an SDM subscription per
-// registration, one goroutine per in-flight registration, so unsynchronised
-// access there aborts the process with "concurrent map writes".
+// Mtx guards both maps. The UDM creates an SDM subscription per registration,
+// one goroutine per in-flight registration, so unsynchronised access aborts the
+// process with "concurrent map writes"; the EE subscription paths are reached
+// from their own handlers and are no different.
 //
-// EeSubscriptionCollection is deliberately left alone. Its ~20 call sites read
-// and write it without taking Mtx, and CreateEeSubscriptionsProcedure still
-// installs the per-UE entry with Load followed by Store, so two hazards remain
-// on that path: concurrent map writes, and an entry replacement that discards
-// SDM subscriptions already recorded. Both predate this change and want the
-// same treatment applied here, but across every EE site rather than piecemeal --
-// guarding only some of them, or making concurrent EE creators share one
-// instance without guarding the map, converts a lost update into a crash.
+// Read paths must hold RLock across the map lookup *and* the use of the value
+// pointer, not just the lookup: the entry can otherwise be replaced while the
+// caller is dereferencing it.
 type UESubsData struct {
 	EeSubscriptionCollection map[subsId]*EeSubscriptionCollection
 	SdmSubscriptions         map[subsId]*models.SdmSubscription
 	Mtx                      sync.RWMutex
 }
 
+// Mtx guards EeSubscriptions. Keyed by group rather than by UE, so it needs its
+// own lock rather than borrowing the per-UE one.
 type UEGroupSubsData struct {
 	EeSubscriptions map[subsId]*models.EeSubscription
+	Mtx             sync.RWMutex
 }
 
 type EeSubscriptionCollection struct {

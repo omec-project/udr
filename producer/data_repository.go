@@ -1901,6 +1901,9 @@ func CreateAMFSubscriptionsProcedure(subsId string, ueId string,
 	}
 	UESubsData := value.(*udr_context.UESubsData)
 
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
+
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 	if !ok {
 		return utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
@@ -1934,6 +1937,9 @@ func RemoveAmfSubscriptionsInfoProcedure(subsId string, ueId string) *models.Pro
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
@@ -1975,6 +1981,9 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 		return utils.ProblemDetailsUserNotFound()
 	}
 	UESubsData := value.(*udr_context.UESubsData)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
@@ -2048,16 +2057,25 @@ func GetAmfSubscriptionInfoProcedure(subsId string, ueId string) (*[]models.AmfS
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
-	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
+	UESubsData.Mtx.RLock()
+	defer UESubsData.Mtx.RUnlock()
+
+	subscription, ok := UESubsData.EeSubscriptionCollection[subsId]
 	if !ok {
 		return nil, utils.ProblemDetailsWithCause("Subscription not found", http.StatusNotFound, "", utils.CauseSubscriptionNotFound)
 	}
 
-	if UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos == nil {
+	if subscription.AmfSubscriptionInfos == nil {
 		return nil, utils.ProblemDetailsWithCause("AMF Subscription not found", http.StatusNotFound, "", utils.CauseAmfSubscriptionNotFound)
 	}
-	return &UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos, nil
+
+	// A copy, not a pointer into the map's value: the caller reads it after this
+	// lock is released, and the entry can be replaced or deleted by then.
+	infos := make([]models.AmfSubscriptionInfo, len(subscription.AmfSubscriptionInfos))
+	copy(infos, subscription.AmfSubscriptionInfos)
+
+	return &infos, nil
 }
 
 func HandleQueryEEData(request *httpwrapper.Request) *httpwrapper.Response {
@@ -2118,6 +2136,9 @@ func RemoveEeGroupSubscriptionsProcedure(ueGroupId string, subsId string) *model
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
+
+	UEGroupSubsData.Mtx.Lock()
+	defer UEGroupSubsData.Mtx.Unlock()
 	_, ok = UEGroupSubsData.EeSubscriptions[subsId]
 
 	if !ok {
@@ -2155,6 +2176,9 @@ func UpdateEeGroupSubscriptionsProcedure(ueGroupId string, subsId string,
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
+
+	UEGroupSubsData.Mtx.Lock()
+	defer UEGroupSubsData.Mtx.Unlock()
 	_, ok = UEGroupSubsData.EeSubscriptions[subsId]
 
 	if !ok {
@@ -2182,19 +2206,19 @@ func HandleCreateEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper
 func CreateEeGroupSubscriptionsProcedure(ueGroupId string, EeSubscription models.EeSubscription) string {
 	udrSelf := udr_context.UDR_Self()
 
-	value, ok := udrSelf.UEGroupCollection.Load(ueGroupId)
-	if !ok {
-		udrSelf.UEGroupCollection.Store(ueGroupId, new(udr_context.UEGroupSubsData))
-		value, _ = udrSelf.UEGroupCollection.Load(ueGroupId)
-	}
+	// See CreateEeSubscriptionsProcedure: LoadOrStore, then the generator outside
+	// the per-group lock, then the map under it.
+	value, _ := udrSelf.UEGroupCollection.LoadOrStore(ueGroupId, new(udr_context.UEGroupSubsData))
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
+
+	newSubscriptionID := strconv.FormatInt(udrSelf.EeSubscriptionIDGenerator.Add(1), 10)
+
+	UEGroupSubsData.Mtx.Lock()
+	defer UEGroupSubsData.Mtx.Unlock()
 	if UEGroupSubsData.EeSubscriptions == nil {
 		UEGroupSubsData.EeSubscriptions = make(map[string]*models.EeSubscription)
 	}
-
-	newSubscriptionID := strconv.Itoa(udrSelf.EeSubscriptionIDGenerator)
 	UEGroupSubsData.EeSubscriptions[newSubscriptionID] = &EeSubscription
-	udrSelf.EeSubscriptionIDGenerator++
 
 	/* Contains the URI of the newly created resource, according
 	   to the structure: {apiRoot}/subscription-data/group-data/{ueGroupId}/ee-subscriptions */
@@ -2233,6 +2257,9 @@ func QueryEeGroupSubscriptionsProcedure(ueGroupId string) ([]models.EeSubscripti
 	}
 
 	UEGroupSubsData := value.(*udr_context.UEGroupSubsData)
+
+	UEGroupSubsData.Mtx.RLock()
+	defer UEGroupSubsData.Mtx.RUnlock()
 	var eeSubscriptionSlice []models.EeSubscription
 
 	for _, v := range UEGroupSubsData.EeSubscriptions {
@@ -2265,6 +2292,9 @@ func RemoveeeSubscriptionsProcedure(ueId string, subsId string) *models.ProblemD
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
@@ -2301,6 +2331,9 @@ func UpdateEesubscriptionsProcedure(ueId string, subsId string,
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 	_, ok = UESubsData.EeSubscriptionCollection[subsId]
 
 	if !ok {
@@ -2328,20 +2361,24 @@ func HandleCreateEeSubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 func CreateEeSubscriptionsProcedure(ueId string, EeSubscription models.EeSubscription) string {
 	udrSelf := udr_context.UDR_Self()
 
-	value, ok := udrSelf.UESubsCollection.Load(ueId)
-	if !ok {
-		udrSelf.UESubsCollection.Store(ueId, new(udr_context.UESubsData))
-		value, _ = udrSelf.UESubsCollection.Load(ueId)
-	}
+	// LoadOrStore keeps concurrent creators for the same ueId on one instance;
+	// a Load/Store pair would let two goroutines install competing values, and
+	// the loser's SDM subscriptions would be discarded with it.
+	value, _ := udrSelf.UESubsCollection.LoadOrStore(ueId, new(udr_context.UESubsData))
 	UESubsData := value.(*udr_context.UESubsData)
+
+	// Allocated before taking the lock: the generator is shared across every
+	// UE, so it must not be serialised behind a per-UE lock.
+	newSubscriptionID := strconv.FormatInt(udrSelf.EeSubscriptionIDGenerator.Add(1), 10)
+
+	UESubsData.Mtx.Lock()
+	defer UESubsData.Mtx.Unlock()
 	if UESubsData.EeSubscriptionCollection == nil {
 		UESubsData.EeSubscriptionCollection = make(map[string]*udr_context.EeSubscriptionCollection)
 	}
-
-	newSubscriptionID := strconv.Itoa(udrSelf.EeSubscriptionIDGenerator)
-	UESubsData.EeSubscriptionCollection[newSubscriptionID] = new(udr_context.EeSubscriptionCollection)
-	UESubsData.EeSubscriptionCollection[newSubscriptionID].EeSubscriptions = &EeSubscription
-	udrSelf.EeSubscriptionIDGenerator++
+	UESubsData.EeSubscriptionCollection[newSubscriptionID] = &udr_context.EeSubscriptionCollection{
+		EeSubscriptions: &EeSubscription,
+	}
 
 	/* Contains the URI of the newly created resource, according
 	   to the structure: {apiRoot}/subscription-data/{ueId}/context-data/ee-subscriptions/{subsId} */
@@ -2380,6 +2417,9 @@ func QueryeesubscriptionsProcedure(ueId string) ([]models.EeSubscription, *model
 	}
 
 	UESubsData := value.(*udr_context.UESubsData)
+
+	UESubsData.Mtx.RLock()
+	defer UESubsData.Mtx.RUnlock()
 	var eeSubscriptionSlice []models.EeSubscription
 
 	for _, v := range UESubsData.EeSubscriptionCollection {

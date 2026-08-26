@@ -231,3 +231,140 @@ func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 		}
 	}
 }
+
+// TestCreateEeSubscriptionsProcedureIsConcurrencySafe covers the EE half of the
+// hazard that udr#351 documented and deliberately left: EeSubscriptionCollection
+// was read and written with no lock, and the per-UE entry was installed with a
+// Load/Store pair. Three failures are possible and only the first is loud:
+//
+//   - "concurrent map writes", which aborts the process
+//   - duplicate subscription IDs from the non-atomic generator, which silently
+//     overwrite one another
+//   - a Load/Store gap that discards an entry, taking its SDM subscriptions too
+//
+// The count assertion is what catches the quiet two: with N creators there must
+// be exactly N subscriptions, each under its own ID.
+func TestCreateEeSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
+	const (
+		ueCount       = 8
+		perUeRequests = 64
+	)
+
+	udrSelf := udr_context.UDR_Self()
+	ueIds := make([]string, 0, ueCount)
+	for u := 0; u < ueCount; u++ {
+		ueIds = append(ueIds, fmt.Sprintf("imsi-20893010001%04d", u))
+	}
+	// UESubsCollection is a process-wide singleton; leaving entries behind would
+	// make a repeat run in the same process see the accumulation and fail.
+	forgetEntries := func() {
+		for _, id := range ueIds {
+			udrSelf.UESubsCollection.Delete(id)
+		}
+	}
+	forgetEntries()
+	t.Cleanup(forgetEntries)
+
+	var wg sync.WaitGroup
+	for u := 0; u < ueCount; u++ {
+		for r := 0; r < perUeRequests; r++ {
+			wg.Add(1)
+			go func(ueId string) {
+				defer wg.Done()
+				CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{})
+			}(ueIds[u])
+		}
+	}
+	wg.Wait()
+
+	for _, ueId := range ueIds {
+		value, ok := udrSelf.UESubsCollection.Load(ueId)
+		if !ok {
+			t.Fatalf("no UESubsData for %s: a Load/Store race discarded it", ueId)
+		}
+
+		subs := value.(*udr_context.UESubsData)
+		subs.Mtx.RLock()
+		got := len(subs.EeSubscriptionCollection)
+		subs.Mtx.RUnlock()
+
+		if got != perUeRequests {
+			t.Errorf("%s has %d EE subscriptions, want %d: duplicate IDs overwrote entries",
+				ueId, got, perUeRequests)
+		}
+	}
+}
+
+// TestCreateEeGroupSubscriptionsProcedureIsConcurrencySafe is the same hazard on
+// the group-keyed map, which had no mutex in its struct at all.
+func TestCreateEeGroupSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
+	const (
+		groupCount      = 4
+		perGroupRequest = 64
+	)
+
+	udrSelf := udr_context.UDR_Self()
+	groupIds := make([]string, 0, groupCount)
+	for g := 0; g < groupCount; g++ {
+		groupIds = append(groupIds, fmt.Sprintf("extgroupid-test-%04d@example.com", g))
+	}
+	forgetEntries := func() {
+		for _, id := range groupIds {
+			udrSelf.UEGroupCollection.Delete(id)
+		}
+	}
+	forgetEntries()
+	t.Cleanup(forgetEntries)
+
+	var wg sync.WaitGroup
+	for g := 0; g < groupCount; g++ {
+		for r := 0; r < perGroupRequest; r++ {
+			wg.Add(1)
+			go func(groupId string) {
+				defer wg.Done()
+				CreateEeGroupSubscriptionsProcedure(groupId, models.EeSubscription{})
+			}(groupIds[g])
+		}
+	}
+	wg.Wait()
+
+	for _, groupId := range groupIds {
+		value, ok := udrSelf.UEGroupCollection.Load(groupId)
+		if !ok {
+			t.Fatalf("no UEGroupSubsData for %s: a Load/Store race discarded it", groupId)
+		}
+
+		subs := value.(*udr_context.UEGroupSubsData)
+		subs.Mtx.RLock()
+		got := len(subs.EeSubscriptions)
+		subs.Mtx.RUnlock()
+
+		if got != perGroupRequest {
+			t.Errorf("%s has %d EE subscriptions, want %d", groupId, got, perGroupRequest)
+		}
+	}
+}
+
+// TestEeSubscriptionReadersRaceWithWriters exercises the read paths, which take
+// RLock and must hold it across the map lookup and the use of the value pointer.
+// A reader that locks only for the lookup can have the entry replaced under it.
+func TestEeSubscriptionReadersRaceWithWriters(t *testing.T) {
+	const iterations = 200
+
+	udrSelf := udr_context.UDR_Self()
+	ueId := "imsi-208930100019999"
+	udrSelf.UESubsCollection.Delete(ueId)
+	t.Cleanup(func() { udrSelf.UESubsCollection.Delete(ueId) })
+
+	// One subscription to read, and a known id to query and modify.
+	CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{})
+
+	var wg sync.WaitGroup
+	for i := 0; i < iterations; i++ {
+		wg.Add(3)
+		go func() { defer wg.Done(); CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{}) }()
+		go func() { defer wg.Done(); QueryeesubscriptionsProcedure(ueId) }()
+		go func() { defer wg.Done(); GetAmfSubscriptionInfoProcedure("1", ueId) }()
+	}
+	wg.Wait()
+}
