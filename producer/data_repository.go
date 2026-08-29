@@ -3141,7 +3141,7 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 	putData[ParamUeId] = ueId
 	putData[ParamPduSessionId] = int32(pduSessionIdInt)
 
-	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: pduSessionIdInt}
+	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: int32(pduSessionIdInt)}
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
@@ -3170,7 +3170,7 @@ func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string
 	if err != nil {
 		logger.DataRepoLog.Error(err)
 	}
-	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: pduSessionIdInt}
+	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: int32(pduSessionIdInt)}
 
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
@@ -3207,7 +3207,7 @@ func QuerySmfRegistrationProcedure(collName string, ueId string,
 		logger.DataRepoLog.Error(err)
 	}
 
-	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: pduSessionIdInt}
+	filter := bson.M{ParamUeId: ueId, ParamPduSessionId: int32(pduSessionIdInt)}
 
 	smfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {

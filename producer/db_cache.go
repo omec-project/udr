@@ -56,7 +56,7 @@ func newCachedDBClient(inner DBInterface) *cachedDBClient {
 // which are the only fields used by cacheable collections.
 func cacheKey(collName string, filter bson.M) string {
 	ueId, _ := filter[ParamUeId].(string)
-	plmnId, _ := filter["servingPlmnId"].(string)
+	plmnId, _ := filter[ParamServingPlmnId].(string)
 	return collName + "\x00" + ueId + "\x00" + plmnId
 }
 
