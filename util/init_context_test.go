@@ -13,19 +13,27 @@ import (
 	"github.com/omec-project/udr/factory"
 )
 
+const (
+	testVersion      = "1.0.0"
+	testDescription  = "UDR test config"
+	testScheme       = "https"
+	testRegisterIPv4 = "127.0.0.1"
+	testNrfUri       = "https://127.0.0.1:29510"
+)
+
 func newBaseConfig() factory.Config {
 	return factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 }
@@ -51,8 +59,8 @@ func TestInitUdrContext_DefaultValues(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: nil,
@@ -75,24 +83,24 @@ func TestInitUdrContext_SbiConfig(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
+				Scheme:       testScheme,
 				RegisterIPv4: "10.0.0.1",
 				Port:         9090,
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{}
 
 	InitUdrContext(ctx)
 
-	if ctx.UriScheme != models.UriScheme("https") {
-		t.Errorf("UriScheme = %q, want %q", ctx.UriScheme, "https")
+	if ctx.UriScheme != models.UriScheme(testScheme) {
+		t.Errorf("UriScheme = %q, want %q", ctx.UriScheme, testScheme)
 	}
 	if ctx.RegisterIPv4 != "10.0.0.1" {
 		t.Errorf("RegisterIPv4 = %q, want %q", ctx.RegisterIPv4, "10.0.0.1")
@@ -107,8 +115,8 @@ func TestInitUdrContext_SbiConfig_EmptyRegisterIPv4(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
@@ -116,7 +124,7 @@ func TestInitUdrContext_SbiConfig_EmptyRegisterIPv4(t *testing.T) {
 				RegisterIPv4: "",
 				Port:         0,
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{}
@@ -136,20 +144,20 @@ func TestInitUdrContext_TLSConfig(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 				Tls: &factory.Tls{
 					Key: "/path/to/key.pem",
 					Pem: "/path/to/cert.pem",
 				},
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{}
@@ -169,20 +177,20 @@ func TestInitUdrContext_TLSConfig_EmptyValues(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 				Tls: &factory.Tls{
 					Key: "",
 					Pem: "",
 				},
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{
@@ -206,13 +214,13 @@ func TestInitUdrContext_NrfUri_Set(t *testing.T) {
 	expectedNrfUri := "https://10.0.0.2:29510"
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 			},
 			NrfUri: expectedNrfUri,
@@ -232,13 +240,13 @@ func TestInitUdrContext_NrfUri_Empty_UsesDefault(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 			},
 			NrfUri: "",
@@ -248,7 +256,7 @@ func TestInitUdrContext_NrfUri_Empty_UsesDefault(t *testing.T) {
 
 	InitUdrContext(ctx)
 
-	expectedNrfUri := fmt.Sprintf("%s://%s:%d", ctx.UriScheme, "127.0.0.1", 29510)
+	expectedNrfUri := fmt.Sprintf("%s://%s:%d", ctx.UriScheme, testRegisterIPv4, 29510)
 	if ctx.NrfUri != expectedNrfUri {
 		t.Errorf("NrfUri = %q, want %q (default)", ctx.NrfUri, expectedNrfUri)
 	}
@@ -259,17 +267,17 @@ func TestInitUdrContext_NilTLS(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi: &factory.Sbi{
-				Scheme:       "https",
-				RegisterIPv4: "127.0.0.1",
+				Scheme:       testScheme,
+				RegisterIPv4: testRegisterIPv4,
 				Port:         8080,
 				Tls:          nil,
 			},
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{}
@@ -283,12 +291,12 @@ func TestInitUdrContext_NilSbi(t *testing.T) {
 	t.Cleanup(func() { factory.UdrConfig = origUdrConfig })
 	factory.UdrConfig = factory.Config{
 		Info: &factory.Info{
-			Version:     "1.0.0",
-			Description: "UDR test config",
+			Version:     testVersion,
+			Description: testDescription,
 		},
 		Configuration: &factory.Configuration{
 			Sbi:    nil,
-			NrfUri: "https://127.0.0.1:29510",
+			NrfUri: testNrfUri,
 		},
 	}
 	ctx := &context.UDRContext{}

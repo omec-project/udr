@@ -22,12 +22,12 @@ const cacheTTL = 30 * time.Second
 // authentication subscription data that is written by simapp before UEs
 // connect and then read many times per registration.
 var cacheableCollections = map[string]bool{
-	"subscriptionData.provisionedData.amData":                        true,
-	"subscriptionData.provisionedData.smfSelectionSubscriptionData":  true,
-	"subscriptionData.provisionedData.smsData":                       true,
-	"subscriptionData.provisionedData.smsMngData":                    true,
-	"subscriptionData.provisionedData.traceData":                     true,
-	"subscriptionData.authenticationData.authenticationSubscription": true,
+	CollAmData:                       true,
+	CollSmfSelectionSubscriptionData: true,
+	CollSmsData:                      true,
+	CollSmsMngData:                   true,
+	CollTraceData:                    true,
+	CollAuthenticationSubscription:   true,
 }
 
 type cacheEntry struct {
@@ -55,7 +55,7 @@ func newCachedDBClient(inner DBInterface) *cachedDBClient {
 // cacheKey builds a stable key from the filter's ueId and servingPlmnId fields,
 // which are the only fields used by cacheable collections.
 func cacheKey(collName string, filter bson.M) string {
-	ueId, _ := filter["ueId"].(string)
+	ueId, _ := filter[ParamUeId].(string)
 	plmnId, _ := filter["servingPlmnId"].(string)
 	return collName + "\x00" + ueId + "\x00" + plmnId
 }

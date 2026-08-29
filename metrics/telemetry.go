@@ -15,6 +15,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+var counterLabels = []string{"query_type", "resource_type", "result"}
+
 // UdrStats captures UDR stats
 type UdrStats struct {
 	udrSubscriptionData *prometheus.CounterVec
@@ -29,15 +31,15 @@ func initUdrStats() *UdrStats {
 		udrSubscriptionData: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "udr_subscription_data",
 			Help: "Counter of total Subscription data queries",
-		}, []string{"query_type", "resource_type", "result"}),
+		}, counterLabels),
 		udrApplicationData: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "udr_application_data",
 			Help: "Counter of total Application data queries",
-		}, []string{"query_type", "resource_type", "result"}),
+		}, counterLabels),
 		udrPolicyData: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "udr_policy_data",
 			Help: "Counter of total Policy data queries",
-		}, []string{"query_type", "resource_type", "result"}),
+		}, counterLabels),
 	}
 }
 
