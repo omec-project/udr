@@ -69,12 +69,16 @@ func (s *stubDB) RestfulAPIPost(_ string, _ bson.M, _ map[string]any) (bool, err
 }
 func (s *stubDB) RestfulAPIPostMany(_ string, _ bson.M, _ []interface{}) error { return nil }
 
-const testColl = "subscriptionData.provisionedData.amData"
+const (
+	testColl     = CollAmData
+	testFooValue = "bar"
+	testFooKey   = "foo"
+)
 
-var testFilter = bson.M{"ueId": "imsi-001010000000001", "servingPlmnId": "00101"}
+var testFilter = bson.M{ParamUeId: "imsi-001010000000001", ParamServingPlmnId: "00101"}
 
 func TestCacheHitAvoidsDatabaseCall(t *testing.T) {
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	first, err := c.RestfulAPIGetOne(testColl, testFilter)
@@ -98,7 +102,7 @@ func TestCacheExpiry(t *testing.T) {
 	// manipulating the entry's expiry via the internals after first load.
 	_ = orig // const cannot be reassigned; we verify expiry by injecting a stale entry
 
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	// Populate the cache.
@@ -125,14 +129,14 @@ func TestCacheExpiry(t *testing.T) {
 }
 
 func TestCacheInvalidatedOnPutOne(t *testing.T) {
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	if _, err := c.RestfulAPIGetOne(testColl, testFilter); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := c.RestfulAPIPutOne(testColl, testFilter, map[string]any{"foo": "new"}); err != nil {
+	if _, err := c.RestfulAPIPutOne(testColl, testFilter, map[string]any{testFooKey: "new"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,7 +150,7 @@ func TestCacheInvalidatedOnPutOne(t *testing.T) {
 }
 
 func TestCacheInvalidatedOnJSONPatch(t *testing.T) {
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	if _, err := c.RestfulAPIGetOne(testColl, testFilter); err != nil {
@@ -187,7 +191,7 @@ func TestCacheReturnedMapIsolatedFromCachedCopy(t *testing.T) {
 }
 
 func TestNonCacheableCollectionBypassesCache(t *testing.T) {
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	for range 3 {
@@ -202,7 +206,7 @@ func TestNonCacheableCollectionBypassesCache(t *testing.T) {
 }
 
 func TestCacheConcurrentReads(t *testing.T) {
-	db := &stubDB{result: map[string]any{"foo": "bar"}}
+	db := &stubDB{result: map[string]any{testFooKey: testFooValue}}
 	c := newCachedDBClient(db)
 
 	// Prime the cache.

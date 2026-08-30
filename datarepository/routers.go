@@ -29,7 +29,52 @@ import (
 	utilLogger "github.com/omec-project/util/logger"
 )
 
-const contentTypeJSON = "application/json"
+const (
+	contentTypeJSON = "application/json"
+
+	pathAmf3gppAccess                      = "/subscription-data/:ueId/context-data/amf-3gpp-access"
+	pathAmfNon3gppAccess                   = "/subscription-data/:ueId/context-data/amf-non-3gpp-access"
+	pathAccessAndMobilityData              = "/exposure-data/:ueId/access-and-mobility-data"
+	pathAuthenticationStatus               = "/subscription-data/:ueId/authentication-data/authentication-status"
+	pathEeSubscriptions                    = "/subscription-data/:ueId/context-data/ee-subscriptions/:subsId"
+	pathAppDataSubsToNotify                = "/application-data/subs-to-notify/:subsId"
+	pathBdtPolicyData                      = "/application-data/bdtPolicyData/:bdtPolicyId"
+	pathAuthenticationStatusServingNetwork = "/subscription-data/:ueId/authentication-data/authentication-status/:servingNetworkName"
+	pathPolicyBdtData                      = "/policy-data/bdt-data/:bdtReferenceId"
+	pathIptvConfigData                     = "/application-data/iptvConfigData/:configurationId"
+	pathInfluenceData                      = "/application-data/influenceData/:influenceId"
+	pathInfluenceDataSubsToNotify          = "/application-data/influenceData/subs-to-notify/:subscriptionId"
+	pathPfds                               = "/application-data/pfds/:appId"
+	pathPolicySubsToNotify                 = "/policy-data/subs-to-notify/:subsId"
+	pathServiceParamData                   = "/application-data/serviceParamData/:serviceParamId"
+	pathOperatorSpecificData               = "/policy-data/ues/:ueId/operator-specific-data"
+	pathSessionManagementData              = "/exposure-data/:ueId/session-management-data/:pduSessionId"
+	pathUePolicySet                        = "/policy-data/ues/:ueId/ue-policy-set"
+	pathSmDataUsageMon                     = "/policy-data/ues/:ueId/sm-data/:usageMonId"
+
+	pathGroupEeSubscriptionsAmf       = "/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions"
+	pathEeSubscriptionsAmf            = "/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions"
+	pathUeUpdateConfirmationSorData   = "/subscription-data/:ueId/ue-update-confirmation-data/sor-data"
+	pathFiveGVnGroups                 = "/subscription-data/group-data/5g-vn-groups/:externalGroupId"
+	pathMbsGroupMembership            = "/subscription-data/group-data/mbs-group-membership/:externalGroupId"
+	pathGroupEeSubscriptions          = "/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId"
+	pathGroupEeSubscriptionsHss       = "/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/hss-subscriptions"
+	pathEeSubscriptionsHss            = "/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/hss-subscriptions"
+	pathSdmSubscriptionsHss           = "/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId/hss-sdm-subscriptions"
+	pathIpSmGw                        = "/subscription-data/:ueId/context-data/ip-sm-gw"
+	pathMwd                           = "/subscription-data/:ueId/context-data/mwd"
+	pathNiddAuthorizations            = "/subscription-data/:ueId/context-data/nidd-authorizations"
+	pathSubscOperatorSpecificData     = "/subscription-data/:ueId/operator-specific-data"
+	pathSdmSubscriptions              = "/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId"
+	pathGroupEeSubscriptionsSmf       = "/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions"
+	pathEeSubscriptionsSmf            = "/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/smf-subscriptions"
+	pathSmfRegistrations              = "/subscription-data/:ueId/context-data/smf-registrations/:pduSessionId"
+	pathSmsf3gppAccess                = "/subscription-data/:ueId/context-data/smsf-3gpp-access"
+	pathSmsfNon3gppAccess             = "/subscription-data/:ueId/context-data/smsf-non-3gpp-access"
+	pathServiceSpecificAuthorizations = "/subscription-data/:ueId/context-data/service-specific-authorizations/:serviceType"
+	pathSubscDataSubsToNotify         = "/subscription-data/subs-to-notify"
+	pathSubscDataSubsToNotifyId       = "/subscription-data/subs-to-notify/:subsId"
+)
 
 // Route is the information for every URI.
 type Route struct {
@@ -145,73 +190,73 @@ func getRoutes() []Route {
 		{
 			"AmfContext3gpp",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/amf-3gpp-access",
+			pathAmf3gppAccess,
 			HTTPAmfContext3gpp,
 		},
 		{
 			"CreateAmfContext3gpp",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/amf-3gpp-access",
+			pathAmf3gppAccess,
 			HTTPCreateAmfContext3gpp,
 		},
 		{
 			"QueryAmfContext3gpp",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/amf-3gpp-access",
+			pathAmf3gppAccess,
 			HTTPQueryAmfContext3gpp,
 		},
 		{
 			"CreateAmfGroupSubscriptions",
 			http.MethodPut,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions",
+			pathGroupEeSubscriptionsAmf,
 			HTTPCreateAmfGroupSubscriptions,
 		},
 		{
 			"AmfContextNon3gpp",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/amf-non-3gpp-access",
+			pathAmfNon3gppAccess,
 			HTTPAmfContextNon3gpp,
 		},
 		{
 			"CreateAmfContextNon3gpp",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/amf-non-3gpp-access",
+			pathAmfNon3gppAccess,
 			HTTPCreateAmfContextNon3gpp,
 		},
 		{
 			"QueryAmfContextNon3gpp",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/amf-non-3gpp-access",
+			pathAmfNon3gppAccess,
 			HTTPQueryAmfContextNon3gpp,
 		},
 		{
 			"CreateAMFSubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions",
+			pathEeSubscriptionsAmf,
 			HTTPCreateAMFSubscriptions,
 		},
 		{
 			"CreateOrReplaceAccessAndMobilityData",
 			http.MethodPut,
-			"/exposure-data/:ueId/access-and-mobility-data",
+			pathAccessAndMobilityData,
 			HTTPCreateOrReplaceAccessAndMobilityData,
 		},
 		{
 			"DeleteAccessAndMobilityData",
 			http.MethodDelete,
-			"/exposure-data/:ueId/access-and-mobility-data",
+			pathAccessAndMobilityData,
 			HTTPDeleteAccessAndMobilityData,
 		},
 		{
 			"QueryAccessAndMobilityData",
 			http.MethodGet,
-			"/exposure-data/:ueId/access-and-mobility-data",
+			pathAccessAndMobilityData,
 			HTTPQueryAccessAndMobilityData,
 		},
 		{
 			"UpdateAccessAndMobilityData",
 			http.MethodPatch,
-			"/exposure-data/:ueId/access-and-mobility-data",
+			pathAccessAndMobilityData,
 			HTTPUpdateAccessAndMobilityData,
 		},
 		{
@@ -229,13 +274,13 @@ func getRoutes() []Route {
 		{
 			"ModifyAmfGroupSubscriptions",
 			http.MethodPatch,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions",
+			pathGroupEeSubscriptionsAmf,
 			HTTPModifyAmfGroupSubscriptions,
 		},
 		{
 			"ModifyAmfSubscriptionInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions",
+			pathEeSubscriptionsAmf,
 			HTTPModifyAmfSubscriptionInfo,
 		},
 		{
@@ -253,13 +298,13 @@ func getRoutes() []Route {
 		{
 			"DeleteAuthenticationStatus",
 			http.MethodDelete,
-			"/subscription-data/:ueId/authentication-data/authentication-status",
+			pathAuthenticationStatus,
 			HTTPDeleteAuthenticationStatus,
 		},
 		{
 			"QueryAuthenticationStatus",
 			http.MethodGet,
-			"/subscription-data/:ueId/authentication-data/authentication-status",
+			pathAuthenticationStatus,
 			HTTPQueryAuthenticationStatus,
 		},
 		{
@@ -271,25 +316,25 @@ func getRoutes() []Route {
 		{
 			"CreateAuthenticationSoR",
 			http.MethodPut,
-			"/subscription-data/:ueId/ue-update-confirmation-data/sor-data",
+			pathUeUpdateConfirmationSorData,
 			HTTPCreateAuthenticationSoR,
 		},
 		{
 			"QueryAuthSoR",
 			http.MethodGet,
-			"/subscription-data/:ueId/ue-update-confirmation-data/sor-data",
+			pathUeUpdateConfirmationSorData,
 			HTTPQueryAuthSoR,
 		},
 		{
 			"UpdateAuthenticationSoR",
 			http.MethodPatch,
-			"/subscription-data/:ueId/ue-update-confirmation-data/sor-data",
+			pathUeUpdateConfirmationSorData,
 			HTTPUpdateAuthenticationSoR,
 		},
 		{
 			"CreateAuthenticationStatus",
 			http.MethodPut,
-			"/subscription-data/:ueId/authentication-data/authentication-status",
+			pathAuthenticationStatus,
 			HTTPCreateAuthenticationStatus,
 		},
 		{
@@ -373,13 +418,13 @@ func getRoutes() []Route {
 		{
 			"Delete5GVnGroup",
 			http.MethodDelete,
-			"/subscription-data/group-data/5g-vn-groups/:externalGroupId",
+			pathFiveGVnGroups,
 			HTTPDelete5GVnGroup,
 		},
 		{
 			"Delete5GmbsGroup",
 			http.MethodDelete,
-			"/subscription-data/group-data/mbs-group-membership/:externalGroupId",
+			pathMbsGroupMembership,
 			HTTPDelete5GmbsGroup,
 		},
 		{
@@ -391,13 +436,13 @@ func getRoutes() []Route {
 		{
 			"RemoveAmfGroupSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions",
+			pathGroupEeSubscriptionsAmf,
 			HTTPRemoveAmfGroupSubscriptions,
 		},
 		{
 			"RemoveAmfSubscriptionsInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions",
+			pathEeSubscriptionsAmf,
 			HTTPRemoveAmfSubscriptionsInfo,
 		},
 		{
@@ -415,25 +460,25 @@ func getRoutes() []Route {
 		{
 			"ModifyEeGroupSubscription",
 			http.MethodPatch,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId",
+			pathGroupEeSubscriptions,
 			HTTPModifyEeGroupSubscription,
 		},
 		{
 			"QueryEeGroupSubscription",
 			http.MethodGet,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId",
+			pathGroupEeSubscriptions,
 			HTTPQueryEeGroupSubscription,
 		},
 		{
 			"RemoveEeGroupSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId",
+			pathGroupEeSubscriptions,
 			HTTPRemoveEeGroupSubscriptions,
 		},
 		{
 			"UpdateEeGroupSubscriptions",
 			http.MethodPut,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId",
+			pathGroupEeSubscriptions,
 			HTTPUpdateEeGroupSubscriptions,
 		},
 		{
@@ -451,25 +496,25 @@ func getRoutes() []Route {
 		{
 			"ModifyEesubscription",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId",
+			pathEeSubscriptions,
 			HTTPModifyEesubscription,
 		},
 		{
 			"QueryeeSubscription",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId",
+			pathEeSubscriptions,
 			HTTPQueryeeSubscription,
 		},
 		{
 			"RemoveeeSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId",
+			pathEeSubscriptions,
 			HTTPRemoveeeSubscriptions,
 		},
 		{
 			"UpdateEesubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId",
+			pathEeSubscriptions,
 			HTTPUpdateEesubscriptions,
 		},
 		{
@@ -493,7 +538,7 @@ func getRoutes() []Route {
 		{
 			"Create5GVnGroup",
 			http.MethodPut,
-			"/subscription-data/group-data/5g-vn-groups/:externalGroupId",
+			pathFiveGVnGroups,
 			HTTPCreate5GVnGroup,
 		},
 		{
@@ -505,97 +550,97 @@ func getRoutes() []Route {
 		{
 			"CreateHssGroupSubscriptions",
 			http.MethodPut,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/hss-subscriptions",
+			pathGroupEeSubscriptionsHss,
 			HTTPCreateHssGroupSubscriptions,
 		},
 		{
 			"CreateHSSSubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/hss-subscriptions",
+			pathEeSubscriptionsHss,
 			HTTPCreateHSSSubscriptions,
 		},
 		{
 			"GetHssGroupSubscriptions",
 			http.MethodGet,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/hss-subscriptions",
+			pathGroupEeSubscriptionsHss,
 			HTTPGetHssGroupSubscriptions,
 		},
 		{
 			"GetHssSubscriptionInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/hss-subscriptions",
+			pathEeSubscriptionsHss,
 			HTTPGetHssSubscriptionInfo,
 		},
 		{
 			"ModifyHssGroupSubscriptions",
 			http.MethodPatch,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/hss-subscriptions",
+			pathGroupEeSubscriptionsHss,
 			HTTPModifyHssGroupSubscriptions,
 		},
 		{
 			"ModifyHssSubscriptionInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/hss-subscriptions",
+			pathEeSubscriptionsHss,
 			HTTPModifyHssSubscriptionInfo,
 		},
 		{
 			"RemoveHssGroupSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/hss-subscriptions",
+			pathGroupEeSubscriptionsHss,
 			HTTPRemoveHssGroupSubscriptions,
 		},
 		{
 			"RemoveHssSubscriptionsInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/hss-subscriptions",
+			pathEeSubscriptionsHss,
 			HTTPRemoveHssSubscriptionsInfo,
 		},
 		{
 			"CreateHSSSDMSubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId/hss-sdm-subscriptions",
+			pathSdmSubscriptionsHss,
 			HTTPCreateHSSSDMSubscriptions,
 		},
 		{
 			"GetHssSDMSubscriptionInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId/hss-sdm-subscriptions",
+			pathSdmSubscriptionsHss,
 			HTTPGetHssSDMSubscriptionInfo,
 		},
 		{
 			"ModifyHssSDMSubscriptionInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId/hss-sdm-subscriptions",
+			pathSdmSubscriptionsHss,
 			HTTPModifyHssSDMSubscriptionInfo,
 		},
 		{
 			"RemoveHssSDMSubscriptionsInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId/hss-sdm-subscriptions",
+			pathSdmSubscriptionsHss,
 			HTTPRemoveHssSDMSubscriptionsInfo,
 		},
 		{
 			"CreateIpSmGwContext",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/ip-sm-gw",
+			pathIpSmGw,
 			HTTPCreateIpSmGwContext,
 		},
 		{
 			"DeleteIpSmGwContext",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/ip-sm-gw",
+			pathIpSmGw,
 			HTTPDeleteIpSmGwContext,
 		},
 		{
 			"ModifyIpSmGwContext",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/ip-sm-gw",
+			pathIpSmGw,
 			HTTPModifyIpSmGwContext,
 		},
 		{
 			"QueryIpSmGwContext",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/ip-sm-gw",
+			pathIpSmGw,
 			HTTPQueryIpSmGwContext,
 		},
 		{
@@ -607,79 +652,79 @@ func getRoutes() []Route {
 		{
 			"DeleteIndividualApplicationDataSubscription",
 			http.MethodDelete,
-			"/application-data/subs-to-notify/:subsId",
+			pathAppDataSubsToNotify,
 			HTTPDeleteIndividualApplicationDataSubscription,
 		},
 		{
 			"ReadIndividualApplicationDataSubscription",
 			http.MethodGet,
-			"/application-data/subs-to-notify/:subsId",
+			pathAppDataSubsToNotify,
 			HTTPReadIndividualApplicationDataSubscription,
 		},
 		{
 			"ReplaceIndividualApplicationDataSubscription",
 			http.MethodPut,
-			"/application-data/subs-to-notify/:subsId",
+			pathAppDataSubsToNotify,
 			HTTPReplaceIndividualApplicationDataSubscription,
 		},
 		{
 			"CreateIndividualAppliedBdtPolicyData",
 			http.MethodPut,
-			"/application-data/bdtPolicyData/:bdtPolicyId",
+			pathBdtPolicyData,
 			HTTPCreateIndividualAppliedBdtPolicyData,
 		},
 		{
 			"DeleteIndividualAppliedBdtPolicyData",
 			http.MethodDelete,
-			"/application-data/bdtPolicyData/:bdtPolicyId",
+			pathBdtPolicyData,
 			HTTPDeleteIndividualAppliedBdtPolicyData,
 		},
 		{
 			"UpdateIndividualAppliedBdtPolicyData",
 			http.MethodPatch,
-			"/application-data/bdtPolicyData/:bdtPolicyId",
+			pathBdtPolicyData,
 			HTTPUpdateIndividualAppliedBdtPolicyData,
 		},
 		{
 			"DeleteIndividualAuthenticationStatus",
 			http.MethodDelete,
-			"/subscription-data/:ueId/authentication-data/authentication-status/:servingNetworkName",
+			pathAuthenticationStatusServingNetwork,
 			HTTPDeleteIndividualAuthenticationStatus,
 		},
 		{
 			"QueryIndividualAuthenticationStatus",
 			http.MethodGet,
-			"/subscription-data/:ueId/authentication-data/authentication-status/:servingNetworkName",
+			pathAuthenticationStatusServingNetwork,
 			HTTPQueryIndividualAuthenticationStatus,
 		},
 		{
 			"CreateIndividualAuthenticationStatus",
 			http.MethodPut,
-			"/subscription-data/:ueId/authentication-data/authentication-status/:servingNetworkName",
+			pathAuthenticationStatusServingNetwork,
 			HTTPCreateIndividualAuthenticationStatus,
 		},
 		{
 			"CreateIndividualBdtData",
 			http.MethodPut,
-			"/policy-data/bdt-data/:bdtReferenceId",
+			pathPolicyBdtData,
 			HTTPCreateIndividualBdtData,
 		},
 		{
 			"DeleteIndividualBdtData",
 			http.MethodDelete,
-			"/policy-data/bdt-data/:bdtReferenceId",
+			pathPolicyBdtData,
 			HTTPDeleteIndividualBdtData,
 		},
 		{
 			"ReadIndividualBdtData",
 			http.MethodGet,
-			"/policy-data/bdt-data/:bdtReferenceId",
+			pathPolicyBdtData,
 			HTTPReadIndividualBdtData,
 		},
 		{
 			"UpdateIndividualBdtData",
 			http.MethodPatch,
-			"/policy-data/bdt-data/:bdtReferenceId",
+			pathPolicyBdtData,
 			HTTPUpdateIndividualBdtData,
 		},
 		{
@@ -697,109 +742,109 @@ func getRoutes() []Route {
 		{
 			"CreateOrReplaceIndividualIPTVConfigurationData",
 			http.MethodPut,
-			"/application-data/iptvConfigData/:configurationId",
+			pathIptvConfigData,
 			HTTPCreateOrReplaceIndividualIPTVConfigurationData,
 		},
 		{
 			"DeleteIndividualIPTVConfigurationData",
 			http.MethodDelete,
-			"/application-data/iptvConfigData/:configurationId",
+			pathIptvConfigData,
 			HTTPDeleteIndividualIPTVConfigurationData,
 		},
 		{
 			"PartialReplaceIndividualIPTVConfigurationData",
 			http.MethodPatch,
-			"/application-data/iptvConfigData/:configurationId",
+			pathIptvConfigData,
 			HTTPPartialReplaceIndividualIPTVConfigurationData,
 		},
 		{
 			"CreateOrReplaceIndividualInfluenceData",
 			http.MethodPut,
-			"/application-data/influenceData/:influenceId",
+			pathInfluenceData,
 			HTTPCreateOrReplaceIndividualInfluenceData,
 		},
 		{
 			"DeleteIndividualInfluenceData",
 			http.MethodDelete,
-			"/application-data/influenceData/:influenceId",
+			pathInfluenceData,
 			HTTPDeleteIndividualInfluenceData,
 		},
 		{
 			"UpdateIndividualInfluenceData",
 			http.MethodPatch,
-			"/application-data/influenceData/:influenceId",
+			pathInfluenceData,
 			HTTPUpdateIndividualInfluenceData,
 		},
 		{
 			"DeleteIndividualInfluenceDataSubscription",
 			http.MethodDelete,
-			"/application-data/influenceData/subs-to-notify/:subscriptionId",
+			pathInfluenceDataSubsToNotify,
 			HTTPDeleteIndividualInfluenceDataSubscription,
 		},
 		{
 			"ReadIndividualInfluenceDataSubscription",
 			http.MethodGet,
-			"/application-data/influenceData/subs-to-notify/:subscriptionId",
+			pathInfluenceDataSubsToNotify,
 			HTTPReadIndividualInfluenceDataSubscription,
 		},
 		{
 			"ReplaceIndividualInfluenceDataSubscription",
 			http.MethodPut,
-			"/application-data/influenceData/subs-to-notify/:subscriptionId",
+			pathInfluenceDataSubsToNotify,
 			HTTPReplaceIndividualInfluenceDataSubscription,
 		},
 		{
 			"CreateOrReplaceIndividualPFDData",
 			http.MethodPut,
-			"/application-data/pfds/:appId",
+			pathPfds,
 			HTTPCreateOrReplaceIndividualPFDData,
 		},
 		{
 			"DeleteIndividualPFDData",
 			http.MethodDelete,
-			"/application-data/pfds/:appId",
+			pathPfds,
 			HTTPDeleteIndividualPFDData,
 		},
 		{
 			"ReadIndividualPFDData",
 			http.MethodGet,
-			"/application-data/pfds/:appId",
+			pathPfds,
 			HTTPReadIndividualPFDData,
 		},
 		{
 			"DeleteIndividualPolicyDataSubscription",
 			http.MethodDelete,
-			"/policy-data/subs-to-notify/:subsId",
+			pathPolicySubsToNotify,
 			HTTPDeleteIndividualPolicyDataSubscription,
 		},
 		{
 			"ReplaceIndividualPolicyDataSubscription",
 			http.MethodPut,
-			"/policy-data/subs-to-notify/:subsId",
+			pathPolicySubsToNotify,
 			HTTPReplaceIndividualPolicyDataSubscription,
 		},
 		{
 			"ReadIndividualPolicySubscriptionData",
 			http.MethodGet,
-			"/policy-data/subs-to-notify/:subsId",
+			pathPolicySubsToNotify,
 			HTTPReadIndividualPolicySubscriptionData,
 		},
 		{
 			"CreateOrReplaceServiceParameterData",
 			http.MethodPut,
-			"/application-data/serviceParamData/:serviceParamId",
+			pathServiceParamData,
 			HTTPCreateOrReplaceServiceParameterData,
 		},
 		{
 			"DeleteIndividualServiceParameterData",
 			http.MethodDelete,
-			"/application-data/serviceParamData/:serviceParamId",
+			pathServiceParamData,
 			HTTPDeleteIndividualServiceParameterData,
 		},
 		{
 			"UpdateIndividualServiceParameterData",
 			http.MethodPatch,
-			"/application-data/serviceParamData/:serviceParamId",
+			pathServiceParamData,
 			HTTPUpdateIndividualServiceParameterData,
 		},
 		{
@@ -847,67 +892,67 @@ func getRoutes() []Route {
 		{
 			"CreateMessageWaitingData",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/mwd",
+			pathMwd,
 			HTTPCreateMessageWaitingData,
 		},
 		{
 			"DeleteMessageWaitingData",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/mwd",
+			pathMwd,
 			HTTPDeleteMessageWaitingData,
 		},
 		{
 			"ModifyMessageWaitingData",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/mwd",
+			pathMwd,
 			HTTPModifyMessageWaitingData,
 		},
 		{
 			"QueryMessageWaitingData",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/mwd",
+			pathMwd,
 			HTTPQueryMessageWaitingData,
 		},
 		{
 			"Modify5GVnGroup",
 			http.MethodPatch,
-			"/subscription-data/group-data/5g-vn-groups/:externalGroupId",
+			pathFiveGVnGroups,
 			HTTPModify5GVnGroup,
 		},
 		{
 			"Modify5GmbsGroup",
 			http.MethodPatch,
-			"/subscription-data/group-data/mbs-group-membership/:externalGroupId",
+			pathMbsGroupMembership,
 			HTTPModify5GmbsGroup,
 		},
 		{
 			"Create5GmbsGroup",
 			http.MethodPut,
-			"/subscription-data/group-data/mbs-group-membership/:externalGroupId",
+			pathMbsGroupMembership,
 			HTTPCreate5GmbsGroup,
 		},
 		{
 			"CreateNIDDAuthorizationInfo",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/nidd-authorizations",
+			pathNiddAuthorizations,
 			HTTPCreateNIDDAuthorizationInfo,
 		},
 		{
 			"GetNiddAuthorizationInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/nidd-authorizations",
+			pathNiddAuthorizations,
 			HTTPGetNiddAuthorizationInfo,
 		},
 		{
 			"ModifyNiddAuthorizationInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/nidd-authorizations",
+			pathNiddAuthorizations,
 			HTTPModifyNiddAuthorizationInfo,
 		},
 		{
 			"RemoveNiddAuthorizationInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/nidd-authorizations",
+			pathNiddAuthorizations,
 			HTTPRemoveNiddAuthorizationInfo,
 		},
 		{
@@ -925,49 +970,49 @@ func getRoutes() []Route {
 		{
 			"CreateOperSpecData",
 			http.MethodPut,
-			"/subscription-data/:ueId/operator-specific-data",
+			pathSubscOperatorSpecificData,
 			HTTPCreateOperSpecData,
 		},
 		{
 			"DeleteOperSpecData",
 			http.MethodDelete,
-			"/subscription-data/:ueId/operator-specific-data",
+			pathSubscOperatorSpecificData,
 			HTTPDeleteOperSpecData,
 		},
 		{
 			"ModifyOperSpecData",
 			http.MethodPatch,
-			"/subscription-data/:ueId/operator-specific-data",
+			pathSubscOperatorSpecificData,
 			HTTPModifyOperSpecData,
 		},
 		{
 			"QueryOperSpecData",
 			http.MethodGet,
-			"/subscription-data/:ueId/operator-specific-data",
+			pathSubscOperatorSpecificData,
 			HTTPQueryOperSpecData,
 		},
 		{
 			"DeleteOperatorSpecificData",
 			http.MethodDelete,
-			"/policy-data/ues/:ueId/operator-specific-data",
+			pathOperatorSpecificData,
 			HTTPDeleteOperatorSpecificData,
 		},
 		{
 			"ReadOperatorSpecificData",
 			http.MethodGet,
-			"/policy-data/ues/:ueId/operator-specific-data",
+			pathOperatorSpecificData,
 			HTTPReadOperatorSpecificData,
 		},
 		{
 			"ReplaceOperatorSpecificData",
 			http.MethodPut,
-			"/policy-data/ues/:ueId/operator-specific-data",
+			pathOperatorSpecificData,
 			HTTPReplaceOperatorSpecificData,
 		},
 		{
 			"UpdateOperatorSpecificData",
 			http.MethodPatch,
-			"/policy-data/ues/:ueId/operator-specific-data",
+			pathOperatorSpecificData,
 			HTTPUpdateOperatorSpecificData,
 		},
 		{
@@ -1003,19 +1048,19 @@ func getRoutes() []Route {
 		{
 			"CreateOrReplaceSessionManagementData",
 			http.MethodPut,
-			"/exposure-data/:ueId/session-management-data/:pduSessionId",
+			pathSessionManagementData,
 			HTTPCreateOrReplaceSessionManagementData,
 		},
 		{
 			"DeleteSessionManagementData",
 			http.MethodDelete,
-			"/exposure-data/:ueId/session-management-data/:pduSessionId",
+			pathSessionManagementData,
 			HTTPDeleteSessionManagementData,
 		},
 		{
 			"QuerySessionManagementData",
 			http.MethodGet,
-			"/exposure-data/:ueId/session-management-data/:pduSessionId",
+			pathSessionManagementData,
 			HTTPQuerySessionManagementData,
 		},
 		{
@@ -1069,19 +1114,19 @@ func getRoutes() []Route {
 		{
 			"GetAmfGroupSubscriptions",
 			http.MethodGet,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/amf-subscriptions",
+			pathGroupEeSubscriptionsAmf,
 			HTTPGetAmfGroupSubscriptions,
 		},
 		{
 			"GetAmfSubscriptionInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/amf-subscriptions",
+			pathEeSubscriptionsAmf,
 			HTTPGetAmfSubscriptionInfo,
 		},
 		{
 			"Get5GVnGroupConfiguration",
 			http.MethodGet,
-			"/subscription-data/group-data/5g-vn-groups/:externalGroupId",
+			pathFiveGVnGroups,
 			HTTPGet5GVnGroupConfiguration,
 		},
 		{
@@ -1093,7 +1138,7 @@ func getRoutes() []Route {
 		{
 			"GetMulticastMbsGroupMemb",
 			http.MethodGet,
-			"/subscription-data/group-data/mbs-group-membership/:externalGroupId",
+			pathMbsGroupMembership,
 			HTTPGetMulticastMbsGroupMemb,
 		},
 		{
@@ -1147,25 +1192,25 @@ func getRoutes() []Route {
 		{
 			"ModifysdmSubscription",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId",
+			pathSdmSubscriptions,
 			HTTPModifysdmSubscription,
 		},
 		{
 			"QuerysdmSubscription",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId",
+			pathSdmSubscriptions,
 			HTTPQuerysdmSubscription,
 		},
 		{
 			"RemovesdmSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId",
+			pathSdmSubscriptions,
 			HTTPRemovesdmSubscriptions,
 		},
 		{
 			"Updatesdmsubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/sdm-subscriptions/:subsId",
+			pathSdmSubscriptions,
 			HTTPUpdatesdmsubscriptions,
 		},
 		{
@@ -1183,73 +1228,73 @@ func getRoutes() []Route {
 		{
 			"CreateSmfGroupSubscriptions",
 			http.MethodPut,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions",
+			pathGroupEeSubscriptionsSmf,
 			HTTPCreateSmfGroupSubscriptions,
 		},
 		{
 			"CreateSMFSubscriptions",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/smf-subscriptions",
+			pathEeSubscriptionsSmf,
 			HTTPCreateSMFSubscriptions,
 		},
 		{
 			"GetSmfGroupSubscriptions",
 			http.MethodGet,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions",
+			pathGroupEeSubscriptionsSmf,
 			HTTPGetSmfGroupSubscriptions,
 		},
 		{
 			"GetSmfSubscriptionInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/smf-subscriptions",
+			pathEeSubscriptionsSmf,
 			HTTPGetSmfSubscriptionInfo,
 		},
 		{
 			"ModifySmfGroupSubscriptions",
 			http.MethodPatch,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions",
+			pathGroupEeSubscriptionsSmf,
 			HTTPModifySmfGroupSubscriptions,
 		},
 		{
 			"ModifySmfSubscriptionInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/smf-subscriptions",
+			pathEeSubscriptionsSmf,
 			HTTPModifySmfSubscriptionInfo,
 		},
 		{
 			"RemoveSmfGroupSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/group-data/:ueGroupId/ee-subscriptions/:subsId/smf-subscriptions",
+			pathGroupEeSubscriptionsSmf,
 			HTTPRemoveSmfGroupSubscriptions,
 		},
 		{
 			"RemoveSmfSubscriptionsInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/ee-subscriptions/:subsId/smf-subscriptions",
+			pathEeSubscriptionsSmf,
 			HTTPRemoveSmfSubscriptionsInfo,
 		},
 		{
 			"CreateOrUpdateSmfRegistration",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/smf-registrations/:pduSessionId",
+			pathSmfRegistrations,
 			HTTPCreateOrUpdateSmfRegistration,
 		},
 		{
 			"DeleteSmfRegistration",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/smf-registrations/:pduSessionId",
+			pathSmfRegistrations,
 			HTTPDeleteSmfRegistration,
 		},
 		{
 			"QuerySmfRegistration",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/smf-registrations/:pduSessionId",
+			pathSmfRegistrations,
 			HTTPQuerySmfRegistration,
 		},
 		{
 			"UpdateSmfContext",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/smf-registrations/:pduSessionId",
+			pathSmfRegistrations,
 			HTTPUpdateSmfContext,
 		},
 		{
@@ -1267,37 +1312,37 @@ func getRoutes() []Route {
 		{
 			"CreateSmsfContext3gpp",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/smsf-3gpp-access",
+			pathSmsf3gppAccess,
 			HTTPCreateSmsfContext3gpp,
 		},
 		{
 			"DeleteSmsfContext3gpp",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/smsf-3gpp-access",
+			pathSmsf3gppAccess,
 			HTTPDeleteSmsfContext3gpp,
 		},
 		{
 			"QuerySmsfContext3gpp",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/smsf-3gpp-access",
+			pathSmsf3gppAccess,
 			HTTPQuerySmsfContext3gpp,
 		},
 		{
 			"CreateSmsfContextNon3gpp",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/smsf-non-3gpp-access",
+			pathSmsfNon3gppAccess,
 			HTTPCreateSmsfContextNon3gpp,
 		},
 		{
 			"DeleteSmsfContextNon3gpp",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/smsf-non-3gpp-access",
+			pathSmsfNon3gppAccess,
 			HTTPDeleteSmsfContextNon3gpp,
 		},
 		{
 			"QuerySmsfContextNon3gpp",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/smsf-non-3gpp-access",
+			pathSmsfNon3gppAccess,
 			HTTPQuerySmsfContextNon3gpp,
 		},
 		{
@@ -1321,25 +1366,25 @@ func getRoutes() []Route {
 		{
 			"CreateServiceSpecificAuthorizationInfo",
 			http.MethodPut,
-			"/subscription-data/:ueId/context-data/service-specific-authorizations/:serviceType",
+			pathServiceSpecificAuthorizations,
 			HTTPCreateServiceSpecificAuthorizationInfo,
 		},
 		{
 			"GetServiceSpecificAuthorizationInfo",
 			http.MethodGet,
-			"/subscription-data/:ueId/context-data/service-specific-authorizations/:serviceType",
+			pathServiceSpecificAuthorizations,
 			HTTPGetServiceSpecificAuthorizationInfo,
 		},
 		{
 			"ModifyServiceSpecificAuthorizationInfo",
 			http.MethodPatch,
-			"/subscription-data/:ueId/context-data/service-specific-authorizations/:serviceType",
+			pathServiceSpecificAuthorizations,
 			HTTPModifyServiceSpecificAuthorizationInfo,
 		},
 		{
 			"RemoveServiceSpecificAuthorizationInfo",
 			http.MethodDelete,
-			"/subscription-data/:ueId/context-data/service-specific-authorizations/:serviceType",
+			pathServiceSpecificAuthorizations,
 			HTTPRemoveServiceSpecificAuthorizationInfo,
 		},
 		{
@@ -1369,37 +1414,37 @@ func getRoutes() []Route {
 		{
 			"QuerySubsToNotify",
 			http.MethodGet,
-			"/subscription-data/subs-to-notify",
+			pathSubscDataSubsToNotify,
 			HTTPQuerySubsToNotify,
 		},
 		{
 			"RemoveMultipleSubscriptionDataSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/subs-to-notify",
+			pathSubscDataSubsToNotify,
 			HTTPRemoveMultipleSubscriptionDataSubscriptions,
 		},
 		{
 			"SubscriptionDataSubscriptions",
 			http.MethodPost,
-			"/subscription-data/subs-to-notify",
+			pathSubscDataSubsToNotify,
 			HTTPSubscriptionDataSubscriptions,
 		},
 		{
 			"ModifysubscriptionDataSubscription",
 			http.MethodPatch,
-			"/subscription-data/subs-to-notify/:subsId",
+			pathSubscDataSubsToNotifyId,
 			HTTPModifysubscriptionDataSubscription,
 		},
 		{
 			"QuerySubscriptionDataSubscriptions",
 			http.MethodGet,
-			"/subscription-data/subs-to-notify/:subsId",
+			pathSubscDataSubsToNotifyId,
 			HTTPQuerySubscriptionDataSubscriptions,
 		},
 		{
 			"RemovesubscriptionDataSubscriptions",
 			http.MethodDelete,
-			"/subscription-data/subs-to-notify/:subsId",
+			pathSubscDataSubsToNotifyId,
 			HTTPRemovesubscriptionDataSubscriptions,
 		},
 		{
@@ -1423,19 +1468,19 @@ func getRoutes() []Route {
 		{
 			"CreateOrReplaceUEPolicySet",
 			http.MethodPut,
-			"/policy-data/ues/:ueId/ue-policy-set",
+			pathUePolicySet,
 			HTTPCreateOrReplaceUEPolicySet,
 		},
 		{
 			"ReadUEPolicySet",
 			http.MethodGet,
-			"/policy-data/ues/:ueId/ue-policy-set",
+			pathUePolicySet,
 			HTTPReadUEPolicySet,
 		},
 		{
 			"UpdateUEPolicySet",
 			http.MethodPatch,
-			"/policy-data/ues/:ueId/ue-policy-set",
+			pathUePolicySet,
 			HTTPUpdateUEPolicySet,
 		},
 		{
@@ -1459,19 +1504,19 @@ func getRoutes() []Route {
 		{
 			"CreateUsageMonitoringResource",
 			http.MethodPut,
-			"/policy-data/ues/:ueId/sm-data/:usageMonId",
+			pathSmDataUsageMon,
 			HTTPCreateUsageMonitoringResource,
 		},
 		{
 			"DeleteUsageMonitoringInformation",
 			http.MethodDelete,
-			"/policy-data/ues/:ueId/sm-data/:usageMonId",
+			pathSmDataUsageMon,
 			HTTPDeleteUsageMonitoringInformation,
 		},
 		{
 			"ReadUsageMonitoringInformation",
 			http.MethodGet,
-			"/policy-data/ues/:ueId/sm-data/:usageMonId",
+			pathSmDataUsageMon,
 			HTTPReadUsageMonitoringInformation,
 		},
 		{

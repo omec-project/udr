@@ -19,6 +19,8 @@ import (
 	"go.yaml.in/yaml/v4"
 )
 
+const defaultWebuiUri = "http://webui:5001"
+
 var UdrConfig Config
 
 // TODO: Support configuration update from REST api
@@ -41,7 +43,7 @@ func InitConfigFactory(f string) error {
 	}
 
 	if UdrConfig.Configuration.WebuiUri == "" {
-		UdrConfig.Configuration.WebuiUri = "http://webui:5001"
+		UdrConfig.Configuration.WebuiUri = defaultWebuiUri
 		logger.CfgLog.Infof("webuiUri not set in configuration file. Using %v", UdrConfig.Configuration.WebuiUri)
 		return nil
 	}
