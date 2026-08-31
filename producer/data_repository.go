@@ -1998,7 +1998,7 @@ func ModifyAmfSubscriptionInfoProcedure(ueId string, subsId string,
 	} else {
 		patch = patchtemp
 	}
-	original, err := json.Marshal((UESubsData.EeSubscriptionCollection[subsId]).AmfSubscriptionInfos)
+	original, err := json.Marshal(UESubsData.EeSubscriptionCollection[subsId].AmfSubscriptionInfos)
 	if err != nil {
 		logger.DataRepoLog.Warnln(err)
 	}
