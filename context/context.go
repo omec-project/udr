@@ -25,7 +25,7 @@ const (
 
 func init() {
 	UDR_Self().Name = "udr"
-	UDR_Self().EeSubscriptionIDGenerator.Store(1)
+	UDR_Self().EeSubscriptionIDGenerator.Store(0)
 	UDR_Self().SubscriptionDataSubscriptionIDGenerator = 1
 	UDR_Self().PolicyDataSubscriptionIDGenerator = 1
 	UDR_Self().SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)

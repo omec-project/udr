@@ -5,6 +5,7 @@ package producer
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 
@@ -367,4 +368,28 @@ func TestEeSubscriptionReadersRaceWithWriters(t *testing.T) {
 		go func() { defer wg.Done(); GetAmfSubscriptionInfoProcedure("1", ueId) }()
 	}
 	wg.Wait()
+}
+
+// The subscription id is handed out with Add(1), which increments before it returns,
+// so the counter has to sit at 0 for the first subscription to be numbered "1" the way
+// it was before the generator became atomic. Nothing asserted the numbering -- the
+// concurrency tests check only that the ids are distinct -- which is how an off-by-one
+// in the initial value got past CI and had to be caught in review.
+func TestCreateEeSubscriptionsProcedureNumbersFromOne(t *testing.T) {
+	const ueId = "imsi-208930100000042"
+
+	udrSelf := udr_context.UDR_Self()
+	udrSelf.UESubsCollection.Delete(ueId)
+	t.Cleanup(func() { udrSelf.UESubsCollection.Delete(ueId) })
+
+	previous := udrSelf.EeSubscriptionIDGenerator.Load()
+	udrSelf.EeSubscriptionIDGenerator.Store(0)
+	t.Cleanup(func() { udrSelf.EeSubscriptionIDGenerator.Store(previous) })
+
+	for _, want := range []string{"1", "2", "3"} {
+		location := CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{})
+		if got := location[strings.LastIndex(location, "/")+1:]; got != want {
+			t.Fatalf("subscription id %q taken from %q, want %q", got, location, want)
+		}
+	}
 }

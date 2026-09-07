@@ -52,7 +52,7 @@ func resetUeSubsCollection(t *testing.T) {
 		udrSelf.UESubsCollection.Delete(key)
 		return true
 	})
-	udrSelf.EeSubscriptionIDGenerator.Store(1)
+	udrSelf.EeSubscriptionIDGenerator.Store(0)
 }
 
 const eeSubscriptionBody = `{"callbackReference":"http://nef.example/notify","monitoringConfigurations":{}}`
