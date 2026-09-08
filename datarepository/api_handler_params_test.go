@@ -19,7 +19,7 @@ import (
 func resetUDRContextForHandlerTests() {
 	udrSelf := udrContext.UDR_Self()
 	udrSelf.SubscriptionDataSubscriptions = make(map[string]*models.SubscriptionDataSubscriptions)
-	udrSelf.EeSubscriptionIDGenerator = 1
+	udrSelf.EeSubscriptionIDGenerator.Store(0)
 	udrSelf.SubscriptionDataSubscriptionIDGenerator = 1
 	udrSelf.UESubsCollection = sync.Map{}
 	udrSelf.UriScheme = models.URISCHEME_HTTP
