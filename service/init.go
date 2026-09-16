@@ -99,6 +99,16 @@ func (udr *UDR) Start() {
 
 	// Connect to MongoDB
 	producer.ConnectMongo(mongodb.Url, mongodb.Name, mongodb.AuthUrl, mongodb.AuthKeysDbName)
+
+	// Serving without these means every subscriber lookup, and every write that
+	// filters by the same key, scans its whole collection -- a cost that grows
+	// with the number of subscribers provisioned and that nothing at runtime
+	// reports. Exit instead, and let the deployment restart the UDR once
+	// MongoDB accepts the writes.
+	if err := producer.EnsureIndexes(); err != nil {
+		logger.InitLog.Fatalf("could not ensure the UDR indexes: %v", err)
+	}
+
 	logger.InitLog.Infoln("server started")
 
 	router := utilLogger.NewGinWithZap(logger.GinLog)

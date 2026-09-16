@@ -4,11 +4,13 @@
 package producer
 
 import (
+	"context"
 	"maps"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/omec-project/util/mongoapi"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -68,6 +70,8 @@ func (s *stubDB) RestfulAPIPost(_ string, _ bson.M, _ map[string]any) (bool, err
 	return true, nil
 }
 func (s *stubDB) RestfulAPIPostMany(_ string, _ bson.M, _ []interface{}) error { return nil }
+
+func (s *stubDB) EnsureIndex(_ context.Context, _ string, _ mongoapi.IndexSpec) error { return nil }
 
 const (
 	testColl     = CollAmData
