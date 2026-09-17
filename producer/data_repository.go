@@ -38,6 +38,7 @@ const (
 	SUBSCDATA_CTXDATA_SMF_REGISTRATION         = "subscriptionData.contextData.smfRegistrations"
 	SUBSCDATA_CTXDATA_SMSF_3GPPACCESS          = "subscriptionData.contextData.smsf3gppAccess"
 	SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS       = "subscriptionData.contextData.smsfNon3gppAccess"
+	SUBSCDATA_SORDATA                          = "subscriptionData.ueUpdateConfirmationData.sorData"
 
 	SUBSCDATA_AUTHDATA_AUTHSTATUS = "subscriptionData.authenticationData.authenticationStatus"
 	AccessTypeAMF3GPP             = "amf-3gpp-access"
@@ -443,7 +444,7 @@ func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Re
 	logger.DataRepoLog.Debugln("handle CreateAuthenticationSoR")
 	putData := util.ToBsonM(request.Body)
 	ueId := request.Params[ParamUeId]
-	collName := "subscriptionData.ueUpdateConfirmationData.sorData"
+	collName := SUBSCDATA_SORDATA
 
 	err := CreateAuthenticationSoRProcedure(collName, ueId, putData)
 	if err == nil {
@@ -470,7 +471,7 @@ func HandleQueryAuthSoR(request *httpwrapper.Request) *httpwrapper.Response {
 	logger.DataRepoLog.Debugln("handle QueryAuthSoR")
 
 	ueId := request.Params[ParamUeId]
-	collName := "subscriptionData.ueUpdateConfirmationData.sorData"
+	collName := SUBSCDATA_SORDATA
 
 	response, problemDetails := QueryAuthSoRProcedure(collName, ueId)
 
