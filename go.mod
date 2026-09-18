@@ -8,7 +8,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/omec-project/openapi/v2 v2.2.3
-	github.com/omec-project/util v1.8.8
+	github.com/omec-project/util v1.8.9
 	github.com/prometheus/client_golang v1.24.1
 	github.com/urfave/cli/v3 v3.12.0
 	go.mongodb.org/mongo-driver/v2 v2.9.1
@@ -19,7 +19,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
-	github.com/bytedance/sonic v1.15.3 // indirect
+	github.com/bytedance/sonic v1.15.4 // indirect
 	github.com/bytedance/sonic/loader v0.5.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
