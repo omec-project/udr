@@ -33,6 +33,7 @@ func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId)
 	if udrContext == nil {
 		return profile, openapi.ReportError("udr context has not been initialized. NF profile cannot be built")
 	}
+	profile = *models.NewNFProfileWithDefaults()
 	profile.SetNfInstanceId(udrContext.NfId)
 	profile.SetNfType(models.NFTYPE_UDR)
 	profile.SetNfStatus(models.NFSTATUS_REGISTERED)
@@ -54,12 +55,10 @@ func getNfProfile(udrContext *udrContext.UDRContext, plmnConfig []models.PlmnId)
 	nfService := models.NewNFService("datarepository", models.SERVICENAME_NUDR_DR, []models.NFServiceVersion{*nfServiceVersion}, udrContext.UriScheme, models.NFSERVICESTATUS_REGISTERED)
 	nfService.SetApiPrefix(apiPrefix)
 	nfService.SetIpEndPoints([]models.IpEndPoint{*ipEndPoint})
-	services := map[string]models.NFService{}
-	serviceList := []models.NFService{}
-	serviceList = append(serviceList, *nfService)
-	services[nfService.GetServiceInstanceId()] = *nfService
-	profile.SetNfServices(serviceList)
-	profile.SetNfServiceList(services)
+	profile.SetNfServices([]models.NFService{*nfService})
+	profile.SetNfServiceList(map[string]models.NFService{
+		nfService.GetServiceInstanceId(): *nfService,
+	})
 	udrInfo := models.NewUdrInfo()
 	udrInfo.SetSupportedDataSets([]models.DataSetId{
 		models.DATASETID_SUBSCRIPTION,
