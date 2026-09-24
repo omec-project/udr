@@ -43,6 +43,33 @@ func Test_getNfProfile_sets_subscription_udr_info(t *testing.T) {
 	if supportedDataSets[0] != models.DATASETID_SUBSCRIPTION {
 		t.Fatalf("expected supported data set %q, got %q", models.DATASETID_SUBSCRIPTION, supportedDataSets[0])
 	}
+
+	if prof.GetNfServicePersistence() {
+		t.Error("expected NfServicePersistence to default to false")
+	}
+
+	nfServices := prof.GetNfServices()
+	if len(nfServices) != 1 {
+		t.Fatalf("expected one entry in NfServices, got %d", len(nfServices))
+	}
+	if nfServices[0].GetServiceName() != models.SERVICENAME_NUDR_DR {
+		t.Fatalf("expected NfServices datarepository entry, got %q", nfServices[0].GetServiceName())
+	}
+
+	nfServiceList, ok := prof.GetNfServiceListOk()
+	if !ok {
+		t.Fatal("expected NfServiceList to be set on NF profile")
+	}
+	dataRepoService, ok := (*nfServiceList)["datarepository"]
+	if !ok {
+		t.Fatal("expected NfServiceList to contain a \"datarepository\" entry")
+	}
+	if dataRepoService.GetServiceName() != models.SERVICENAME_NUDR_DR {
+		t.Fatalf("expected NfServiceList datarepository entry, got %q", dataRepoService.GetServiceName())
+	}
+	if dataRepoService.GetServiceInstanceId() != nfServices[0].GetServiceInstanceId() {
+		t.Fatal("expected NfServiceList entry to match the NfServices entry")
+	}
 }
 
 func Test_nrf_url_is_not_overwritten_when_registering(t *testing.T) {
