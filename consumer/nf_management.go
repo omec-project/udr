@@ -95,10 +95,10 @@ var SendRegisterNFInstance = func(plmnConfig []models.PlmnId) (prof *models.NFPr
 	}
 
 	switch res.StatusCode {
-	case http.StatusOK: // NFUpdate
+	case http.StatusOK:
 		logger.ConsumerLog.Debugln("UDR NF profile updated with complete replacement")
 		return receivedNfProfile, "", nil
-	case http.StatusCreated: // NFRegister
+	case http.StatusCreated:
 		resourceUri := res.Header.Get("Location")
 		resourceNrfUri = resourceUri[:strings.Index(resourceUri, "/nnrf-nfm/")]
 		retrieveNfInstanceId := resourceUri[strings.LastIndex(resourceUri, "/")+1:]
