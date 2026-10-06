@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func MapToByte(data map[string]interface{}) []byte {
+func MapToByte(data map[string]any) []byte {
 	ret, err := json.Marshal(data)
 	if err != nil {
 		logger.UtilLog.Error(err)
@@ -22,7 +22,7 @@ func MapToByte(data map[string]interface{}) []byte {
 	return ret
 }
 
-func MapArrayToByte(data []map[string]interface{}) []byte {
+func MapArrayToByte(data []map[string]any) []byte {
 	ret, err := json.Marshal(data)
 	if err != nil {
 		logger.UtilLog.Error(err)
@@ -30,7 +30,7 @@ func MapArrayToByte(data []map[string]interface{}) []byte {
 	return ret
 }
 
-func PrimitiveAToByte(data []interface{}) []byte {
+func PrimitiveAToByte(data []any) []byte {
 	ret, err := json.Marshal(data)
 	if err != nil {
 		logger.UtilLog.Error(err)
@@ -38,7 +38,7 @@ func PrimitiveAToByte(data []interface{}) []byte {
 	return ret
 }
 
-func ToBsonM(data interface{}) bson.M {
+func ToBsonM(data any) bson.M {
 	tmp, err := json.Marshal(data)
 	if err != nil {
 		logger.UtilLog.Error(err)

@@ -11,7 +11,7 @@ import (
 )
 
 func PreHandleOnDataChangeNotify(ueId string, resourceId string, patchItems []models.PatchItem,
-	origValue interface{}, newValue interface{},
+	origValue any, newValue any,
 ) {
 	notifyItems := []models.NotifyItem{}
 	changes := []models.ChangeItem{}
@@ -33,7 +33,7 @@ func PreHandleOnDataChangeNotify(ueId string, resourceId string, patchItems []mo
 	go callback.SendOnDataChangeNotify(ueId, notifyItems)
 }
 
-func PreHandlePolicyDataChangeNotification(ueId string, dataId string, value interface{}) {
+func PreHandlePolicyDataChangeNotification(ueId string, dataId string, value any) {
 	policyDataChangeNotification := models.PolicyDataChangeNotification{}
 
 	if ueId != "" {
