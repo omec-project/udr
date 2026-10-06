@@ -17,19 +17,19 @@ import (
 )
 
 type DBInterface interface {
-	RestfulAPIGetOne(collName string, filter bson.M) (map[string]interface{}, error)
-	RestfulAPIGetMany(collName string, filter bson.M) ([]map[string]interface{}, error)
-	RestfulAPIPutOneTimeout(collName string, filter bson.M, putData map[string]interface{}, timeout int32, timeField string) bool
-	RestfulAPIPutOne(collName string, filter bson.M, putData map[string]interface{}) (bool, error)
-	RestfulAPIPutOneNotUpdate(collName string, filter bson.M, putData map[string]interface{}) (bool, error)
-	RestfulAPIPutMany(collName string, filterArray []bson.M, putDataArray []map[string]interface{}) error
+	RestfulAPIGetOne(collName string, filter bson.M) (map[string]any, error)
+	RestfulAPIGetMany(collName string, filter bson.M) ([]map[string]any, error)
+	RestfulAPIPutOneTimeout(collName string, filter bson.M, putData map[string]any, timeout int32, timeField string) bool
+	RestfulAPIPutOne(collName string, filter bson.M, putData map[string]any) (bool, error)
+	RestfulAPIPutOneNotUpdate(collName string, filter bson.M, putData map[string]any) (bool, error)
+	RestfulAPIPutMany(collName string, filterArray []bson.M, putDataArray []map[string]any) error
 	RestfulAPIDeleteOne(collName string, filter bson.M) error
 	RestfulAPIDeleteMany(collName string, filter bson.M) error
-	RestfulAPIMergePatch(collName string, filter bson.M, patchData map[string]interface{}) error
+	RestfulAPIMergePatch(collName string, filter bson.M, patchData map[string]any) error
 	RestfulAPIJSONPatch(collName string, filter bson.M, patchJSON []byte) error
 	RestfulAPIJSONPatchExtend(collName string, filter bson.M, patchJSON []byte, dataName string) error
-	RestfulAPIPost(collName string, filter bson.M, postData map[string]interface{}) (bool, error)
-	RestfulAPIPostMany(collName string, filter bson.M, postDataArray []interface{}) error
+	RestfulAPIPost(collName string, filter bson.M, postData map[string]any) (bool, error)
+	RestfulAPIPostMany(collName string, filter bson.M, postDataArray []any) error
 	EnsureIndex(ctx context.Context, collName string, spec mongoapi.IndexSpec) error
 }
 

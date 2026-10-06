@@ -69,7 +69,7 @@ func (s *stubDB) RestfulAPIJSONPatchExtend(_ string, _ bson.M, _ []byte, _ strin
 func (s *stubDB) RestfulAPIPost(_ string, _ bson.M, _ map[string]any) (bool, error) {
 	return true, nil
 }
-func (s *stubDB) RestfulAPIPostMany(_ string, _ bson.M, _ []interface{}) error { return nil }
+func (s *stubDB) RestfulAPIPostMany(_ string, _ bson.M, _ []any) error { return nil }
 
 func (s *stubDB) EnsureIndex(_ context.Context, _ string, _ mongoapi.IndexSpec) error { return nil }
 

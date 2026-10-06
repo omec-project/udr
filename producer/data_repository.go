@@ -95,7 +95,7 @@ const (
 
 var CurrentResourceUri string
 
-func getDataFromDB(collName string, filter bson.M) (map[string]interface{}, *models.ProblemDetails) {
+func getDataFromDB(collName string, filter bson.M) (map[string]any, *models.ProblemDetails) {
 	data, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
 		logger.DataRepoLog.Warnln(errGetOne)
@@ -131,7 +131,7 @@ func HandleQueryAmData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
 }
 
-func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*map[string]interface{},
+func QueryAmDataProcedure(collName string, ueId string, servingPlmnId string) (*map[string]any,
 	*models.ProblemDetails,
 ) {
 	filter := bson.M{ParamUeId: ueId, ParamServingPlmnId: servingPlmnId}
@@ -154,7 +154,7 @@ func HandleAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
 	problemDetails := AmfContext3gppProcedure(collName, ueId, patchItem)
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", AccessTypeAMF3GPP, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", AccessTypeAMF3GPP, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -198,7 +198,7 @@ func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMF3GPP, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateAmfContext3gppProcedure(collName string, ueId string,
@@ -235,7 +235,7 @@ func HandleQueryAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respon
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryAmfContext3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QueryAmfContext3gppProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 	amf3GppAccessRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -260,7 +260,7 @@ func HandleAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", AccessTypeAMFNon3GPP, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", AccessTypeAMFNon3GPP, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -304,7 +304,7 @@ func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMFNon3GPP, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration models.AmfNon3GppAccessRegistration,
@@ -342,7 +342,7 @@ func HandleQueryAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Res
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryAmfContextNon3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QueryAmfContextNon3gppProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 	response, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -366,7 +366,7 @@ func HandleModifyAuthentication(request *httpwrapper.Request) *httpwrapper.Respo
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", AuthenticationSubscription, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", AuthenticationSubscription, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -379,7 +379,7 @@ func ModifyAuthenticationProcedure(collName string, ueId string, patchItem []mod
 		logger.DataRepoLog.Warnln(errGetOne)
 	}
 	if sequenceNumber, ok := origValue["sequenceNumber"].(string); ok {
-		origValue["sequenceNumber"] = map[string]interface{}{"sqn": sequenceNumber}
+		origValue["sequenceNumber"] = map[string]any{"sqn": sequenceNumber}
 		if _, errPut := AuthDBClient.RestfulAPIPutOne(collName, filter, origValue); errPut != nil {
 			logger.DataRepoLog.Warnln(errPut)
 		}
@@ -423,7 +423,7 @@ func HandleQueryAuthSubsData(request *httpwrapper.Request) *httpwrapper.Response
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]interface{}, *models.ProblemDetails) {
+func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	authenticationSubscription, errGetOne := AuthDBClient.RestfulAPIGetOne(collName, filter)
@@ -433,7 +433,7 @@ func QueryAuthSubsDataProcedure(collName string, ueId string) (map[string]interf
 
 	if authenticationSubscription != nil {
 		if sequenceNumber, ok := authenticationSubscription["sequenceNumber"].(string); ok {
-			authenticationSubscription["sequenceNumber"] = map[string]interface{}{"sqn": sequenceNumber}
+			authenticationSubscription["sequenceNumber"] = map[string]any{"sqn": sequenceNumber}
 		}
 		return authenticationSubscription, nil
 	}
@@ -453,7 +453,7 @@ func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Re
 		stats.IncrementUdrSubscriptionDataStats("create", SORData, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateAuthenticationSoRProcedure(collName string, ueId string, putData bson.M) error {
@@ -488,7 +488,7 @@ func HandleQueryAuthSoR(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryAuthSoRProcedure(collName string, ueId string) (map[string]interface{}, *models.ProblemDetails) {
+func QueryAuthSoRProcedure(collName string, ueId string) (map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	sorData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -516,7 +516,7 @@ func HandleCreateAuthenticationStatus(request *httpwrapper.Request) *httpwrapper
 		stats.IncrementUdrSubscriptionDataStats("create", AuthenticationStatus, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateAuthenticationStatusProcedure(collName string, ueId string, putData bson.M) error {
@@ -551,7 +551,7 @@ func HandleQueryAuthenticationStatus(request *httpwrapper.Request) *httpwrapper.
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[string]interface{},
+func QueryAuthenticationStatusProcedure(collName string, ueId string) (*map[string]any,
 	*models.ProblemDetails,
 ) {
 	filter := bson.M{ParamUeId: ueId}
@@ -589,13 +589,13 @@ func HandleApplicationDataInfluenceDataGet(queryParams map[string][]string) *htt
 
 func getApplicationDataInfluenceDatafromDB(influIDs, dnns, snssais,
 	intGroupIDs, supis []string,
-) []map[string]interface{} {
+) []map[string]any {
 	filter := bson.M{}
 	allInfluDatas, errGetMany := CommonDBClient.RestfulAPIGetMany(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
 	if errGetMany != nil {
 		logger.DataRepoLog.Warnln(errGetMany)
 	}
-	var matchedInfluDatas []map[string]interface{}
+	var matchedInfluDatas []map[string]any
 	matchedInfluDatas = filterDataByString(ParamInfluenceId, influIDs, allInfluDatas)
 	matchedInfluDatas = filterDataByString("dnn", dnns, matchedInfluDatas)
 	matchedInfluDatas = filterDataByString("interGroupId", intGroupIDs, matchedInfluDatas)
@@ -611,12 +611,12 @@ func getApplicationDataInfluenceDatafromDB(influIDs, dnns, snssais,
 }
 
 func filterDataByString(filterName string, filterValues []string,
-	datas []map[string]interface{},
-) []map[string]interface{} {
+	datas []map[string]any,
+) []map[string]any {
 	if len(filterValues) == 0 {
 		return datas
 	}
-	var matchedDatas []map[string]interface{}
+	var matchedDatas []map[string]any
 	for _, data := range datas {
 		for _, v := range filterValues {
 			if data[filterName].(string) == v {
@@ -629,16 +629,16 @@ func filterDataByString(filterName string, filterValues []string,
 }
 
 func filterDataBySnssai(snssaiValues []string,
-	datas []map[string]interface{},
-) []map[string]interface{} {
+	datas []map[string]any,
+) []map[string]any {
 	if len(snssaiValues) == 0 {
 		return datas
 	}
-	var matchedDatas []map[string]interface{}
+	var matchedDatas []map[string]any
 	for _, data := range datas {
 		dataSnssai := models.NewSnssaiWithDefaults()
 		if err := json.Unmarshal(
-			util.MapToByte(data["snssai"].(map[string]interface{})), dataSnssai); err != nil {
+			util.MapToByte(data["snssai"].(map[string]any)), dataSnssai); err != nil {
 			logger.DataRepoLog.Warnln(err)
 			continue
 		}
@@ -664,7 +664,7 @@ func HandleApplicationDataInfluenceDataInfluenceIdDelete(influID string) *httpwr
 
 	deleteApplicationDataIndividualInfluenceDataFromDB(influID)
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func deleteApplicationDataIndividualInfluenceDataFromDB(influID string) {
@@ -803,7 +803,7 @@ func HandleApplicationDataInfluenceDataSubsToNotifyGet(queryParams map[string][]
 
 func getApplicationDataInfluenceDataSubsToNotifyfromDB(dnn, snssai, intGroupID,
 	supi []string,
-) []map[string]interface{} {
+) []map[string]any {
 	filter := bson.M{}
 	if len(dnn) != 0 {
 		filter["dnns"] = dnn[0]
@@ -831,9 +831,9 @@ func getApplicationDataInfluenceDataSubsToNotifyfromDB(dnn, snssai, intGroupID,
 }
 
 func filterDataBySnssais(snssaiValue string,
-	datas []map[string]interface{},
-) []map[string]interface{} {
-	var matchedDatas []map[string]interface{}
+	datas []map[string]any,
+) []map[string]any {
+	var matchedDatas []map[string]any
 	filterSnssai := models.NewSnssaiWithDefaults()
 	if err := json.Unmarshal([]byte(snssaiValue), filterSnssai); err != nil {
 		logger.DataRepoLog.Warnln(err)
@@ -902,7 +902,7 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete(subscID 
 		stats.IncrementUdrApplicationDataStats("delete", InfluenceDataSubscription, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID string) error {
@@ -925,7 +925,7 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdGet(subscID str
 
 func getApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(
 	subscID string,
-) (map[string]interface{}, *models.ProblemDetails) {
+) (map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamSubscriptionId: subscID}
 	data, problemDetails := getDataFromDB(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter)
 	if data != nil {
@@ -985,7 +985,7 @@ func HandleApplicationDataPfdsAppIdDelete(appID string) *httpwrapper.Response {
 	} else {
 		stats.IncrementUdrApplicationDataStats("delete", "pfds", "FAILURE")
 	}
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func deleteApplicationDataIndividualPfdFromDB(appID string) error {
@@ -1006,7 +1006,7 @@ func HandleApplicationDataPfdsAppIdGet(appID string) *httpwrapper.Response {
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
-func getApplicationDataIndividualPfdFromDB(appID string) (map[string]interface{}, *models.ProblemDetails) {
+func getApplicationDataIndividualPfdFromDB(appID string) (map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamApplicationId: appID}
 	return getDataFromDB(APPDATA_PFD_DB_COLLECTION_NAME, filter)
 }
@@ -1048,10 +1048,10 @@ func HandleApplicationDataPfdsGet(pfdsAppIDs []string) *httpwrapper.Response {
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
-func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]interface{}) {
+func getApplicationDataPfdsFromDB(pfdsAppIDs []string) (response []map[string]any) {
 	filter := bson.M{}
 
-	var matchedPfds []map[string]interface{}
+	var matchedPfds []map[string]any
 	var errGetMany error
 	if len(pfdsAppIDs) == 0 {
 		matchedPfds, errGetMany = CommonDBClient.RestfulAPIGetMany(APPDATA_PFD_DB_COLLECTION_NAME, filter)
@@ -1090,7 +1090,7 @@ func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *
 	} else {
 		stats.IncrementUdrPolicyDataStats("delete", BDTData, "FAILURE")
 	}
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName string, bdtReferenceId string) error {
@@ -1122,7 +1122,7 @@ func HandlePolicyDataBdtDataBdtReferenceIdGet(request *httpwrapper.Request) *htt
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId string) (*map[string]interface{},
+func PolicyDataBdtDataBdtReferenceIdGetProcedure(collName string, bdtReferenceId string) (*map[string]any,
 	*models.ProblemDetails,
 ) {
 	filter := bson.M{ParamBdtReferenceId: bdtReferenceId}
@@ -1184,7 +1184,7 @@ func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Respo
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
-func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]interface{}) {
+func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]any) {
 	filter := bson.M{}
 	bdtDataArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
 	if errGetMany != nil {
@@ -1216,7 +1216,7 @@ func HandlePolicyDataPlmnsPlmnIdUePolicySetGet(request *httpwrapper.Request) *ht
 
 func PolicyDataPlmnsPlmnIdUePolicySetGetProcedure(collName string,
 	plmnId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{"plmnId": plmnId}
 	uePolicySet, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -1243,7 +1243,7 @@ func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Re
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	case http.StatusNoContent:
 		stats.IncrementUdrPolicyDataStats("get", SponsorConnectivityData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 
 	pd := utils.ProblemDetailsUnspecified()
@@ -1253,7 +1253,7 @@ func HandlePolicyDataSponsorConnectivityDataSponsorIdGet(request *httpwrapper.Re
 
 func PolicyDataSponsorConnectivityDataSponsorIdGetProcedure(collName string,
 	sponsorId string,
-) (*map[string]interface{}, int) {
+) (*map[string]any, int) {
 	filter := bson.M{"sponsorId": sponsorId}
 
 	sponsorConnectivityData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -1304,7 +1304,7 @@ func HandlePolicyDataSubsToNotifySubsIdDelete(request *httpwrapper.Request) *htt
 
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("delete", SubsToNotify, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrPolicyDataStats("delete", SubsToNotify, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1374,7 +1374,7 @@ func HandlePolicyDataUesUeIdAmDataGet(request *httpwrapper.Request) *httpwrapper
 
 func PolicyDataUesUeIdAmDataGetProcedure(collName string,
 	ueId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	amPolicyData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -1411,7 +1411,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataGet(request *httpwrapper.Request
 
 func PolicyDataUesUeIdOperatorSpecificDataGetProcedure(collName string,
 	ueId string,
-) (*interface{}, *models.ProblemDetails) {
+) (*any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	operatorSpecificDataContainerMapCover, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -1437,7 +1437,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPatch(request *httpwrapper.Reque
 
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", OperatorSpecificData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrPolicyDataStats("update", OperatorSpecificData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1478,7 +1478,7 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request
 		stats.IncrementUdrPolicyDataStats("create", OperatorSpecificData, "FAILURE")
 	}
 
-	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]any{})
 }
 
 func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId string,
@@ -1486,7 +1486,7 @@ func PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName string, ueId str
 ) error {
 	filter := bson.M{ParamUeId: ueId}
 
-	putData := map[string]interface{}{"operatorSpecificDataContainerMap": OperatorSpecificDataContainer}
+	putData := map[string]any{"operatorSpecificDataContainerMap": OperatorSpecificDataContainer}
 	putData[ParamUeId] = ueId
 
 	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
@@ -1558,7 +1558,7 @@ func PolicyDataUesUeIdSmDataGetProcedure(collName string, ueId string, snssai mo
 
 func SmDataGetProcedureSmPolicyDataResponse(
 	ueId string,
-	smPolicyData map[string]interface{},
+	smPolicyData map[string]any,
 ) (*models.SmPolicyData, *models.ProblemDetails) {
 	smPolicyDataResp := models.NewSmPolicyDataWithDefaults()
 	err := json.Unmarshal(util.MapToByte(smPolicyData), smPolicyDataResp)
@@ -1572,7 +1572,7 @@ func SmDataGetProcedureSmPolicyDataResponse(
 		logger.DataRepoLog.Warnln(errGetMany)
 	}
 
-	if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
+	if !reflect.DeepEqual(usageMonDataMapArray, []map[string]any{}) {
 		var usageMonDataArray []models.UsageMonData
 		err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
 		if err != nil {
@@ -1597,7 +1597,7 @@ func HandlePolicyDataUesUeIdSmDataPatch(request *httpwrapper.Request) *httpwrapp
 	problemDetails := PolicyDataUesUeIdSmDataPatchProcedure(collName, ueId, usageMonData)
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", SMData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrPolicyDataStats("update", SMData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1654,7 +1654,7 @@ func SmDataPatchProcedureSuccessAll(
 			logger.DataRepoLog.Warnln(errGetMany)
 		}
 
-		if !reflect.DeepEqual(usageMonDataMapArray, []map[string]interface{}{}) {
+		if !reflect.DeepEqual(usageMonDataMapArray, []map[string]any{}) {
 			var usageMonDataArray []models.UsageMonData
 			err = json.Unmarshal(util.MapArrayToByte(usageMonDataMapArray), &usageMonDataArray)
 			if err != nil {
@@ -1685,7 +1685,7 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request)
 	} else {
 		stats.IncrementUdrPolicyDataStats("delete", SMData, "FAILURE")
 	}
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName string, ueId string, usageMonId string) error {
@@ -1711,12 +1711,12 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdGet(request *httpwrapper.Request) *h
 		return httpwrapper.NewResponse(http.StatusOK, nil, response)
 	}
 	stats.IncrementUdrPolicyDataStats("get", SMData, "FAILURE")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func PolicyDataUesUeIdSmDataUsageMonIdGetProcedure(collName string, usageMonId string,
 	ueId string,
-) *map[string]interface{} {
+) *map[string]any {
 	filter := bson.M{ParamUeId: ueId, ParamUsageMonId: usageMonId}
 
 	usageMonData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -1777,7 +1777,7 @@ func HandlePolicyDataUesUeIdUePolicySetGet(request *httpwrapper.Request) *httpwr
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*map[string]interface{},
+func PolicyDataUesUeIdUePolicySetGetProcedure(collName string, ueId string) (*map[string]any,
 	*models.ProblemDetails,
 ) {
 	filter := bson.M{ParamUeId: ueId}
@@ -1804,7 +1804,7 @@ func HandlePolicyDataUesUeIdUePolicySetPatch(request *httpwrapper.Request) *http
 
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", UEPolicySet, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrPolicyDataStats("update", UEPolicySet, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1847,7 +1847,7 @@ func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwr
 	switch status {
 	case http.StatusNoContent:
 		stats.IncrementUdrPolicyDataStats("create", UEPolicySet, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	case http.StatusCreated:
 		stats.IncrementUdrPolicyDataStats("create", UEPolicySet, "SUCCESS")
 		return httpwrapper.NewResponse(http.StatusCreated, nil, response)
@@ -1886,7 +1886,7 @@ func HandleCreateAMFSubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("create", AMFSubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("create", AMFSubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1924,7 +1924,7 @@ func HandleRemoveAmfSubscriptionsInfo(request *httpwrapper.Request) *httpwrapper
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", AMFSubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("delete", AMFSubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -1967,7 +1967,7 @@ func HandleModifyAmfSubscriptionInfo(request *httpwrapper.Request) *httpwrapper.
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", AMFSubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", AMFSubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2100,7 +2100,7 @@ func HandleQueryEEData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryEEDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QueryEEDataProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 	eeProfileData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -2123,7 +2123,7 @@ func HandleRemoveEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", GroupData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("delete", GroupData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2161,7 +2161,7 @@ func HandleUpdateEeGroupSubscriptions(request *httpwrapper.Request) *httpwrapper
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", GroupData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", GroupData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2279,7 +2279,7 @@ func HandleRemoveeeSubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", EESubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("delete", EESubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2316,7 +2316,7 @@ func HandleUpdateEesubscriptions(request *httpwrapper.Request) *httpwrapper.Resp
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", EESubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", EESubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2440,7 +2440,7 @@ func HandlePatchOperSpecData(request *httpwrapper.Request) *httpwrapper.Response
 
 	if problemDetails == nil {
 		stats.IncrementUdrPolicyDataStats("update", OperatorSpecificData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrPolicyDataStats("update", OperatorSpecificData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2493,7 +2493,7 @@ func HandleQueryOperSpecData(request *httpwrapper.Request) *httpwrapper.Response
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QueryOperSpecDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QueryOperSpecDataProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	operatorSpecificDataContainer, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2530,7 +2530,7 @@ func HandleGetppData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func GetppDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func GetppDataProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	ppData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2697,7 +2697,7 @@ func HandleModifyPpData(request *httpwrapper.Request) *httpwrapper.Response {
 	problemDetails := ModifyPpDataProcedure(collName, ueId, patchItem)
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", PPData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", PPData, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2750,7 +2750,7 @@ func HandleGetIdentityData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func GetIdentityDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func GetIdentityDataProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	identityData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2785,7 +2785,7 @@ func HandleGetOdbData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func GetOdbDataProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func GetOdbDataProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	operatorDeterminedBarringData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2826,10 +2826,10 @@ func HandleGetSharedData(request *httpwrapper.Request) *httpwrapper.Response {
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func GetSharedDataProcedure(collName string, sharedDataIds []string) (*[]map[string]interface{},
+func GetSharedDataProcedure(collName string, sharedDataIds []string) (*[]map[string]any,
 	*models.ProblemDetails,
 ) {
-	var sharedDataArray []map[string]interface{}
+	var sharedDataArray []map[string]any
 	for _, sharedDataId := range sharedDataIds {
 		filter := bson.M{"sharedDataId": sharedDataId}
 		sharedData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -2857,7 +2857,7 @@ func HandleRemovesdmSubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", SDMSubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("delete", SDMSubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -2893,7 +2893,7 @@ func HandleUpdatesdmsubscriptions(request *httpwrapper.Request) *httpwrapper.Res
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("update", SDMSubscriptions, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	}
 	stats.IncrementUdrSubscriptionDataStats("update", SDMSubscriptions, "FAILURE")
 	return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -3203,7 +3203,7 @@ func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response 
 
 	DeleteSmfContextProcedure(collName, ueId, pduSessionId)
 	stats.IncrementUdrSubscriptionDataStats("delete", SMFRegistrations, "SUCCESS")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string) {
@@ -3242,7 +3242,7 @@ func HandleQuerySmfRegistration(request *httpwrapper.Request) *httpwrapper.Respo
 
 func QuerySmfRegistrationProcedure(collName string, ueId string,
 	pduSessionId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	pduSessionIdInt, err := strconv.ParseInt(pduSessionId, 10, 32)
 	if err != nil {
 		logger.DataRepoLog.Error(err)
@@ -3270,12 +3270,12 @@ func HandleQuerySmfRegList(request *httpwrapper.Request) *httpwrapper.Response {
 
 	stats.IncrementUdrSubscriptionDataStats("get", SMFRegistrations, "SUCCESS")
 	if response == nil {
-		return httpwrapper.NewResponse(http.StatusOK, nil, []map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusOK, nil, []map[string]any{})
 	}
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
-func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]interface{} {
+func QuerySmfRegListProcedure(collName string, ueId string) *[]map[string]any {
 	filter := bson.M{ParamUeId: ueId}
 	smfRegList, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
 	if errGetMany != nil {
@@ -3307,7 +3307,7 @@ func HandleQuerySmfSelectData(request *httpwrapper.Request) *httpwrapper.Respons
 
 func QuerySmfSelectDataProcedure(collName string, ueId string,
 	servingPlmnId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId, ParamServingPlmnId: servingPlmnId}
 	smfSelectionSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -3329,7 +3329,7 @@ func HandleCreateSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Resp
 
 	CreateSmsfContext3gppProcedure(collName, ueId, SmsfRegistration)
 	stats.IncrementUdrSubscriptionDataStats("create", SMSF3GPPAccess, "SUCCESS")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistration models.SmsfRegistration) {
@@ -3351,7 +3351,7 @@ func HandleDeleteSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Resp
 
 	DeleteSmsfContext3gppProcedure(collName, ueId)
 	stats.IncrementUdrSubscriptionDataStats("delete", SMSF3GPPAccess, "SUCCESS")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func DeleteSmsfContext3gppProcedure(collName string, ueId string) {
@@ -3382,7 +3382,7 @@ func HandleQuerySmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QuerySmsfContext3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QuerySmsfContext3gppProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	smsfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -3405,7 +3405,7 @@ func HandleCreateSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.R
 
 	CreateSmsfContextNon3gppProcedure(SmsfRegistration, collName, ueId)
 	stats.IncrementUdrSubscriptionDataStats("create", SMSFNon3GPPAccess, "SUCCESS")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration, collName string, ueId string) {
@@ -3427,7 +3427,7 @@ func HandleDeleteSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.R
 
 	DeleteSmsfContextNon3gppProcedure(collName, ueId)
 	stats.IncrementUdrSubscriptionDataStats("delete", SMSFNon3GPPAccess, "SUCCESS")
-	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
 func DeleteSmsfContextNon3gppProcedure(collName string, ueId string) {
@@ -3458,7 +3458,7 @@ func HandleQuerySmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
 }
 
-func QuerySmsfContextNon3gppProcedure(collName string, ueId string) (*map[string]interface{}, *models.ProblemDetails) {
+func QuerySmsfContextNon3gppProcedure(collName string, ueId string) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId}
 
 	smsfRegistration, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -3495,7 +3495,7 @@ func HandleQuerySmsMngData(request *httpwrapper.Request) *httpwrapper.Response {
 
 func QuerySmsMngDataProcedure(collName string, ueId string,
 	servingPlmnId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId, ParamServingPlmnId: servingPlmnId}
 	smsManagementSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -3532,7 +3532,7 @@ func HandleQuerySmsData(request *httpwrapper.Request) *httpwrapper.Response {
 
 func QuerySmsDataProcedure(collName string, ueId string,
 	servingPlmnId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId, ParamServingPlmnId: servingPlmnId}
 
 	smsSubscriptionData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
@@ -3585,7 +3585,7 @@ func HandleRemovesubscriptionDataSubscriptions(request *httpwrapper.Request) *ht
 
 	if problemDetails == nil {
 		stats.IncrementUdrSubscriptionDataStats("delete", SubsToNotify, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]interface{}{})
+		return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 	} else {
 		stats.IncrementUdrSubscriptionDataStats("delete", SubsToNotify, "FAILURE")
 		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
@@ -3626,7 +3626,7 @@ func HandleQueryTraceData(request *httpwrapper.Request) *httpwrapper.Response {
 
 func QueryTraceDataProcedure(collName string, ueId string,
 	servingPlmnId string,
-) (*map[string]interface{}, *models.ProblemDetails) {
+) (*map[string]any, *models.ProblemDetails) {
 	filter := bson.M{ParamUeId: ueId, ParamServingPlmnId: servingPlmnId}
 
 	traceData, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
