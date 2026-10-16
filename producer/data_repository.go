@@ -14,7 +14,6 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/omec-project/openapi/v2"
 	"github.com/omec-project/openapi/v2/models"
 	"github.com/omec-project/openapi/v2/utils"
 	udr_context "github.com/omec-project/udr/context"
@@ -701,21 +700,34 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 		return nil, http.StatusNotFound
 	}
 
-	trInfluData := models.TrafficInfluData{
-		UpPathChgNotifCorreId: trInfluDataPatch.UpPathChgNotifCorreId,
-		AppReloInd:            trInfluDataPatch.AppReloInd,
-		AfAppId:               openapi.PtrString(oldData["afAppId"].(string)),
-		// Dnn:                   trInfluDataPatch.Dnn, // TrafficInfluDataPatch does not have this field
-		EthTrafficFilters: trInfluDataPatch.EthTrafficFilters,
-		// Snssai:                trInfluDataPatch.Snssai, // TrafficInfluDataPatch does not have this field
-		// InterGroupId:          trInfluDataPatch.InternalGroupId, // TrafficInfluDataPatch does not have this field
-		// Supi:                  trInfluDataPatch.Supi, // TrafficInfluDataPatch does not have this field
-		TrafficFilters:    trInfluDataPatch.TrafficFilters,
-		TrafficRoutes:     trInfluDataPatch.TrafficRoutes,
-		ValidStartTime:    trInfluDataPatch.ValidStartTime,
-		ValidEndTime:      trInfluDataPatch.ValidEndTime,
-		NwAreaInfo:        trInfluDataPatch.NwAreaInfo,
-		UpPathChgNotifUri: trInfluDataPatch.UpPathChgNotifUri,
+	var trInfluData models.TrafficInfluData
+	if trInfluDataPatch.HasUpPathChgNotifCorreId() {
+		trInfluData.SetUpPathChgNotifCorreId(trInfluDataPatch.GetUpPathChgNotifCorreId())
+	}
+	if trInfluDataPatch.HasAppReloInd() {
+		trInfluData.SetAppReloInd(trInfluDataPatch.GetAppReloInd())
+	}
+	trInfluData.SetAfAppId(oldData["afAppId"].(string))
+	if trInfluDataPatch.HasEthTrafficFilters() {
+		trInfluData.SetEthTrafficFilters(trInfluDataPatch.GetEthTrafficFilters())
+	}
+	if trInfluDataPatch.HasTrafficFilters() {
+		trInfluData.SetTrafficFilters(trInfluDataPatch.GetTrafficFilters())
+	}
+	if trInfluDataPatch.HasTrafficRoutes() {
+		trInfluData.SetTrafficRoutes(trInfluDataPatch.GetTrafficRoutes())
+	}
+	if trInfluDataPatch.HasValidStartTime() {
+		trInfluData.SetValidStartTime(trInfluDataPatch.GetValidStartTime())
+	}
+	if trInfluDataPatch.HasValidEndTime() {
+		trInfluData.SetValidEndTime(trInfluDataPatch.GetValidEndTime())
+	}
+	if trInfluDataPatch.HasNwAreaInfo() {
+		trInfluData.SetNwAreaInfo(trInfluDataPatch.GetNwAreaInfo())
+	}
+	if trInfluDataPatch.HasUpPathChgNotifUri() {
+		trInfluData.SetUpPathChgNotifUri(trInfluDataPatch.GetUpPathChgNotifUri())
 	}
 	newData := util.ToBsonM(trInfluData)
 

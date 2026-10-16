@@ -24,10 +24,12 @@ import (
 )
 
 func TestStartPollingService_Success(t *testing.T) {
-	ctx := t.Context()
 	originalFetchPlmnConfig := fetchPlmnConfig
+	originalInterval := initialPollingInterval
+	initialPollingInterval = 20 * time.Millisecond
 	defer func() {
 		fetchPlmnConfig = originalFetchPlmnConfig
+		initialPollingInterval = originalInterval
 	}()
 
 	expectedConfig := []models.PlmnId{{Mcc: "001", Mnc: "01"}}
@@ -36,7 +38,7 @@ func TestStartPollingService_Success(t *testing.T) {
 	}
 	pollingChan := make(chan []models.PlmnId, 1)
 
-	go StartPollingService(ctx, "http://dummy", pollingChan)
+	go StartPollingService(t.Context(), "http://dummy", pollingChan)
 	time.Sleep(initialPollingInterval)
 
 	select {
@@ -52,6 +54,8 @@ func TestStartPollingService_Success(t *testing.T) {
 func TestStartPollingService_RetryAfterFailure(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	originalFetchPlmnConfig := fetchPlmnConfig
+	originalInterval := initialPollingInterval
+	initialPollingInterval = 20 * time.Millisecond
 
 	callCount := 0
 	fetchPlmnConfig = func(poller *nfConfigPoller, pollingEndpoint string) ([]models.PlmnId, error) {
@@ -70,6 +74,7 @@ func TestStartPollingService_RetryAfterFailure(t *testing.T) {
 	<-done
 
 	fetchPlmnConfig = originalFetchPlmnConfig
+	initialPollingInterval = originalInterval
 
 	if callCount < 2 {
 		t.Error("Expected to retry after failure")

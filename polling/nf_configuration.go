@@ -19,12 +19,15 @@ import (
 	"github.com/omec-project/udr/logger"
 )
 
-const (
+var (
 	initialPollingInterval = 5 * time.Second
 	pollingMaxBackoff      = 40 * time.Second
-	pollingBackoffFactor   = 2
-	pollingPath            = "/nfconfig/plmn"
-	contentTypeJSON        = "application/json"
+)
+
+const (
+	pollingBackoffFactor = 2
+	pollingPath          = "/nfconfig/plmn"
+	contentTypeJSON      = "application/json"
 )
 
 type nfConfigPoller struct {
@@ -52,7 +55,7 @@ func StartPollingService(ctx context.Context, webuiUri string, plmnConfigChan ch
 		case <-time.After(interval):
 			newPlmnConfig, err := fetchPlmnConfig(&poller, pollingEndpoint)
 			if err != nil {
-				interval = minDuration(interval*time.Duration(pollingBackoffFactor), pollingMaxBackoff)
+				interval = min(interval*time.Duration(pollingBackoffFactor), pollingMaxBackoff)
 				logger.PollConfigLog.Errorf("Polling error. Retrying in %v: %+v", interval, err)
 				continue
 			}
@@ -115,11 +118,4 @@ func (p *nfConfigPoller) handlePolledPlmnConfig(newPlmnConfig []models.PlmnId) {
 	p.currentPlmnConfig = newPlmnConfig
 	logger.PollConfigLog.Infof("PLMN config changed. New PLMN ID list: %+v", p.currentPlmnConfig)
 	p.plmnConfigChan <- p.currentPlmnConfig
-}
-
-func minDuration(a, b time.Duration) time.Duration {
-	if a < b {
-		return a
-	}
-	return b
 }
