@@ -24,21 +24,27 @@ import (
 )
 
 func TestStartPollingService_Success(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
 	originalFetchPlmnConfig := fetchPlmnConfig
 	originalInterval := initialPollingInterval
 	initialPollingInterval = 20 * time.Millisecond
-	defer func() {
-		fetchPlmnConfig = originalFetchPlmnConfig
-		initialPollingInterval = originalInterval
-	}()
 
 	expectedConfig := []models.PlmnId{{Mcc: "001", Mnc: "01"}}
 	fetchPlmnConfig = func(poller *nfConfigPoller, pollingEndpoint string) ([]models.PlmnId, error) {
 		return expectedConfig, nil
 	}
 	pollingChan := make(chan []models.PlmnId, 1)
-
-	go StartPollingService(t.Context(), "http://dummy", pollingChan)
+	done := make(chan struct{})
+	go func() {
+		StartPollingService(ctx, "http://dummy", pollingChan)
+		close(done)
+	}()
+	defer func() {
+		cancel()
+		<-done
+		fetchPlmnConfig = originalFetchPlmnConfig
+		initialPollingInterval = originalInterval
+	}()
 	time.Sleep(initialPollingInterval)
 
 	select {
