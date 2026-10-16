@@ -61,7 +61,7 @@ func TestHTTPQueryeesubscriptions_UsesUeIdPathParam(t *testing.T) {
 	ueId := "imsi-001010000000001"
 	udrContext.UDR_Self().UESubsCollection.Store(ueId, &udrContext.UESubsData{
 		EeSubscriptionCollection: map[string]*udrContext.EeSubscriptionCollection{
-			"1": {EeSubscriptions: &models.EeSubscription{}},
+			"1": {EeSubscriptions: models.NewEeSubscriptionWithDefaults()},
 		},
 	})
 
@@ -86,7 +86,7 @@ func TestHTTPRemovesubscriptionDataSubscriptions_UsesSubsIdPathParam(t *testing.
 	resetUDRContextForHandlerTests()
 
 	subsId := "sub-1"
-	udrContext.UDR_Self().SubscriptionDataSubscriptions[subsId] = &models.SubscriptionDataSubscriptions{}
+	udrContext.UDR_Self().SubscriptionDataSubscriptions[subsId] = models.NewSubscriptionDataSubscriptionsWithDefaults()
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequestWithContext(context.Background(), http.MethodDelete,
