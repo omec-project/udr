@@ -1191,18 +1191,27 @@ func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Respo
 
 	collName := POLICYDATA_BDTDATA
 
-	response := PolicyDataBdtDataGetProcedure(collName)
+	response, problemDetails := PolicyDataBdtDataGetProcedure(collName)
+	if problemDetails != nil {
+		stats.IncrementUdrPolicyDataStats("get", BDTData, "FAILURE")
+		return httpwrapper.NewResponse(int(problemDetails.GetStatus()), nil, problemDetails)
+	}
 	stats.IncrementUdrPolicyDataStats("get", BDTData, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
-func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]any) {
+func PolicyDataBdtDataGetProcedure(collName string) (response *[]map[string]any, problemDetails *models.ProblemDetails) {
 	filter := bson.M{}
 	bdtDataArray, errGetMany := CommonDBClient.RestfulAPIGetMany(collName, filter)
 	if errGetMany != nil {
 		logger.DataRepoLog.Warnln(errGetMany)
+		return nil, utils.ProblemDetailsSystemFailure(errGetMany.Error())
 	}
-	return &bdtDataArray
+	if bdtDataArray == nil {
+		// an empty collection must serialize as [] rather than null
+		bdtDataArray = []map[string]any{}
+	}
+	return &bdtDataArray, nil
 }
 
 func HandlePolicyDataPlmnsPlmnIdUePolicySetGet(request *httpwrapper.Request) *httpwrapper.Response {
