@@ -94,6 +94,13 @@ const (
 
 var CurrentResourceUri string
 
+// systemFailureResponse reports a failed database operation as 500 SYSTEM_FAILURE
+// (TS 29.500 clause 5.2.7), so the caller does not take a lost write for a stored one.
+func systemFailureResponse(err error) *httpwrapper.Response {
+	pd := utils.ProblemDetailsSystemFailure(err.Error())
+	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
+}
+
 func getDataFromDB(collName string, filter bson.M) (map[string]any, *models.ProblemDetails) {
 	data, errGetOne := CommonDBClient.RestfulAPIGetOne(collName, filter)
 	if errGetOne != nil {
@@ -191,11 +198,11 @@ func HandleCreateAmfContext3gpp(request *httpwrapper.Request) *httpwrapper.Respo
 	collName := SUBSCDATA_CTXDATA_AMF_3GPPACCESS
 
 	err := CreateAmfContext3gppProcedure(collName, ueId, Amf3GppAccessRegistration)
-	if err == nil {
-		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMF3GPP, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMF3GPP, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMF3GPP, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
@@ -297,11 +304,11 @@ func HandleCreateAmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 	ueId := request.Params[ParamUeId]
 
 	err := CreateAmfContextNon3gppProcedure(AmfNon3GppAccessRegistration, collName, ueId)
-	if err == nil {
-		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMFNon3GPP, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMFNon3GPP, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrSubscriptionDataStats("create", AccessTypeAMFNon3GPP, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
@@ -446,11 +453,11 @@ func HandleCreateAuthenticationSoR(request *httpwrapper.Request) *httpwrapper.Re
 	collName := SUBSCDATA_SORDATA
 
 	err := CreateAuthenticationSoRProcedure(collName, ueId, putData)
-	if err == nil {
-		stats.IncrementUdrSubscriptionDataStats("create", SORData, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrSubscriptionDataStats("create", SORData, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrSubscriptionDataStats("create", SORData, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
@@ -509,11 +516,11 @@ func HandleCreateAuthenticationStatus(request *httpwrapper.Request) *httpwrapper
 	collName := SUBSCDATA_AUTHDATA_AUTHSTATUS
 
 	err := CreateAuthenticationStatusProcedure(collName, ueId, putData)
-	if err == nil {
-		stats.IncrementUdrSubscriptionDataStats("create", AuthenticationStatus, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrSubscriptionDataStats("create", AuthenticationStatus, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrSubscriptionDataStats("create", AuthenticationStatus, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
@@ -661,12 +668,14 @@ func filterDataBySnssai(snssaiValues []string,
 func HandleApplicationDataInfluenceDataInfluenceIdDelete(influID string) *httpwrapper.Response {
 	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdDelete: influID=%q", influID)
 
-	deleteApplicationDataIndividualInfluenceDataFromDB(influID)
+	if err := deleteApplicationDataIndividualInfluenceDataFromDB(influID); err != nil {
+		return systemFailureResponse(err)
+	}
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func deleteApplicationDataIndividualInfluenceDataFromDB(influID string) {
+func deleteApplicationDataIndividualInfluenceDataFromDB(influID string) error {
 	filter := bson.M{ParamInfluenceId: influID}
 	err := deleteDataFromDB(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
 	if err == nil {
@@ -674,6 +683,7 @@ func deleteApplicationDataIndividualInfluenceDataFromDB(influID string) {
 	} else {
 		stats.IncrementUdrApplicationDataStats("delete", InfluenceData, "FAILURE")
 	}
+	return err
 }
 
 func HandleApplicationDataInfluenceDataInfluenceIdPatch(influID string,
@@ -681,7 +691,11 @@ func HandleApplicationDataInfluenceDataInfluenceIdPatch(influID string,
 ) *httpwrapper.Response {
 	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdPatch: influID=%q", influID)
 
-	response, status := patchApplicationDataIndividualInfluenceDataToDB(influID, trInfluDataPatch)
+	response, status, err := patchApplicationDataIndividualInfluenceDataToDB(influID, trInfluDataPatch)
+	if err != nil {
+		stats.IncrementUdrApplicationDataStats("update", InfluenceData, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrApplicationDataStats("update", InfluenceData, "SUCCESS")
 
 	return httpwrapper.NewResponse(status, nil, response)
@@ -689,7 +703,7 @@ func HandleApplicationDataInfluenceDataInfluenceIdPatch(influID string,
 
 func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 	trInfluDataPatch *models.TrafficInfluDataPatch,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	filter := bson.M{ParamInfluenceId: influID}
 
 	oldData, errGetOne := CommonDBClient.RestfulAPIGetOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter)
@@ -697,7 +711,7 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 		logger.DataRepoLog.Warnln(errGetOne)
 	}
 	if oldData == nil {
-		return nil, http.StatusNotFound
+		return nil, http.StatusNotFound, nil
 	}
 
 	var trInfluData models.TrafficInfluData
@@ -736,11 +750,12 @@ func patchApplicationDataIndividualInfluenceDataToDB(influID string,
 	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, newData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 	// Roll back to origin data before return
 	delete(newData, ParamInfluenceId)
 
-	return newData, http.StatusOK
+	return newData, http.StatusOK, nil
 }
 
 func HandleApplicationDataInfluenceDataInfluenceIdPut(influID string,
@@ -748,14 +763,17 @@ func HandleApplicationDataInfluenceDataInfluenceIdPut(influID string,
 ) *httpwrapper.Response {
 	logger.DataRepoLog.Debugf("handle ApplicationDataInfluenceDataInfluenceIdPut: influID=%q", influID)
 
-	response, status := putApplicationDataIndividualInfluenceDataToDB(influID, trInfluData)
+	response, status, err := putApplicationDataIndividualInfluenceDataToDB(influID, trInfluData)
+	if err != nil {
+		return systemFailureResponse(err)
+	}
 
 	return httpwrapper.NewResponse(status, nil, response)
 }
 
 func putApplicationDataIndividualInfluenceDataToDB(influID string,
 	trInfluData *models.TrafficInfluData,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	filter := bson.M{ParamInfluenceId: influID}
 	data := util.ToBsonM(*trInfluData)
 
@@ -764,14 +782,15 @@ func putApplicationDataIndividualInfluenceDataToDB(influID string,
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_DB_COLLECTION_NAME, filter, data)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 	// Roll back to origin data before return
 	delete(data, ParamInfluenceId)
 
 	if isExisted {
-		return data, http.StatusOK
+		return data, http.StatusOK, nil
 	}
-	return data, http.StatusCreated
+	return data, http.StatusCreated, nil
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifyGet(queryParams map[string][]string) *httpwrapper.Response {
@@ -874,7 +893,11 @@ func HandleApplicationDataInfluenceDataSubsToNotifyPost(trInfluSub *models.Traff
 	udrSelf := udr_context.UDR_Self()
 
 	newSubscID := strconv.FormatUint(udrSelf.NewAppDataInfluDataSubscriptionID(), 10)
-	response, status := postApplicationDataInfluenceDataSubsToNotifyToDB(newSubscID, trInfluSub)
+	response, status, err := postApplicationDataInfluenceDataSubsToNotifyToDB(newSubscID, trInfluSub)
+	if err != nil {
+		stats.IncrementUdrApplicationDataStats("create", InfluenceDataSubscription, "FAILURE")
+		return systemFailureResponse(err)
+	}
 
 	/* Contains the URI of the newly created resource, according
 	   to the structure: {apiRoot}/application-data/influenceData/subs-to-notify/{subscID} */
@@ -888,7 +911,7 @@ func HandleApplicationDataInfluenceDataSubsToNotifyPost(trInfluSub *models.Traff
 
 func postApplicationDataInfluenceDataSubsToNotifyToDB(subscID string,
 	trInfluSub *models.TrafficInfluSub,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	filter := bson.M{ParamSubscriptionId: subscID}
 	data := util.ToBsonM(*trInfluSub)
 
@@ -897,10 +920,11 @@ func postApplicationDataInfluenceDataSubsToNotifyToDB(subscID string,
 	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, data)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 	// Revert back to origin data before return
 	delete(data, ParamSubscriptionId)
-	return data, http.StatusCreated
+	return data, http.StatusCreated, nil
 }
 
 func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete(subscID string) *httpwrapper.Response {
@@ -908,11 +932,11 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete(subscID 
 		"handle ApplicationDataInfluenceDataSubsToNotifySubscriptionIdDelete: subscID=%q", subscID)
 
 	err := deleteApplicationDataIndividualInfluenceDataSubsToNotifyFromDB(subscID)
-	if err == nil {
-		stats.IncrementUdrApplicationDataStats("delete", InfluenceDataSubscription, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrApplicationDataStats("delete", InfluenceDataSubscription, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrApplicationDataStats("delete", InfluenceDataSubscription, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
@@ -953,7 +977,11 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdPut(
 	logger.DataRepoLog.Infof(
 		"handle HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdPut: subscID=%q", subscID)
 
-	response, status := putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID, trInfluSub)
+	response, status, err := putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID, trInfluSub)
+	if err != nil {
+		stats.IncrementUdrApplicationDataStats("update", InfluenceDataSubscription, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	if response != nil {
 		stats.IncrementUdrApplicationDataStats("update", InfluenceDataSubscription, "SUCCESS")
 	} else {
@@ -965,7 +993,7 @@ func HandleApplicationDataInfluenceDataSubsToNotifySubscriptionIdPut(
 
 func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 	trInfluSub *models.TrafficInfluSub,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	filter := bson.M{ParamSubscriptionId: subscID}
 	newData := util.ToBsonM(*trInfluSub)
 
@@ -974,7 +1002,7 @@ func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 		logger.DataRepoLog.Warnln(errGetOne)
 	}
 	if oldData == nil {
-		return nil, http.StatusNotFound
+		return nil, http.StatusNotFound, nil
 	}
 	// Add ParamSubscriptionId entry to DB
 	newData[ParamSubscriptionId] = subscID
@@ -982,21 +1010,22 @@ func putApplicationDataIndividualInfluenceDataSubsToNotifyToDB(subscID string,
 	_, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_INFLUDATA_SUBSC_DB_COLLECTION_NAME, filter, newData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 	// Roll back to origin data before return
 	delete(newData, ParamSubscriptionId)
-	return newData, http.StatusOK
+	return newData, http.StatusOK, nil
 }
 
 func HandleApplicationDataPfdsAppIdDelete(appID string) *httpwrapper.Response {
 	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsAppIdDelete: appID=%s", appID)
 
 	err := deleteApplicationDataIndividualPfdFromDB(appID)
-	if err == nil {
-		stats.IncrementUdrApplicationDataStats("delete", "pfds", "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrApplicationDataStats("delete", "pfds", "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrApplicationDataStats("delete", "pfds", "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
@@ -1026,7 +1055,11 @@ func getApplicationDataIndividualPfdFromDB(appID string) (map[string]any, *model
 func HandleApplicationDataPfdsAppIdPut(appID string, pfdDataForApp *models.PfdDataForApp) *httpwrapper.Response {
 	logger.DataRepoLog.Debugf("handle ApplicationDataPfdsAppIdPut: appID=%s", appID)
 
-	response, status := putApplicationDataIndividualPfdToDB(appID, pfdDataForApp)
+	response, status, err := putApplicationDataIndividualPfdToDB(appID, pfdDataForApp)
+	if err != nil {
+		stats.IncrementUdrApplicationDataStats("update", "pfds", "FAILURE")
+		return systemFailureResponse(err)
+	}
 	if response != nil {
 		stats.IncrementUdrApplicationDataStats("update", "pfds", "SUCCESS")
 	} else {
@@ -1035,19 +1068,20 @@ func HandleApplicationDataPfdsAppIdPut(appID string, pfdDataForApp *models.PfdDa
 	return httpwrapper.NewResponse(status, nil, response)
 }
 
-func putApplicationDataIndividualPfdToDB(appID string, pfdDataForApp *models.PfdDataForApp) (bson.M, int) {
+func putApplicationDataIndividualPfdToDB(appID string, pfdDataForApp *models.PfdDataForApp) (bson.M, int, error) {
 	filter := bson.M{ParamApplicationId: appID}
 	data := util.ToBsonM(*pfdDataForApp)
 
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(APPDATA_PFD_DB_COLLECTION_NAME, filter, data)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 
 	if isExisted {
-		return data, http.StatusOK
+		return data, http.StatusOK, nil
 	}
-	return data, http.StatusCreated
+	return data, http.StatusCreated, nil
 }
 
 func HandleApplicationDataPfdsGet(pfdsAppIDs []string) *httpwrapper.Response {
@@ -1097,11 +1131,11 @@ func HandlePolicyDataBdtDataBdtReferenceIdDelete(request *httpwrapper.Request) *
 	bdtReferenceId := request.Params[ParamBdtReferenceId]
 
 	err := PolicyDataBdtDataBdtReferenceIdDeleteProcedure(collName, bdtReferenceId)
-	if err == nil {
-		stats.IncrementUdrPolicyDataStats("delete", BDTData, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrPolicyDataStats("delete", BDTData, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrPolicyDataStats("delete", BDTData, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
@@ -1157,20 +1191,18 @@ func HandlePolicyDataBdtDataBdtReferenceIdPut(request *httpwrapper.Request) *htt
 	bdtReferenceId := request.Params[ParamBdtReferenceId]
 	bdtData := request.Body.(models.BdtData)
 
-	response := PolicyDataBdtDataBdtReferenceIdPutProcedure(collName, bdtReferenceId, bdtData)
-	if response != nil {
-		stats.IncrementUdrPolicyDataStats("update", BDTData, "SUCCESS")
-		return httpwrapper.NewResponse(http.StatusOK, nil, response)
+	response, err := PolicyDataBdtDataBdtReferenceIdPutProcedure(collName, bdtReferenceId, bdtData)
+	if err != nil {
+		stats.IncrementUdrPolicyDataStats("update", BDTData, "FAILURE")
+		return systemFailureResponse(err)
 	}
-
-	pd := utils.ProblemDetailsUnspecified()
-	stats.IncrementUdrPolicyDataStats("update", BDTData, "FAILURE")
-	return httpwrapper.NewResponse(int(pd.GetStatus()), nil, pd)
+	stats.IncrementUdrPolicyDataStats("update", BDTData, "SUCCESS")
+	return httpwrapper.NewResponse(http.StatusOK, nil, response)
 }
 
 func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId string,
 	bdtData models.BdtData,
-) bson.M {
+) (bson.M, error) {
 	putData := util.ToBsonM(bdtData)
 	putData[ParamBdtReferenceId] = bdtReferenceId
 	filter := bson.M{ParamBdtReferenceId: bdtReferenceId}
@@ -1178,12 +1210,13 @@ func PolicyDataBdtDataBdtReferenceIdPutProcedure(collName string, bdtReferenceId
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, errPutOne
 	}
 
 	if isExisted {
 		PreHandlePolicyDataChangeNotification("", bdtReferenceId, bdtData)
 	}
-	return putData
+	return putData, nil
 }
 
 func HandlePolicyDataBdtDataGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1493,11 +1526,11 @@ func HandlePolicyDataUesUeIdOperatorSpecificDataPut(request *httpwrapper.Request
 	OperatorSpecificDataContainer := request.Body.(map[string]models.OperatorSpecificDataContainer)
 
 	err := PolicyDataUesUeIdOperatorSpecificDataPutProcedure(collName, ueId, OperatorSpecificDataContainer)
-	if err == nil {
-		stats.IncrementUdrPolicyDataStats("create", OperatorSpecificData, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrPolicyDataStats("create", OperatorSpecificData, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrPolicyDataStats("create", OperatorSpecificData, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusOK, nil, map[string]any{})
 }
@@ -1701,11 +1734,11 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdDelete(request *httpwrapper.Request)
 	usageMonId := request.Params[ParamUsageMonId]
 
 	err := PolicyDataUesUeIdSmDataUsageMonIdDeleteProcedure(collName, ueId, usageMonId)
-	if err == nil {
-		stats.IncrementUdrPolicyDataStats("delete", SMData, "SUCCESS")
-	} else {
+	if err != nil {
 		stats.IncrementUdrPolicyDataStats("delete", SMData, "FAILURE")
+		return systemFailureResponse(err)
 	}
+	stats.IncrementUdrPolicyDataStats("delete", SMData, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
@@ -1756,7 +1789,11 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdPut(request *httpwrapper.Request) *h
 	usageMonData := request.Body.(models.UsageMonData)
 	collName := POLICYDATA_UES_SMDATA_USAGEMONDATA
 
-	response := PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName, ueId, usageMonId, usageMonData)
+	response, err := PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName, ueId, usageMonId, usageMonData)
+	if err != nil {
+		stats.IncrementUdrPolicyDataStats("create", SMData, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrPolicyDataStats("create", SMData, "SUCCESS")
 
 	return httpwrapper.NewResponse(http.StatusCreated, nil, response)
@@ -1764,7 +1801,7 @@ func HandlePolicyDataUesUeIdSmDataUsageMonIdPut(request *httpwrapper.Request) *h
 
 func PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName string, ueId string, usageMonId string,
 	usageMonData models.UsageMonData,
-) *bson.M {
+) (*bson.M, error) {
 	putData := util.ToBsonM(usageMonData)
 	putData[ParamUeId] = ueId
 	putData[ParamUsageMonId] = usageMonId
@@ -1773,8 +1810,9 @@ func PolicyDataUesUeIdSmDataUsageMonIdPutProcedure(collName string, ueId string,
 	_, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, errPutOne
 	}
-	return &putData
+	return &putData, nil
 }
 
 func HandlePolicyDataUesUeIdUePolicySetGet(request *httpwrapper.Request) *httpwrapper.Response {
@@ -1863,7 +1901,11 @@ func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwr
 	ueId := request.Params[ParamUeId]
 	UePolicySet := request.Body.(models.UePolicySet)
 
-	response, status := PolicyDataUesUeIdUePolicySetPutProcedure(collName, ueId, UePolicySet)
+	response, status, err := PolicyDataUesUeIdUePolicySetPutProcedure(collName, ueId, UePolicySet)
+	if err != nil {
+		stats.IncrementUdrPolicyDataStats("create", UEPolicySet, "FAILURE")
+		return systemFailureResponse(err)
+	}
 
 	switch status {
 	case http.StatusNoContent:
@@ -1881,7 +1923,7 @@ func HandlePolicyDataUesUeIdUePolicySetPut(request *httpwrapper.Request) *httpwr
 
 func PolicyDataUesUeIdUePolicySetPutProcedure(collName string, ueId string,
 	UePolicySet models.UePolicySet,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	putData := util.ToBsonM(UePolicySet)
 	putData[ParamUeId] = ueId
 	filter := bson.M{ParamUeId: ueId}
@@ -1889,11 +1931,12 @@ func PolicyDataUesUeIdUePolicySetPutProcedure(collName string, ueId string,
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 	if !isExisted {
-		return putData, http.StatusCreated
+		return putData, http.StatusCreated, nil
 	}
-	return nil, http.StatusNoContent
+	return nil, http.StatusNoContent, nil
 }
 
 func HandleCreateAMFSubscriptions(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3180,7 +3223,11 @@ func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 		logger.DataRepoLog.Warnln(err)
 	}
 
-	response, status := CreateSmfContextNon3gppProcedure(SmfRegistration, collName, ueId, pduSessionId)
+	response, status, errPut := CreateSmfContextNon3gppProcedure(SmfRegistration, collName, ueId, pduSessionId)
+	if errPut != nil {
+		stats.IncrementUdrSubscriptionDataStats("create", SMFRegistrations, "FAILURE")
+		return systemFailureResponse(errPut)
+	}
 
 	switch status {
 	case http.StatusCreated:
@@ -3198,7 +3245,7 @@ func HandleCreateSmfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Re
 
 func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 	collName string, ueId string, pduSessionIdInt int64,
-) (bson.M, int) {
+) (bson.M, int, error) {
 	putData := util.ToBsonM(SmfRegistration)
 	putData[ParamUeId] = ueId
 	putData[ParamPduSessionId] = int32(pduSessionIdInt)
@@ -3207,12 +3254,13 @@ func CreateSmfContextNon3gppProcedure(SmfRegistration models.SmfRegistration,
 	isExisted, errPutOne := CommonDBClient.RestfulAPIPutOne(collName, filter, putData)
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
+		return nil, http.StatusInternalServerError, errPutOne
 	}
 
 	if !isExisted {
-		return putData, http.StatusCreated
+		return putData, http.StatusCreated, nil
 	}
-	return putData, http.StatusOK
+	return putData, http.StatusOK, nil
 }
 
 func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3222,12 +3270,15 @@ func HandleDeleteSmfContext(request *httpwrapper.Request) *httpwrapper.Response 
 	ueId := request.Params[ParamUeId]
 	pduSessionId := request.Params[ParamPduSessionId]
 
-	DeleteSmfContextProcedure(collName, ueId, pduSessionId)
+	if err := DeleteSmfContextProcedure(collName, ueId, pduSessionId); err != nil {
+		stats.IncrementUdrSubscriptionDataStats("delete", SMFRegistrations, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrSubscriptionDataStats("delete", SMFRegistrations, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string) {
+func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string) error {
 	pduSessionIdInt, err := strconv.ParseInt(pduSessionId, 10, 32)
 	if err != nil {
 		logger.DataRepoLog.Error(err)
@@ -3238,6 +3289,7 @@ func DeleteSmfContextProcedure(collName string, ueId string, pduSessionId string
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
+	return errDelOne
 }
 
 func HandleQuerySmfRegistration(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3348,12 +3400,15 @@ func HandleCreateSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Resp
 	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params[ParamUeId]
 
-	CreateSmsfContext3gppProcedure(collName, ueId, SmsfRegistration)
+	if err := CreateSmsfContext3gppProcedure(collName, ueId, SmsfRegistration); err != nil {
+		stats.IncrementUdrSubscriptionDataStats("create", SMSF3GPPAccess, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrSubscriptionDataStats("create", SMSF3GPPAccess, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistration models.SmsfRegistration) {
+func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistration models.SmsfRegistration) error {
 	putData := util.ToBsonM(SmsfRegistration)
 	putData[ParamUeId] = ueId
 	filter := bson.M{ParamUeId: ueId}
@@ -3362,6 +3417,7 @@ func CreateSmsfContext3gppProcedure(collName string, ueId string, SmsfRegistrati
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
+	return errPutOne
 }
 
 func HandleDeleteSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3370,17 +3426,21 @@ func HandleDeleteSmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Resp
 	collName := SUBSCDATA_CTXDATA_SMSF_3GPPACCESS
 	ueId := request.Params[ParamUeId]
 
-	DeleteSmsfContext3gppProcedure(collName, ueId)
+	if err := DeleteSmsfContext3gppProcedure(collName, ueId); err != nil {
+		stats.IncrementUdrSubscriptionDataStats("delete", SMSF3GPPAccess, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrSubscriptionDataStats("delete", SMSF3GPPAccess, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func DeleteSmsfContext3gppProcedure(collName string, ueId string) {
+func DeleteSmsfContext3gppProcedure(collName string, ueId string) error {
 	filter := bson.M{ParamUeId: ueId}
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
+	return errDelOne
 }
 
 func HandleQuerySmsfContext3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3424,12 +3484,15 @@ func HandleCreateSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.R
 	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 	ueId := request.Params[ParamUeId]
 
-	CreateSmsfContextNon3gppProcedure(SmsfRegistration, collName, ueId)
+	if err := CreateSmsfContextNon3gppProcedure(SmsfRegistration, collName, ueId); err != nil {
+		stats.IncrementUdrSubscriptionDataStats("create", SMSFNon3GPPAccess, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrSubscriptionDataStats("create", SMSFNon3GPPAccess, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration, collName string, ueId string) {
+func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration, collName string, ueId string) error {
 	putData := util.ToBsonM(SmsfRegistration)
 	putData[ParamUeId] = ueId
 	filter := bson.M{ParamUeId: ueId}
@@ -3438,6 +3501,7 @@ func CreateSmsfContextNon3gppProcedure(SmsfRegistration models.SmsfRegistration,
 	if errPutOne != nil {
 		logger.DataRepoLog.Warnln(errPutOne)
 	}
+	return errPutOne
 }
 
 func HandleDeleteSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
@@ -3446,17 +3510,21 @@ func HandleDeleteSmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.R
 	collName := SUBSCDATA_CTXDATA_SMSF_NON3GPPACCESS
 	ueId := request.Params[ParamUeId]
 
-	DeleteSmsfContextNon3gppProcedure(collName, ueId)
+	if err := DeleteSmsfContextNon3gppProcedure(collName, ueId); err != nil {
+		stats.IncrementUdrSubscriptionDataStats("delete", SMSFNon3GPPAccess, "FAILURE")
+		return systemFailureResponse(err)
+	}
 	stats.IncrementUdrSubscriptionDataStats("delete", SMSFNon3GPPAccess, "SUCCESS")
 	return httpwrapper.NewResponse(http.StatusNoContent, nil, map[string]any{})
 }
 
-func DeleteSmsfContextNon3gppProcedure(collName string, ueId string) {
+func DeleteSmsfContextNon3gppProcedure(collName string, ueId string) error {
 	filter := bson.M{ParamUeId: ueId}
 	errDelOne := CommonDBClient.RestfulAPIDeleteOne(collName, filter)
 	if errDelOne != nil {
 		logger.DataRepoLog.Warnln(errDelOne)
 	}
+	return errDelOne
 }
 
 func HandleQuerySmsfContextNon3gpp(request *httpwrapper.Request) *httpwrapper.Response {
