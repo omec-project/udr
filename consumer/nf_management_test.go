@@ -1,8 +1,11 @@
-// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2026 Intel Corporation
 // Copyright 2023 Open Networking Foundation <info@opennetworking.org>
+// SPDX-License-Identifier: Apache-2.0
+
 package consumer
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -88,9 +91,12 @@ func Test_nrf_url_is_not_overwritten_when_registering(t *testing.T) {
 	}
 	self := udrContext.UDR_Self()
 	self.NrfUri = svr.URL
+	// The instance ID is the NF's own, made at startup (util.InitUDRContext). Every request about the NF is
+	// addressed with it, the registration too; the NRF may name another one in Location, which is then adopted.
+	self.NfId = "4947a69a-f61b-4bc1-b9da-47c9c5d14b64"
 	self.RegisterIPv4 = "127.0.0.2"
 
-	_, _, err := SendRegisterNFInstance([]models.PlmnId{{Mcc: "123", Mnc: "45"}})
+	_, _, err := SendRegisterNFInstance(context.Background(), []models.PlmnId{{Mcc: "123", Mnc: "45"}})
 	if err != nil {
 		t.Errorf("Got and error %+v", err)
 	}
