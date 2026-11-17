@@ -199,11 +199,9 @@ func TestCreateSdmSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	for u := range ueCount {
 		ueId := fmt.Sprintf("imsi-20893010000%04d", u)
 		for range perUeRequests {
-			wg.Add(1)
-			go func(ueId string) {
-				defer wg.Done()
+			wg.Go(func() {
 				CreateSdmSubscriptionsProcedure(models.SdmSubscription{}, "subscriptionData.contextData.sdmSubscriptions", ueId)
-			}(ueId)
+			})
 		}
 	}
 	wg.Wait()
@@ -253,7 +251,7 @@ func TestCreateEeSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 
 	udrSelf := udr_context.UDR_Self()
 	ueIds := make([]string, 0, ueCount)
-	for u := 0; u < ueCount; u++ {
+	for u := range ueCount {
 		ueIds = append(ueIds, fmt.Sprintf("imsi-20893010001%04d", u))
 	}
 	// UESubsCollection is a process-wide singleton; leaving entries behind would
@@ -267,13 +265,12 @@ func TestCreateEeSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	t.Cleanup(forgetEntries)
 
 	var wg sync.WaitGroup
-	for u := 0; u < ueCount; u++ {
-		for r := 0; r < perUeRequests; r++ {
-			wg.Add(1)
-			go func(ueId string) {
-				defer wg.Done()
+	for u := range ueCount {
+		ueId := ueIds[u]
+		for range perUeRequests {
+			wg.Go(func() {
 				CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{})
-			}(ueIds[u])
+			})
 		}
 	}
 	wg.Wait()
@@ -306,7 +303,7 @@ func TestCreateEeGroupSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 
 	udrSelf := udr_context.UDR_Self()
 	groupIds := make([]string, 0, groupCount)
-	for g := 0; g < groupCount; g++ {
+	for g := range groupCount {
 		groupIds = append(groupIds, fmt.Sprintf("extgroupid-test-%04d@example.com", g))
 	}
 	forgetEntries := func() {
@@ -318,13 +315,12 @@ func TestCreateEeGroupSubscriptionsProcedureIsConcurrencySafe(t *testing.T) {
 	t.Cleanup(forgetEntries)
 
 	var wg sync.WaitGroup
-	for g := 0; g < groupCount; g++ {
-		for r := 0; r < perGroupRequest; r++ {
-			wg.Add(1)
-			go func(groupId string) {
-				defer wg.Done()
+	for g := range groupCount {
+		groupId := groupIds[g]
+		for range perGroupRequest {
+			wg.Go(func() {
 				CreateEeGroupSubscriptionsProcedure(groupId, models.EeSubscription{})
-			}(groupIds[g])
+			})
 		}
 	}
 	wg.Wait()
@@ -361,11 +357,10 @@ func TestEeSubscriptionReadersRaceWithWriters(t *testing.T) {
 	CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{})
 
 	var wg sync.WaitGroup
-	for i := 0; i < iterations; i++ {
-		wg.Add(3)
-		go func() { defer wg.Done(); CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{}) }()
-		go func() { defer wg.Done(); QueryeesubscriptionsProcedure(ueId) }()
-		go func() { defer wg.Done(); GetAmfSubscriptionInfoProcedure("1", ueId) }()
+	for range iterations {
+		wg.Go(func() { CreateEeSubscriptionsProcedure(ueId, models.EeSubscription{}) })
+		wg.Go(func() { QueryeesubscriptionsProcedure(ueId) })
+		wg.Go(func() { GetAmfSubscriptionInfoProcedure("1", ueId) })
 	}
 	wg.Wait()
 }
